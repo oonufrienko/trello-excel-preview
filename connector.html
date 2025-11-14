@@ -9,20 +9,23 @@
         window.TrelloPowerUp.initialize({
             'attachment-sections': function(t, options) {
                 var attachments = options.entries;
-                return attachments.map(function(attachment) {
-                    if (attachment.name.endsWith('.xlsx') || attachment.name.endsWith('.xls')) {
+                return attachments
+                    .filter(function(attachment) {
+                        return attachment.name.endsWith('.xlsx') || attachment.name.endsWith('.xls');
+                    })
+                    .map(function(attachment) {
                         return {
-                            id: 'excel-preview',
-                            title: 'Excel Preview',
-                            icon: 'https://oonufrienko.github.io/icon.png', // Замініть на URL вашої іконки, якщо є
+                            id: 'excel-preview-' + attachment.id, // Унікальний ID для кожної секції
+                            claimed: [attachment], // Обов'язкове: масив з attachments, які ця секція обробляє
+                            title: 'Excel Preview: ' + attachment.name, // Тайтл з назвою файлу для ясності
+                            icon: 'https://oonufrienko.github.io/icon.png', // URL сірої іконки
                             content: {
                                 type: 'iframe',
-                                url: t.signUrl('https://oonufrienko.github.io/preview.html'), // Замініть на URL вашого preview.html
-                                height: 400 // Початкова висота iframe (адаптується автоматично)
+                                url: t.signUrl('https://oonufrienko.github.io/preview.html'),
+                                height: 400 // Початкова висота
                             }
                         };
-                    }
-                }).filter(Boolean); // Фільтрує порожні значення
+                    });
             }
         });
     </script>
