@@ -4,6 +4,7 @@
     <title>Excel Preview</title>
     <script src="https://p.trellocdn.com/power-up.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="https://p.trellocdn.com/power-up.min.css"> <!-- Додано для стилів Trello -->
     <style>
         table { border-collapse: collapse; }
         th, td { border: 1px solid #ddd; padding: 8px; }
@@ -15,7 +16,17 @@
     <script>
         var t = window.TrelloPowerUp.iframe();
         t.render(function() {
-            t.attachment('attachment').then(function(attachment) {
+            t.card('attachments').then(function(attachments) {
+                var context = t.getContext(); // Отримуємо контекст (включає attachmentId, якщо потрібно)
+                var attachment = attachments.find(function(att) {
+                    return att.id === context.attachment; // Якщо є context.attachment, інакше адаптуйте
+                }) || attachments[0]; // Фallback на перший, але для однієї секції це OK
+                
+                if (!attachment) {
+                    document.getElementById('preview-container').innerHTML = '<p>Файл не знайдено.</p>';
+                    return t.sizeTo('#preview-container');
+                }
+                
                 fetch(attachment.url, { method: 'GET' })
                     .then(response => response.arrayBuffer())
                     .then(data => {
@@ -27,10 +38,10 @@
                             html += XLSX.utils.sheet_to_html(worksheet, { id: 'data-table', editable: false });
                         });
                         document.getElementById('preview-container').innerHTML = html;
-                        t.sizeTo('#preview-container'); // Адаптує висоту iframe
+                        t.sizeTo('#preview-container');
                     })
                     .catch(error => {
-                        document.getElementById('preview-container').innerHTML = '<p>Помилка завантаження: ' + error.message + '</p>';
+                        document.getElementById('preview-container').innerHTML = '<p>Помилка: ' + error.message + '</p>';
                         t.sizeTo('#preview-container');
                     });
             });
