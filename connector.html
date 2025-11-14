@@ -15,13 +15,13 @@
                     })
                     .map(function(attachment) {
                         return {
-                            id: 'excel-preview-' + attachment.id, // Унікальний ID для кожної секції
-                            claimed: [attachment], // Обов'язкове: масив з attachments, які ця секція обробляє
-                            title: 'Excel Preview: ' + attachment.name, // Тайтл з назвою файлу для ясності
-                            icon: 'https://oonufrienko.github.io/trello-excel-preview/icon.png', // URL сірої іконки
+                            id: 'excel-preview-' + attachment.id, // Унікальний ID
+                            claimed: [attachment], // Обов'язкове: заявляємо цей attachment
+                            title: 'Excel Preview: ' + attachment.name, // Тайтл з назвою файлу
+                            icon: 'https://oonufrienko.github.io/trello-excel-preview/icon-gray.png', // Сіра іконка (створіть, якщо немає)
                             content: {
                                 type: 'iframe',
-                                url: t.signUrl('https://oonufrienko.github.io/trello-excel-preview/preview.html'),
+                                url: t.signUrl('https://oonufrienko.github.io/trello-excel-preview/preview.html', { attUrl: attachment.url }),
                                 height: 400 // Початкова висота
                             }
                         };
