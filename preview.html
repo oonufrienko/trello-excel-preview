@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Excel Preview</title>
+    <script src="https://p.trellocdn.com/power-up.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        table { border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 8px; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body style="margin:0; padding:0;">
+    <div id="preview-container"></div>
+    <script>
+        var t = window.TrelloPowerUp.iframe();
+        t.render(function() {
+            t.attachment('attachment').then(function(attachment) {
+                fetch(attachment.url, { method: 'GET' })
+                    .then(response => response.arrayBuffer())
+                    .then(data => {
+                        var workbook = XLSX.read(data, { type: 'array' });
+                        var html = '';
+                        workbook.SheetNames.forEach(function(sheetName) {
+                            var worksheet = workbook.Sheets[sheetName];
+                            html += '<h3>' + sheetName + '</h3>';
+                            html += XLSX.utils.sheet_to_html(worksheet, { id: 'data-table', editable: false });
+                        });
+                        document.getElementById('preview-container').innerHTML = html;
+                        t.sizeTo('#preview-container'); // Адаптує висоту iframe
+                    })
+                    .catch(error => {
+                        document.getElementById('preview-container').innerHTML = '<p>Помилка завантаження: ' + error.message + '</p>';
+                        t.sizeTo('#preview-container');
+                    });
+            });
+        });
+    </script>
+</body>
+</html>
