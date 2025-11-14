@@ -1,9 +1,20 @@
 const fetch = require('node-fetch');
+const urlModule = require('url'); // Додаємо вбудований модуль для перевірки URL
 
 module.exports = async (req, res) => {
     const { url, token, key } = req.query;
     if (!url || !token || !key) {
         return res.status(400).send('Missing parameters');
+    }
+
+    // Перевірка, чи url є валідним абсолютним URL
+    try {
+        const parsedUrl = new urlModule.URL(url);
+        if (!parsedUrl.protocol || !parsedUrl.hostname) {
+            throw new Error('Invalid URL');
+        }
+    } catch (err) {
+        return res.status(400).send('Invalid URL: Must be absolute (e.g., https://example.com)');
     }
 
     try {
