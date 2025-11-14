@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Excel Preview Connector</title>
+    <script src="https://p.trellocdn.com/power-up.min.js"></script>
+</head>
+<body>
+    <script>
+        window.TrelloPowerUp.initialize({
+            'attachment-sections': function(t, options) {
+                var attachments = options.entries;
+                return attachments.map(function(attachment) {
+                    if (attachment.name.endsWith('.xlsx') || attachment.name.endsWith('.xls')) {
+                        return {
+                            id: 'excel-preview',
+                            title: 'Excel Preview',
+                            icon: 'https://your-host.com/icon.png', // Замініть на URL вашої іконки, якщо є
+                            content: {
+                                type: 'iframe',
+                                url: t.signUrl('https://your-host.com/preview.html'), // Замініть на URL вашого preview.html
+                                height: 400 // Початкова висота iframe (адаптується автоматично)
+                            }
+                        };
+                    }
+                }).filter(Boolean); // Фільтрує порожні значення
+            }
+        });
+    </script>
+</body>
+</html>
