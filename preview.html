@@ -4,7 +4,7 @@
     <title>Excel Preview</title>
     <script src="https://p.trellocdn.com/power-up.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <link rel="stylesheet" href="https://p.trellocdn.com/power-up.min.css"> <!-- Стилі Trello для кращої інтеграції -->
+    <link rel="stylesheet" href="https://p.trellocdn.com/power-up.min.css">
     <style>
         table { border-collapse: collapse; }
         th, td { border: 1px solid #ddd; padding: 8px; }
@@ -16,40 +16,46 @@
     <script>
         var t = window.TrelloPowerUp.iframe();
         t.render(function() {
-            t.card('attachments').then(function(card) {  // Змінено: тепер card — це об'єкт { attachments: [...] }
-                var attachments = card.attachments;  // Отримуємо масив attachments
+            t.card('attachments').then(function(card) {
                 var context = t.getContext();
-                var attachment = attachments.find(function(att) {
-                    return att.id === context.attachment;  // Використовуємо context.attachment для ID поточного файлу
+                var attachment = card.attachments.find(function(att) {
+                    return att.id === context.attachment;
                 });
-
                 if (!attachment) {
-                    document.getElementById('preview-container').innerHTML = '<p>Файл не знайдено в контексті.</p>';
-                    return t.sizeTo('#preview-container');
+                    return showError('Файл не знайдено.');
                 }
 
-                fetch(attachment.url, { method: 'GET' })
-                    .then(response => response.arrayBuffer())
-                    .then(data => {
-                        var workbook = XLSX.read(data, { type: 'array' });
-                        var html = '';
-                        workbook.SheetNames.forEach(function(sheetName) {
-                            var worksheet = workbook.Sheets[sheetName];
-                            html += '<h3>' + sheetName + '</h3>';
-                            html += XLSX.utils.sheet_to_html(worksheet, { id: 'data-table', editable: false });
-                        });
-                        document.getElementById('preview-container').innerHTML = html;
-                        t.sizeTo('#preview-container');  // Адаптує висоту iframe
+                var apiKey = 'eaa6d0d7c57218139af1b772bbd777cb'; // Замініть на ваш API Key з Trello
+                var proxyUrl = '/api/proxy'; // Відносний шлях до проксі на Vercel
+
+                t.authorize('https://trello.com/1/authorize?expiration=never&name=ExcelPreview&scope=read&response_type=token&key=' + apiKey)
+                    .then(function(token) {
+                        var fullProxyUrl = proxyUrl + '?url=' + encodeURIComponent(attachment.url) + '&token=' + token + '&key=' + apiKey;
+                        fetch(fullProxyUrl)
+                            .then(response => {
+                                if (!response.ok) throw new Error('Proxy error: ' + response.status);
+                                return response.arrayBuffer();
+                            })
+                            .then(data => {
+                                var workbook = XLSX.read(data, { type: 'array' });
+                                var html = '';
+                                workbook.SheetNames.forEach(function(sheetName) {
+                                    html += '<h3>' + sheetName + '</h3>';
+                                    html += XLSX.utils.sheet_to_html(workbook.Sheets[sheetName], { id: 'data-table', editable: false });
+                                });
+                                document.getElementById('preview-container').innerHTML = html;
+                                t.sizeTo('#preview-container');
+                            })
+                            .catch(error => showError('Помилка: ' + error.message));
                     })
-                    .catch(error => {
-                        document.getElementById('preview-container').innerHTML = '<p>Помилка завантаження: ' + error.message + '</p>';
-                        t.sizeTo('#preview-container');
-                    });
-            }).catch(function(error) {
-                document.getElementById('preview-container').innerHTML = '<p>Помилка API Trello: ' + error.message + '</p>';
-                t.sizeTo('#preview-container');
+                    .catch(error => showError('Авторизація не вдалася: ' + error));
             });
         });
+
+        function showError(msg) {
+            document.getElementById('preview-container').innerHTML = '<p>' + msg + '</p>';
+            t.sizeTo('#preview-container');
+        }
     </script>
 </body>
 </html>
