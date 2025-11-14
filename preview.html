@@ -24,9 +24,10 @@
         t.render(async () => {
             const context = t.getContext();
             const attachmentId = context.attachment;
+            const cardId = context.card;
 
             try {
-                // Отримуємо карточку з attachments
+                // Отримуємо attachment
                 const card = await t.card('attachments');
                 const attachment = card.attachments.find(a => a.id === attachmentId);
 
@@ -34,11 +35,14 @@
                     throw new Error('Файл не знайдено в карточці.');
                 }
 
-                // КЛЮЧ: Використовуємо t.get для завантаження файлу
-                const arrayBuffer = await t.get(attachment.url, 'arrayBuffer');
+                // КЛЮЧ: Правильний шлях до завантаження
+                const downloadUrl = `https://api.trello.com/1/cards/${cardId}/attachments/${attachmentId}/download`;
+
+                // Завантажуємо через t.get (автоматично додає key + token)
+                const arrayBuffer = await t.get(downloadUrl, 'arrayBuffer');
 
                 if (!arrayBuffer || arrayBuffer.byteLength === 0) {
-                    throw new Error('Файл пор price або недоступний.');
+                    throw new Error('Файл порожній або недоступний.');
                 }
 
                 // Парсимо Excel
@@ -54,6 +58,7 @@
                 t.sizeTo('#preview-container').catch(() => t.sizeTo(600));
 
             } catch (error) {
+                console.error('Preview error:', error);
                 showError('Помилка: ' + error.message);
             }
         });
