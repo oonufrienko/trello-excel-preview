@@ -6,22 +6,26 @@
 </head>
 <body>
     <script>
-        TrelloPowerUp.initialize({
+        window.TrelloPowerUp.initialize({
             'attachment-sections': function(t, options) {
-                return options.entries
-                    .filter(att => att.name.match(/\.(xlsx?|xls)$/i))
-                    .map(attachment => ({
-                        id: 'excel-preview-' + attachment.id,
-                        claimed: [attachment],
-                        title: 'Excel Preview: ' + attachment.name,
-                        icon: 'https://oonufrienko.github.io/trello-excel-preview/icon-gray.png',
-                        content: {
-                            type: 'iframe',
-                            // КЛЮЧ: відносний шлях + передача ID
-                            url: t.signUrl('./preview.html', { attachmentId: attachment.id }),
-                            height: 400
-                        }
-                    }));
+                var attachments = options.entries;
+                return attachments
+                    .filter(function(attachment) {
+                        return attachment.name.endsWith('.xlsx') || attachment.name.endsWith('.xls');
+                    })
+                    .map(function(attachment) {
+                        return {
+                            id: 'excel-preview-' + attachment.id, // Унікальний ID
+                            claimed: [attachment], // Обов'язкове: заявляємо цей attachment
+                            title: 'Excel Preview: ' + attachment.name, // Тайтл з назвою файлу
+                            icon: 'https://oonufrienko.github.io/trello-excel-preview/icon-gray.png', // Сіра іконка (створіть, якщо немає)
+                            content: {
+                                type: 'iframe',
+                                url: t.signUrl('https://oonufrienko.github.io/trello-excel-preview/preview.html', { attUrl: attachment.url }),
+                                height: 400 // Початкова висота
+                            }
+                        };
+                    });
             }
         });
     </script>
