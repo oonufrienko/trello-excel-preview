@@ -2,71 +2,58 @@
 <html>
 <head>
     <title>Excel Preview</title>
-    <!-- КЛЮЧ: Підключаємо power-up.min.js -->
+    <script src="https://p.trellocdn.com/power-up.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="https://p.trellocdn.com/power-up.min.css">
     <style>
-        body { margin: 0; padding: 16px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-        table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
-        th, td { border: 1px solid #ddd; padding: 8px; font-size: 12px; text-align: left; }
+        table { border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 8px; }
         th { background-color: #f2f2f2; }
-        h3 { margin: 16px 0 8px; font-size: 16px; font-weight: 600; }
-        .loading { color: #666; font-style: italic; }
-        .error { color: #d32f2f; }
     </style>
 </head>
-<body>
-    <div id="preview-container"><p class="loading">Завантаження файлу...</p></div>
-
+<body style="margin:0; padding:0;">
+    <div id="preview-container"></div>
     <script>
-        // КЛЮЧ: Перевіряємо, чи завантажився TrelloPowerUp
-        if (!window.TrelloPowerUp) {
-            document.getElementById('preview-container').innerHTML = 
-                '<p class="error">Помилка: Trello Power-Up не завантажено. Перевірте підключення.</p>';
-            throw new Error('TrelloPowerUp is not defined');
-        }
-
-        const t = TrelloPowerUp.iframe();
-
-        t.render(async () => {
-            try {
-                const args = await t.args();
-                const attachmentId = args.attachmentId;
-
-                if (!attachmentId) throw new Error('ID файлу не передано.');
-
-                const context = t.getContext();
-                const cardId = context.card;
-
-                const card = await t.card('attachments');
-                const attachment = card.attachments.find(a => a.id === attachmentId);
-                if (!attachment) throw new Error('Файл не знайдено.');
-
-                const downloadUrl = `https://api.trello.com/1/cards/${cardId}/attachments/${attachmentId}/download`;
-                const arrayBuffer = await t.get(downloadUrl, 'arrayBuffer');
-
-                if (!arrayBuffer || arrayBuffer.byteLength === 0) {
-                    throw new Error('Файл порожній.');
+        var t = window.TrelloPowerUp.iframe();
+        t.render(function() {
+            t.card('attachments').then(function(card) {
+                var context = t.getContext();
+                var attachment = card.attachments.find(function(att) {
+                    return att.id === context.attachment;
+                });
+                if (!attachment) {
+                    return showError('Файл не знайдено.');
                 }
 
-                const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-                let html = '';
-                workbook.SheetNames.forEach(sheetName => {
-                    html += `<h3>${sheetName}</h3>`;
-                    html += XLSX.utils.sheet_to_html(workbook.Sheets[sheetName]);
-                });
+                var apiKey = 'eaa6d0d7c57218139af1b772bbd777cb'; // Замініть на ваш API Key з Trello
+                var proxyUrl = '/api/proxy'; // Відносний шлях до проксі на Vercel
 
-                document.getElementById('preview-container').innerHTML = html;
-                t.sizeTo('#preview-container').catch(() => t.sizeTo(600));
-
-            } catch (error) {
-                console.error('Preview error:', error);
-                showError('Помилка: ' + error.message);
-            }
+                t.authorize('https://trello.com/1/authorize?expiration=never&name=ExcelPreview&scope=read&response_type=token&key=' + apiKey)
+                    .then(function(token) {
+                        var fullProxyUrl = proxyUrl + '?url=' + encodeURIComponent(attachment.url) + '&token=' + token + '&key=' + apiKey;
+                        fetch(fullProxyUrl)
+                            .then(response => {
+                                if (!response.ok) throw new Error('Proxy error: ' + response.status);
+                                return response.arrayBuffer();
+                            })
+                            .then(data => {
+                                var workbook = XLSX.read(data, { type: 'array' });
+                                var html = '';
+                                workbook.SheetNames.forEach(function(sheetName) {
+                                    html += '<h3>' + sheetName + '</h3>';
+                                    html += XLSX.utils.sheet_to_html(workbook.Sheets[sheetName], { id: 'data-table', editable: false });
+                                });
+                                document.getElementById('preview-container').innerHTML = html;
+                                t.sizeTo('#preview-container');
+                            })
+                            .catch(error => showError('Помилка: ' + error.message));
+                    })
+                    .catch(error => showError('Авторизація не вдалася: ' + error));
+            });
         });
 
         function showError(msg) {
-            document.getElementById('preview-container').innerHTML = `<p class="error">${msg}</p>`;
+            document.getElementById('preview-container').innerHTML = '<p>' + msg + '</p>';
             t.sizeTo('#preview-container');
         }
     </script>
