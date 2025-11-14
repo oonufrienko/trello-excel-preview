@@ -1,72 +1,53 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Excel Preview</title>
-    <script src="https://p.trellocdn.com/power-up.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <link rel="stylesheet" href="https://p.trellocdn.com/power-up.min.css">
-    <style>
-        body { margin: 0; padding: 16px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-        table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
-        th, td { border: 1px solid #ddd; padding: 8px; font-size: 12px; text-align: left; }
-        th { background-color: #f2f2f2; }
-        h3 { margin: 16px 0 8px; font-size: 16px; font-weight: 600; }
-        .loading { color: #666; font-style: italic; }
-        .error { color: #d32f2f; }
-    </style>
-</head>
-<body>
-    <div id="preview-container"><p class="loading">Завантаження файлу...</p></div>
+<script>
+    const t = window.TrelloPowerUp.iframe();
 
-    <script>
-        const t = window.TrelloPowerUp.iframe();
+    t.render(async () => {
+        try {
+            // Отримуємо параметри з signed URL
+            const args = await t.args();
+            const attachmentId = args.attachmentId;
 
-        t.render(async () => {
+            if (!attachmentId) {
+                throw new Error('ID файлу не передано.');
+            }
+
             const context = t.getContext();
-            const attachmentId = context.attachment;
             const cardId = context.card;
 
-            try {
-                // Отримуємо attachment
-                const card = await t.card('attachments');
-                const attachment = card.attachments.find(a => a.id === attachmentId);
+            // Отримуємо attachment
+            const card = await t.card('attachments');
+            const attachment = card.attachments.find(a => a.id === attachmentId);
 
-                if (!attachment) {
-                    throw new Error('Файл не знайдено в карточці.');
-                }
-
-                // КЛЮЧ: Правильний шлях до завантаження
-                const downloadUrl = `https://api.trello.com/1/cards/${cardId}/attachments/${attachmentId}/download`;
-
-                // Завантажуємо через t.get (автоматично додає key + token)
-                const arrayBuffer = await t.get(downloadUrl, 'arrayBuffer');
-
-                if (!arrayBuffer || arrayBuffer.byteLength === 0) {
-                    throw new Error('Файл порожній або недоступний.');
-                }
-
-                // Парсимо Excel
-                const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-                let html = '';
-
-                workbook.SheetNames.forEach(sheetName => {
-                    html += `<h3>${sheetName}</h3>`;
-                    html += XLSX.utils.sheet_to_html(workbook.Sheets[sheetName]);
-                });
-
-                document.getElementById('preview-container').innerHTML = html;
-                t.sizeTo('#preview-container').catch(() => t.sizeTo(600));
-
-            } catch (error) {
-                console.error('Preview error:', error);
-                showError('Помилка: ' + error.message);
+            if (!attachment) {
+                throw new Error('Файл не знайдено в карточці.');
             }
-        });
 
-        function showError(msg) {
-            document.getElementById('preview-container').innerHTML = `<p class="error">${msg}</p>`;
-            t.sizeTo('#preview-container');
+            // Завантажуємо через Trello API
+            const downloadUrl = `https://api.trello.com/1/cards/${cardId}/attachments/${attachmentId}/download`;
+            const arrayBuffer = await t.get(downloadUrl, 'arrayBuffer');
+
+            if (!arrayBuffer || arrayBuffer.byteLength === 0) {
+                throw new Error('Файл порожній.');
+            }
+
+            const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+            let html = '';
+            workbook.SheetNames.forEach(sheetName => {
+                html += `<h3>${sheetName}</h3>`;
+                html += XLSX.utils.sheet_to_html(workbook.Sheets[sheetName]);
+            });
+
+            document.getElementById('preview-container').innerHTML = html;
+            t.sizeTo('#preview-container').catch(() => t.sizeTo(600));
+
+        } catch (error) {
+            console.error('Preview error:', error);
+            showError('Помилка: ' + error.message);
         }
-    </script>
-</body>
-</html>
+    });
+
+    function showError(msg) {
+        document.getElementById('preview-container').innerHTML = `<p style="color:red;">${msg}</p>`;
+        t.sizeTo('#preview-container');
+    }
+</script>
