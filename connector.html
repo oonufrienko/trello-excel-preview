@@ -6,28 +6,23 @@
 </head>
 <body>
     <script>
-        window.TrelloPowerUp.initialize({
+        TrelloPowerUp.initialize({
             'attachment-sections': function(t, options) {
-    var attachments = options.entries;
-    return attachments
-        .filter(function(attachment) {
-            return attachment.name.endsWith('.xlsx') || attachment.name.endsWith('.xls');
-        })
-        .map(function(attachment) {
-            return {
-                id: 'excel-preview-' + attachment.id,
-                claimed: [attachment],
-                title: 'Excel Preview: ' + attachment.name,
-                icon: 'https://oonufrienko.github.io/trello-excel-preview/icon-gray.png',
-                content: {
-                    type: 'iframe',
-                    // КЛЮЧ: Передаємо attachment.id через signed URL
-                    url: t.signUrl('./preview.html', { attachmentId: attachment.id }),
-                    height: 400
-                }
-            };
-        });
-}
+                return options.entries
+                    .filter(att => att.name.match(/\.(xlsx?|xls)$/i))
+                    .map(attachment => ({
+                        id: 'excel-preview-' + attachment.id,
+                        claimed: [attachment],
+                        title: 'Excel Preview: ' + attachment.name,
+                        icon: 'https://oonufrienko.github.io/trello-excel-preview/icon-gray.png',
+                        content: {
+                            type: 'iframe',
+                            // КЛЮЧ: відносний шлях + передача ID
+                            url: t.signUrl('./preview.html', { attachmentId: attachment.id }),
+                            height: 400
+                        }
+                    }));
+            }
         });
     </script>
 </body>
