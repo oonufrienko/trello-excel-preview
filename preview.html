@@ -16,40 +16,35 @@
     <script>
         var t = window.TrelloPowerUp.iframe();
         t.render(function() {
-            t.card('attachments').then(function(card) {
-                var context = t.getContext();
-                var attachment = card.attachments.find(function(att) {
-                    return att.id === context.attachment;
-                });
-                if (!attachment) {
-                    return showError('Файл не знайдено.');
-                }
+            var attUrl = t.arg('attUrl'); // Отримуємо URL з аргументу
+            if (!attUrl) {
+                return showError('URL файлу не знайдено.');
+            }
 
-                var apiKey = 'eaa6d0d7c57218139af1b772bbd777cb'; // Замініть на ваш API Key з Trello
-                var proxyUrl = '/api/proxy'; // Відносний шлях до проксі на Vercel
+            var apiKey = 'eaa6d0d7c57218139af1b772bbd777cb'; // Замініть на ваш API Key з Trello admin
+            var proxyUrl = '/api/proxy';
 
-                t.authorize('https://trello.com/1/authorize?expiration=never&name=ExcelPreview&scope=read&response_type=token&key=' + apiKey)
-                    .then(function(token) {
-                        var fullProxyUrl = proxyUrl + '?url=' + encodeURIComponent(attachment.url) + '&token=' + token + '&key=' + apiKey;
-                        fetch(fullProxyUrl)
-                            .then(response => {
-                                if (!response.ok) throw new Error('Proxy error: ' + response.status);
-                                return response.arrayBuffer();
-                            })
-                            .then(data => {
-                                var workbook = XLSX.read(data, { type: 'array' });
-                                var html = '';
-                                workbook.SheetNames.forEach(function(sheetName) {
-                                    html += '<h3>' + sheetName + '</h3>';
-                                    html += XLSX.utils.sheet_to_html(workbook.Sheets[sheetName], { id: 'data-table', editable: false });
-                                });
-                                document.getElementById('preview-container').innerHTML = html;
-                                t.sizeTo('#preview-container');
-                            })
-                            .catch(error => showError('Помилка: ' + error.message));
-                    })
-                    .catch(error => showError('Авторизація не вдалася: ' + error));
-            });
+            t.authorize('https://trello.com/1/authorize?expiration=never&name=ExcelPreview&scope=read&response_type=token&key=' + apiKey)
+                .then(function(token) {
+                    var fullProxyUrl = proxyUrl + '?url=' + encodeURIComponent(attUrl) + '&token=' + token + '&key=' + apiKey;
+                    fetch(fullProxyUrl)
+                        .then(response => {
+                            if (!response.ok) throw new Error('Proxy error: ' + response.status);
+                            return response.arrayBuffer();
+                        })
+                        .then(data => {
+                            var workbook = XLSX.read(data, { type: 'array' });
+                            var html = '';
+                            workbook.SheetNames.forEach(function(sheetName) {
+                                html += '<h3>' + sheetName + '</h3>';
+                                html += XLSX.utils.sheet_to_html(workbook.Sheets[sheetName], { id: 'data-table', editable: false });
+                            });
+                            document.getElementById('preview-container').innerHTML = html;
+                            t.sizeTo('#preview-container');
+                        })
+                        .catch(error => showError('Помилка: ' + error.message));
+                })
+                .catch(error => showError('Авторизація не вдалася: ' + error));
         });
 
         function showError(msg) {
