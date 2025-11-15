@@ -21,14 +21,37 @@
                 return showError('URL файлу не знайдено.');
             }
 
-            var apiKey = 'eaa6d0d7c57218139af1b772bbd777cb'; // Замініть на ваш реальний API Key з Trello admin
+            var apiKey = 'eaa6d0d7c57218139af1b772bbd777cb'; // Замініть на ваш реальний API Key!
             var proxyUrl = '/api/proxy';
 
-            // Отримуємо токен автоматично без попапу
-            t.token().then(function(token) {
-                if (!token) {
-                    return showError('Токен не доступний.');
-                }
+            // Перевіряємо збережений токен
+            t.get('card', 'shared', 'authToken')
+                .then(function(token) {
+                    if (token) {
+                        loadPreview(token); // Якщо є — завантажуємо одразу
+                    } else {
+                        // Конструюємо authUrl з callback_method і return_url
+                        var authUrl = 'https://trello.com/1/authorize?expiration=never&name=ExcelPreview&scope=read&response_type=token&key=' + apiKey + '&callback_method=fragment&return_url=' + encodeURIComponent('https://trello-excel-preview.vercel.app/authorize.html');
+                        t.authorize(authUrl)
+                            .then(function(newToken) {
+                                t.set('card', 'shared', 'authToken', newToken)
+                                    .then(function() {
+                                        loadPreview(newToken);
+                                    })
+                                    .catch(function(error) {
+                                        showError('Помилка збереження токена: ' + error);
+                                    });
+                            })
+                            .catch(function(error) {
+                                showError('Авторизація не вдалася: ' + error);
+                            });
+                    }
+                })
+                .catch(function(error) {
+                    showError('Помилка перевірки токена: ' + error);
+                });
+
+            function loadPreview(token) {
                 var fullProxyUrl = proxyUrl + '?url=' + encodeURIComponent(attUrl) + '&token=' + token + '&key=' + apiKey;
                 fetch(fullProxyUrl)
                     .then(response => {
@@ -46,15 +69,13 @@
                         t.sizeTo('#preview-container');
                     })
                     .catch(error => showError('Помилка завантаження: ' + error.message));
-            }).catch(function(error) {
-                showError('Помилка отримання токена: ' + error);
-            });
-        });
+            }
 
-        function showError(msg) {
-            document.getElementById('preview-container').innerHTML = '<p>' + msg + '</p>';
-            t.sizeTo('#preview-container');
-        }
+            function showError(msg) {
+                document.getElementById('preview-container').innerHTML = '<p>' + msg + '</p>';
+                t.sizeTo('#preview-container');
+            }
+        });
     </script>
 </body>
 </html>
