@@ -2,28 +2,18 @@
 <html>
 <body>
 <script>
-    let authorize;
-    try {
-        if (window.opener && typeof window.opener.authorize === "function") {
-            authorize = window.opener.authorize;
-        }
-    } catch (e) {
-        // Security settings prevent access; fall back to localStorage
-    }
+    // Витягуємо токен з hash (#token=...)
+    const hash = window.location.hash.substring(1);
+    const token = new URLSearchParams(hash).get('token');
 
-    // Extract token from URL hash (for callback_method=fragment)
-    const hash = window.location.hash.substring(1); // Remove #
-    const token = new URLSearchParams(hash).get('token'); // Parse token=ATTA...
-
-    if (authorize && token) {
-        authorize(token);
+    if (token && window.opener && typeof window.opener.authorizeCallback === 'function') {
+        window.opener.authorizeCallback(token); // Передаємо токен у батьківське вікно
+        window.close(); // Закриваємо попап
     } else {
-        localStorage.setItem("token", token);
+        // Fallback, якщо opener заблоковано (рідко)
+        console.error('Не вдалося передати токен.');
+        setTimeout(window.close, 1000);
     }
-
-    setTimeout(function () {
-        window.close();
-    }, 1000);
 </script>
 </body>
 </html>
