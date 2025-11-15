@@ -15,14 +15,14 @@
                     })
                     .map(function(attachment) {
                         return {
-                            id: 'excel-preview-' + attachment.id, // Унікальний ID
-                            claimed: [attachment], // Обов'язкове: заявляємо цей attachment
-                            title: 'Excel Preview: ' + attachment.name, // Тайтл з назвою файлу
-                            icon: 'https://oonufrienko.github.io/trello-excel-preview/icon-gray.png', // Сіра іконка (створіть, якщо немає)
+                            id: 'excel-preview-' + attachment.id,
+                            claimed: [attachment],
+                            title: 'Excel Preview: ' + attachment.name,
+                            icon: 'https://trello-excel-preview.vercel.app/icon.png', // Якщо є сіра іконка
                             content: {
                                 type: 'iframe',
-                                url: t.signUrl('https://oonufrienko.github.io/trello-excel-preview/preview.html', { attUrl: attachment.url }),
-                                height: 400 // Початкова висота
+                                url: t.signUrl('https://trello-excel-preview.vercel.app/preview.html', { attUrl: attachment.url }), // Передаємо attUrl; замініть на ваш Vercel URL
+                                height: 400
                             }
                         };
                     });
