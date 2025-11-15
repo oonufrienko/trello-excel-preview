@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<body>
+<script>
+    let authorize;
+    try {
+        if (window.opener && typeof window.opener.authorize === "function") {
+            authorize = window.opener.authorize;
+        }
+    } catch (e) {
+        // Security settings prevent access; fall back to localStorage
+    }
+
+    // Extract token from URL hash (for callback_method=fragment)
+    const hash = window.location.hash.substring(1); // Remove #
+    const token = new URLSearchParams(hash).get('token'); // Parse token=ATTA...
+
+    if (authorize && token) {
+        authorize(token);
+    } else {
+        localStorage.setItem("token", token);
+    }
+
+    setTimeout(function () {
+        window.close();
+    }, 1000);
+</script>
+</body>
+</html>
