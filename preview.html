@@ -21,29 +21,40 @@
                 return showError('URL файлу не знайдено.');
             }
 
-            var apiKey = 'eaa6d0d7c57218139af1b772bbd777cb'; // Замініть на ваш реальний API Key!
+            var apiKey = 'eaa6d0d7c57218139af1b772bbd777cb'; // Замініть на ваш реальний API Key з Trello admin
             var proxyUrl = '/api/proxy';
 
-            // Перевіряємо збережений токен (тепер private)
-            t.get('card', 'private', 'authToken') // Змінено на private
+            // Перевіряємо збережений токен
+            t.get('card', 'private', 'authToken')
                 .then(function(token) {
                     if (token) {
-                        loadPreview(token); // Якщо є — завантажуємо одразу
+                        loadPreview(token);
                     } else {
-                        // Авторизуємо без return_url — використовуємо попап-мод
-                        t.authorize('https://trello.com/1/authorize?expiration=never&name=ExcelPreview&scope=read&response_type=token&key=' + apiKey)
-                            .then(function(newToken) {
-                                t.set('card', 'private', 'authToken', newToken) // Змінено на private
-                                    .then(function() {
-                                        loadPreview(newToken);
-                                    })
-                                    .catch(function(error) {
-                                        showError('Помилка збереження токена: ' + error);
-                                    });
-                            })
-                            .catch(function(error) {
-                                showError('Авторизація не вдалася: ' + error);
-                            });
+                        // Встановлюємо callback для токена з попапу
+                        var authorizeResolve;
+                        var authorizePromise = new Promise(function(resolve) {
+                            authorizeResolve = resolve;
+                        });
+                        window.authorizeCallback = function(token) {
+                            authorizeResolve(token);
+                        };
+
+                        // Авторизуємо з callback_method і return_url
+                        var authUrl = 'https://trello.com/1/authorize?expiration=never&name=ExcelPreview&scope=read&response_type=token&key=' + apiKey + '&callback_method=fragment&return_url=' + encodeURIComponent('https://trello-excel-preview.vercel.app/authorize.html');
+                        t.authorize(authUrl);
+
+                        // Чекаємо токен з callback
+                        authorizePromise.then(function(newToken) {
+                            t.set('card', 'private', 'authToken', newToken)
+                                .then(function() {
+                                    loadPreview(newToken);
+                                })
+                                .catch(function(error) {
+                                    showError('Помилка збереження токена: ' + error);
+                                });
+                        }).catch(function(error) {
+                            showError('Авторизація не вдалася: ' + error);
+                        });
                     }
                 })
                 .catch(function(error) {
