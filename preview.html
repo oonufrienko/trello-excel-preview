@@ -30,8 +30,8 @@
                     if (token) {
                         loadPreview(token); // Якщо є — завантажуємо одразу
                     } else {
-                        // Авторизуємо і зберігаємо
-                        t.authorize('https://trello.com/1/authorize?expiration=never&name=ExcelPreview&scope=read&response_type=token&key=' + apiKey + '&return_url=' + encodeURIComponent(window.location.href))
+                        // Авторизуємо без return_url — використовуємо попап-мод
+                        t.authorize('https://trello.com/1/authorize?expiration=never&name=ExcelPreview&scope=read&response_type=token&key=' + apiKey)
                             .then(function(newToken) {
                                 t.set('card', 'shared', 'authToken', newToken)
                                     .then(function() {
