@@ -17,12 +17,12 @@
                         return {
                             id: 'excel-preview-button-' + attachment.id,
                             claimed: [attachment],
-                            title: 'Excel Preview',
-                            icon: 'https://trello-excel-preview.vercel.app/icon.png', // Сіра іконка, якщо є (опціонально)
+                            title: 'Excel Preview: ' + attachment.name, // Додаємо назву файлу в title
+                            icon: 'https://trello-excel-preview.vercel.app/icon-gray.png', // Сіра іконка, якщо є
                             content: {
                                 type: 'iframe',
                                 url: t.signUrl('https://trello-excel-preview.vercel.app/button.html', { attUrl: attachment.url }),
-                                height: 30 // Мінімальна висота, щоб не ламати картку
+                                height: 34 // Збільшено на 4px
                             }
                         };
                     });
@@ -30,4 +30,4 @@
         });
     </script>
 </body>
-</html
+</html>
