@@ -17,7 +17,8 @@
                 var attUrl = t.arg('attUrl');
                 t.popup({
                     title: 'Excel Preview',
-                    url: t.signUrl('/preview.html', { attUrl: attUrl }), // Змінено на відносний URL для фіксу попередження
+                    url: t.signUrl('https://trello-excel-preview.vercel.app/preview.html'), // Без параметрів, щоб уникнути hash-ошибки
+                    args: { attUrl: attUrl }, // Передаємо attUrl через args
                     height: 600,
                     mouseEvent: event
                 });
