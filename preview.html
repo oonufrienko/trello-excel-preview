@@ -17,22 +17,80 @@
         var t = window.TrelloPowerUp.iframe();
         t.render(function() {
             var attUrl = t.arg('attUrl');
-            console.log('attUrl in preview.html:', attUrl); // Дебаг: перевірте в консолі F12
+            console.log('attUrl in preview.html:', attUrl); // Вже є, валідний
             if (!attUrl) {
                 return showError('URL файлу не знайдено.');
             }
 
-            var apiKey = 'eaa6d0d7c57218139af1b772bbd777cb'; // Замініть на ваш реальний API Key!
+            var apiKey = 'YOUR_TRELLO_API_KEY'; // Замініть на ваш реальний API Key!
             var proxyUrl = '/api/proxy';
 
-            // Ваш попередній код з авторизацією і loadPreview (не змінюємо, оскільки запрацювало)
-            // ... (скопіюйте ваш попередній код тут, з 'private' для токена)
-        });
+            // Перевіряємо збережений токен
+            t.get('card', 'private', 'authToken')
+                .then(function(token) {
+                    console.log('Token from storage:', token); // Дебаг: чи є токен
+                    if (token) {
+                        loadPreview(token);
+                    } else {
+                        // Авторизуємо (ваш попередній код, що запрацював)
+                        var authUrl = 'https://trello.com/1/authorize?expiration=never&name=ExcelPreview&scope=read&response_type=token&key=' + apiKey + '&callback_method=fragment&return_url=' + encodeURIComponent('https://trello-excel-preview.vercel.app/authorize.html');
+                        t.authorize(authUrl)
+                            .then(function(newToken) {
+                                console.log('New token from authorize:', newToken); // Дебаг: новий токен
+                                t.set('card', 'private', 'authToken', newToken)
+                                    .then(function() {
+                                        loadPreview(newToken);
+                                    })
+                                    .catch(function(error) {
+                                        showError('Помилка збереження токена: ' + error.message);
+                                        console.error('Save token error:', error);
+                                    });
+                            })
+                            .catch(function(error) {
+                                showError('Авторизація не вдалася: ' + error.message);
+                                console.error('Authorize error:', error);
+                            });
+                    }
+                })
+                .catch(function(error) {
+                    showError('Помилка перевірки токена: ' + error.message);
+                    console.error('Get token error:', error);
+                });
 
-        function showError(msg) {
-            document.getElementById('preview-container').innerHTML = '<p>' + msg + '</p>';
-            t.sizeTo('#preview-container');
-        }
+            function loadPreview(token) {
+                var fullProxyUrl = proxyUrl + '?url=' + encodeURIComponent(attUrl) + '&token=' + token + '&key=' + apiKey;
+                console.log('Fetching from proxy:', fullProxyUrl); // Дебаг: URL проксі
+                fetch(fullProxyUrl)
+                    .then(response => {
+                        console.log('Fetch response status:', response.status); // Дебаг: статус відповіді
+                        if (!response.ok) throw new Error('Proxy error: ' + response.status);
+                        return response.arrayBuffer();
+                    })
+                    .then(data => {
+                        console.log('Data received from fetch:', data.byteLength + ' bytes'); // Дебаг: розмір даних
+                        var workbook = XLSX.read(data, { type: 'array' });
+                        console.log('Workbook parsed:', workbook.SheetNames); // Дебаг: аркуші
+                        var html = '';
+                        workbook.SheetNames.forEach(function(sheetName) {
+                            var worksheet = workbook.Sheets[sheetName];
+                            html += '<h3>' + sheetName + '</h3>';
+                            html += XLSX.utils.sheet_to_html(worksheet, { id: 'data-table', editable: false });
+                        });
+                        console.log('Generated HTML length:', html.length); // Дебаг: розмір HTML
+                        document.getElementById('preview-container').innerHTML = html;
+                        t.sizeTo('#preview-container');
+                    })
+                    .catch(error => {
+                        showError('Помилка завантаження: ' + error.message);
+                        console.error('Load preview error:', error);
+                    });
+            }
+
+            function showError(msg) {
+                document.getElementById('preview-container').innerHTML = '<p>' + msg + '</p>';
+                t.sizeTo('#preview-container');
+            }
+        });
     </script>
 </body>
 </html>
