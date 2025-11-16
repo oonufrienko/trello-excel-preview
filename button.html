@@ -13,14 +13,13 @@
     <script>
         var t = window.TrelloPowerUp.iframe();
         t.render(function() {
-            document.getElementById('preview-button').addEventListener('click', function(event) { // Додаємо event
+            document.getElementById('preview-button').addEventListener('click', function(event) {
                 var attUrl = t.arg('attUrl');
                 t.popup({
                     title: 'Excel Preview',
                     url: t.signUrl('https://trello-excel-preview.vercel.app/preview.html', { attUrl: attUrl }),
                     height: 600,
-                    fullscreen: true,
-                    mouseEvent: event // Додаємо mouseEvent для фіксу помилки
+                    mouseEvent: event // Для фіксу попередньої помилки
                 });
             });
             t.sizeTo('#preview-button');
