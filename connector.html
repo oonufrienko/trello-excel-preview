@@ -7,29 +7,27 @@
 <body>
     <script>
         window.TrelloPowerUp.initialize({
-            'attachment-thumbnail': function(t, options) {
+            'attachment-sections': function(t, options) {
                 var attachments = options.entries;
-                return attachments.map(function(attachment) {
-                    if (attachment.name.endsWith('.xlsx') || attachment.name.endsWith('.xls')) {
+                return attachments
+                    .filter(function(attachment) {
+                        return attachment.name.endsWith('.xlsx') || attachment.name.endsWith('.xls');
+                    })
+                    .map(function(attachment) {
                         return {
-                            url: 'https://e7.pngegg.com/pngimages/468/231/png-clipart-xls-microsoft-excel-spreadsheet-computer-icons-microsoft-template-text.png', // Стандартна іконка Excel
-                            title: 'Preview Excel',
-                            contentType: 'image/png', // Тип для іконки
-                            action: {
-                                callback: function(t) {
-                                    t.popup({
-                                        title: 'Excel Preview',
-                                        url: t.signUrl('https://trello-excel-preview.vercel.app/preview.html', { attUrl: attachment.url }),
-                                        height: 600,
-                                        fullscreen: true // Повноекранна модалка для всього документа
-                                    });
-                                }
+                            id: 'excel-preview-button-' + attachment.id,
+                            claimed: [attachment],
+                            title: 'Excel Preview',
+                            icon: 'https://trello-excel-preview.vercel.app/icon.png', // Сіра іконка, якщо є (опціонально)
+                            content: {
+                                type: 'iframe',
+                                url: t.signUrl('https://trello-excel-preview.vercel.app/button.html', { attUrl: attachment.url }),
+                                height: 30 // Мінімальна висота, щоб не ламати картку
                             }
                         };
-                    }
-                }).filter(Boolean);
+                    });
             }
         });
     </script>
 </body>
-</html>
+</html
