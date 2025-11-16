@@ -7,25 +7,25 @@
 <body>
     <script>
         window.TrelloPowerUp.initialize({
-            'attachment-sections': function(t, options) {
-                var attachments = options.entries;
-                return attachments
-                    .filter(function(attachment) {
-                        return attachment.name.endsWith('.xlsx') || attachment.name.endsWith('.xls');
-                    })
-                    .map(function(attachment) {
-                        return {
-                            id: 'excel-preview-' + attachment.id,
-                            claimed: [attachment],
-                            title: 'Excel Preview: ' + attachment.name,
-                            icon: 'https://trello-excel-preview.vercel.app/icon.png', // Якщо є сіра іконка
-                            content: {
-                                type: 'iframe',
-                                url: t.signUrl('https://trello-excel-preview.vercel.app/preview.html', { attUrl: attachment.url }), // Передаємо attUrl; замініть на ваш Vercel URL
-                                height: 400
+            'attachment-thumbnail': function(t, options) {
+                var attachment = options.entries[0]; // Для thumbnail це один attachment
+                if (attachment.name.endsWith('.xlsx') || attachment.name.endsWith('.xls')) {
+                    return {
+                        url: 'https://your-vercel-app.vercel.app/icon-excel.png', // URL на іконку Excel (створіть grayscale іконку і завантажте на Vercel)
+                        title: 'Excel Preview',
+                        action: {
+                            text: 'View Excel',
+                            callback: function(t) {
+                                t.popup({
+                                    title: 'Excel Viewer',
+                                    url: t.signUrl('https://your-vercel-app.vercel.app/preview.html', { attUrl: attachment.url }),
+                                    height: 600, // Висота модалки
+                                    fullscreen: true // Повноекранний режим для кращого перегляду
+                                });
                             }
-                        };
-                    });
+                        }
+                    };
+                }
             }
         });
     </script>
