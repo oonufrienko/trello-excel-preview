@@ -5,7 +5,7 @@
     <script src="https://p.trellocdn.com/power-up.min.js"></script>
     <link rel="stylesheet" href="https://p.trellocdn.com/power-up.min.css">
     <style>
-        #preview-button { width:100%; height:30px; background:#0079bf; color:white; border:none; cursor:pointer; font-size:12px; padding:0; margin:0; }
+        #preview-button { width:100%; height:34px; background:#0079bf; color:white; border:none; cursor:pointer; font-size:12px; padding:0; margin:0; } /* Збільшено на 4px */
     </style>
 </head>
 <body style="margin:0; padding:0;">
@@ -13,17 +13,18 @@
     <script>
         var t = window.TrelloPowerUp.iframe();
         t.render(function() {
-            document.getElementById('preview-button').addEventListener('click', function() {
+            document.getElementById('preview-button').addEventListener('click', function(event) { // Додаємо event
                 var attUrl = t.arg('attUrl');
                 t.popup({
                     title: 'Excel Preview',
                     url: t.signUrl('https://trello-excel-preview.vercel.app/preview.html', { attUrl: attUrl }),
                     height: 600,
-                    fullscreen: true // Повноекранна модалка для всього документа
+                    fullscreen: true,
+                    mouseEvent: event // Додаємо mouseEvent для фіксу помилки
                 });
             });
-            t.sizeTo('#preview-button'); // Адаптує висоту iframe
+            t.sizeTo('#preview-button');
         });
     </script>
 </body>
-</html
+</html>
