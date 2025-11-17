@@ -15,12 +15,11 @@
         t.render(function() {
             document.getElementById('preview-button').addEventListener('click', function(event) {
                 var attUrl = t.arg('attUrl');
-                var popupHeight = Math.floor(window.innerHeight * 0.8); // 80% від висоти вікна
                 t.popup({
                     title: 'Excel Preview',
                     url: t.signUrl('https://trello-excel-preview.vercel.app/preview.html'),
                     args: { attUrl: attUrl },
-                    height: popupHeight,
+                    height: 400, // Фіксована висота 400px (width ~80% вікна, адаптивний)
                     mouseEvent: event
                 });
             });
