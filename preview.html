@@ -26,15 +26,15 @@
             var apiKey = 'eaa6d0d7c57218139af1b772bbd777cb'; // Ваш API Key
             var proxyUrl = '/api/proxy';
 
-            // 'member', 'private' для глобального зберігання токена (один раз для користувача)
+            // 'member', 'private' для глобального зберігання (один раз для користувача)
             t.get('member', 'private', 'authToken')
                 .then(function(token) {
                     console.log('Token from storage:', token);
                     if (token) {
                         loadPreview(token);
                     } else {
-                        var authUrl = 'https://trello.com/1/authorize?expiration=never&name=ExcelPreview&scope=read&response_type=token&key=' + apiKey + '&callback_method=fragment&return_url=' + encodeURIComponent('https://trello-excel-preview.vercel.app/authorize.html');
-                        console.log('Starting authorize with URL:', authUrl); // Дебаг авторизації
+                        var authUrl = 'https://trello.com/1/authorize?expiration=never&name=ExcelPreview&scope=read&response_type=token&key=' + apiKey; // Спростили, без return_url і callback_method
+                        console.log('Starting authorize with URL:', authUrl);
                         t.authorize(authUrl)
                             .then(function(newToken) {
                                 console.log('New token from authorize:', newToken);
