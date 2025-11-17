@@ -5,14 +5,13 @@
     // Витягуємо токен з hash (#token=...)
     const hash = window.location.hash.substring(1);
     const token = new URLSearchParams(hash).get('token');
-
+    console.log('Token in authorize.html:', token); // Дебаг: перевірте в консолі попапу
     if (token && window.opener && typeof window.opener.authorizeCallback === 'function') {
-        window.opener.authorizeCallback(token); // Передаємо токен у батьківське вікно
-        window.close(); // Закриваємо попап
+        window.opener.authorizeCallback(token); // Передаємо токен
+        window.close(); // Закриваємо автоматично
     } else {
-        // Fallback, якщо opener заблоковано (рідко)
-        console.error('Не вдалося передати токен.');
-        setTimeout(window.close, 1000);
+        console.error('Не вдалося передати токен. Закрийте вікно вручну.');
+        setTimeout(window.close, 5000); // Закриваємо через 5s
     }
 </script>
 </body>
