@@ -6,7 +6,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="https://p.trellocdn.com/power-up.min.css">
     <style>
-        table { border-collapse: collapse; overflow: auto; display: block; max-width: 100%; white-space: nowrap; } /* Горизонтальний скрол, без переносу */
+        table { border-collapse: collapse; overflow: auto; display: block; max-width: 100%; white-space: nowrap; } /* Горизонтальний скрол */
         th, td { border: 1px solid #ddd; padding: 8px; }
         th { background-color: #f2f2f2; }
         #preview-container { overflow: auto; max-width: 100%; height: 100%; } /* Вертикальний/горизонтальний скрол */
@@ -26,14 +26,13 @@
             var apiKey = 'eaa6d0d7c57218139af1b772bbd777cb'; // Ваш API Key
             var proxyUrl = '/api/proxy';
 
-            // 'member', 'private' для глобального зберігання токена
+            // 'member', 'private' для глобального зберігання
             t.get('member', 'private', 'authToken')
                 .then(function(token) {
                     console.log('Token from storage:', token);
                     if (token) {
                         loadPreview(token);
                     } else {
-                        // Спростили authUrl без return_url — попап з токеном, закрийте вручну один раз
                         var authUrl = 'https://trello.com/1/authorize?expiration=never&name=ExcelPreview&scope=read&response_type=token&key=' + apiKey;
                         console.log('Starting authorize with URL:', authUrl);
                         t.authorize(authUrl)
@@ -66,6 +65,7 @@
                 fetch(fullProxyUrl)
                     .then(response => {
                         console.log('Fetch response status:', response.status);
+                        console.log('Fetch response headers:', response.headers.get('Content-Type')); // Дебаг: тип вмісту
                         if (!response.ok) {
                             return response.text().then(text => {
                                 console.error('Response body:', text);
