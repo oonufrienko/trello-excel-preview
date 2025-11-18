@@ -29,38 +29,29 @@
             // 'member', 'private' для глобального зберігання
             t.get('member', 'private', 'authToken')
                 .then(function(token) {
-                    console.log('Token from Trello storage:', token);
+                    console.log('Token from storage:', token);
                     if (token) {
                         loadPreview(token);
                     } else {
-                        // Fallback на localStorage, якщо t.set не спрацювало
-                        var fallbackToken = localStorage.getItem('authToken');
-                        console.log('Fallback token from localStorage:', fallbackToken);
-                        if (fallbackToken) {
-                            loadPreview(fallbackToken);
-                        } else {
-                            var authUrl = 'https://trello.com/1/authorize?expiration=never&name=ExcelPreview&scope=read&response_type=token&key=' + apiKey;
-                            console.log('Starting authorize with URL:', authUrl);
-                            t.authorize(authUrl)
-                                .then(function(newToken) {
-                                    console.log('New token from authorize:', newToken);
-                                    t.set('member', 'private', 'authToken', newToken)
-                                        .then(function() {
-                                            console.log('Token saved to Trello storage successfully');
-                                            localStorage.setItem('authToken', newToken); // Fallback збереження
-                                            loadPreview(newToken);
-                                        })
-                                        .catch(function(error) {
-                                            console.error('Save token to Trello error:', error);
-                                            localStorage.setItem('authToken', newToken); // Fallback
-                                            loadPreview(newToken);
-                                        });
-                                })
-                                .catch(function(error) {
-                                    showError('Авторизація не вдалася: ' + error.message);
-                                    console.error('Authorize error:', error);
-                                });
-                        }
+                        var authUrl = 'https://trello.com/1/authorize?expiration=never&name=ExcelPreview&scope=read&response_type=token&key=' + apiKey;
+                        console.log('Starting authorize with URL:', authUrl);
+                        t.authorize(authUrl)
+                            .then(function(newToken) {
+                                console.log('New token from authorize:', newToken);
+                                t.set('member', 'private', 'authToken', newToken)
+                                    .then(function() {
+                                        console.log('Token saved successfully');
+                                        loadPreview(newToken);
+                                    })
+                                    .catch(function(error) {
+                                        showError('Помилка збереження токена: ' + error.message);
+                                        console.error('Save token error:', error);
+                                    });
+                            })
+                            .catch(function(error) {
+                                showError('Авторизація не вдалася: ' + error.message);
+                                console.error('Authorize error:', error);
+                            });
                     }
                 })
                 .catch(function(error) {
