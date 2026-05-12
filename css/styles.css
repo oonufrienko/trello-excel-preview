@@ -130,6 +130,19 @@ body {
 }
 .btn-danger:hover:not(:disabled) { background: var(--danger-hover); }
 
+.btn-icon {
+  width: 28px;
+  padding: 4px;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -1px;
+  background: var(--secondary-bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+.btn-icon:hover:not(:disabled) { background: var(--secondary-hover); }
+
 /* ── Attachment list section ── */
 .attachment-list {
   padding: 4px 0;
