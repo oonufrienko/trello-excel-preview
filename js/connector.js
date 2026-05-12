@@ -10,14 +10,15 @@ TrelloPowerUp.initialize({
     const excel = (options.entries || []).filter(isExcel);
     if (!excel.length) return [];
 
+    const base = window.location.origin;
     return [{
       id: 'excel-preview',
       claimed: excel,
-      icon: t.signUrl('/images/excel-icon.svg'),
+      icon: base + '/images/excel-icon.svg',
       title: 'Excel Files',
       content: {
         type: 'iframe',
-        url: t.signUrl('/api/attachments-html'),
+        url: t.signUrl(base + '/api/attachments-html'),
         height: excel.length * 56 + 24
       }
     }];

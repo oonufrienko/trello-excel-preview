@@ -45,7 +45,7 @@ async function openPreview(attachment) {
   });
   t.modal({
     title: attachment.name,
-    url: t.signUrl('/api/preview-html'),
+    url: t.signUrl(window.location.origin + '/api/preview-html'),
     fullscreen: true,
     accentColor: '#217346'
   });
