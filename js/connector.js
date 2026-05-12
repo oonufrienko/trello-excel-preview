@@ -17,7 +17,7 @@ TrelloPowerUp.initialize({
       title: 'Excel Files',
       content: {
         type: 'iframe',
-        url: t.signUrl('./attachments.html'),
+        url: t.signUrl('./api/attachments-html'),
         height: excel.length * 56 + 24
       }
     }];

@@ -14,8 +14,8 @@ function esc(s) {
 
 let _apiKey = null;
 
-// Must be called synchronously — delays break the Trello iframe handshake
-const t = TrelloPowerUp.iframe();
+// appKey injected server-side into window.TRELLO_APP_KEY — enables t.getRestApi()
+const t = TrelloPowerUp.iframe({ appKey: window.TRELLO_APP_KEY || '' });
 
 async function getApiKey() {
   if (_apiKey) return _apiKey;
@@ -27,13 +27,25 @@ async function getApiKey() {
 }
 
 async function openPreview(attachment) {
+  let userToken = null;
+  try {
+    const isAuth = await t.getRestApi().isAuthorized();
+    if (!isAuth) {
+      await t.getRestApi().authorize({ scope: 'read,write' });
+    }
+    userToken = await t.getRestApi().getToken();
+  } catch (err) {
+    console.warn('Could not get user token:', err);
+  }
+
   await t.set('card', 'private', 'excel-preview-data', {
     url: attachment.url,
-    name: attachment.name
+    name: attachment.name,
+    token: userToken
   });
   t.modal({
     title: attachment.name,
-    url: t.signUrl('./preview.html'),
+    url: t.signUrl('./api/preview-html'),
     fullscreen: true,
     accentColor: '#217346'
   });

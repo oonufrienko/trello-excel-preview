@@ -1,4 +1,4 @@
-const t = TrelloPowerUp.iframe();
+const t = TrelloPowerUp.iframe({ appKey: window.TRELLO_APP_KEY || '' });
 
 let currentWorkbook = null;
 
@@ -10,7 +10,9 @@ async function loadPreview() {
       return;
     }
 
-    const res = await fetch(`/api/proxy?url=${encodeURIComponent(data.url)}`);
+    const params = new URLSearchParams({ url: data.url });
+    if (data.token) params.set('token', data.token);
+    const res = await fetch(`/api/proxy?${params}`);
     if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
 
     const buffer = await res.arrayBuffer();

@@ -18,19 +18,33 @@ function isAllowedUrl(urlStr) {
   }
 }
 
+function addTrelloAuth(urlStr, token) {
+  try {
+    const u = new URL(urlStr);
+    if (u.hostname === 'trello.com' && u.pathname.startsWith('/1/')) {
+      u.searchParams.set('key', process.env.TRELLO_API_KEY || '');
+      if (token) u.searchParams.set('token', token);
+      return u.toString();
+    }
+  } catch {}
+  return urlStr;
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { url, download } = req.query;
+  const { url, download, token } = req.query;
 
   if (!url || !isAllowedUrl(url)) {
     return res.status(400).json({ error: 'Invalid or disallowed URL' });
   }
 
+  const fetchUrl = addTrelloAuth(url, token);
+
   try {
-    const upstream = await fetch(url);
+    const upstream = await fetch(fetchUrl);
 
     if (!upstream.ok) {
       return res.status(upstream.status).json({ error: 'Upstream error' });
