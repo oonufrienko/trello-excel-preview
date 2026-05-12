@@ -15,7 +15,7 @@ function esc(s) {
 let _apiKey = null;
 
 // appKey injected server-side into window.TRELLO_APP_KEY — enables t.getRestApi()
-const t = TrelloPowerUp.iframe({ appKey: window.TRELLO_APP_KEY || '' });
+const t = TrelloPowerUp.iframe({ appKey: window.TRELLO_APP_KEY || '', appName: 'Excel Preview' });
 
 async function getApiKey() {
   if (_apiKey) return _apiKey;
@@ -45,7 +45,7 @@ async function openPreview(attachment) {
   });
   t.modal({
     title: attachment.name,
-    url: t.signUrl('./api/preview-html'),
+    url: t.signUrl('/api/preview-html'),
     fullscreen: true,
     accentColor: '#217346'
   });

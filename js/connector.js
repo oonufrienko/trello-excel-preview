@@ -13,11 +13,11 @@ TrelloPowerUp.initialize({
     return [{
       id: 'excel-preview',
       claimed: excel,
-      icon: t.signUrl('./images/excel-icon.svg'),
+      icon: t.signUrl('/images/excel-icon.svg'),
       title: 'Excel Files',
       content: {
         type: 'iframe',
-        url: t.signUrl('./api/attachments-html'),
+        url: t.signUrl('/api/attachments-html'),
         height: excel.length * 56 + 24
       }
     }];

@@ -1,4 +1,4 @@
-const t = TrelloPowerUp.iframe({ appKey: window.TRELLO_APP_KEY || '' });
+const t = TrelloPowerUp.iframe({ appKey: window.TRELLO_APP_KEY || '', appName: 'Excel Preview' });
 
 let currentWorkbook = null;
 
