@@ -1,6 +1,7 @@
 const t = TrelloPowerUp.iframe({ appKey: window.TRELLO_APP_KEY || '', appName: 'Excel Preview' });
 
 let currentWorkbook = null;
+let imageUrls = [];
 
 const MAX_PREVIEW_CELLS = 200000;
 
@@ -43,6 +44,12 @@ async function loadPreview() {
     const buffer = await res.arrayBuffer();
     const ext = (data.name || '').split('.').pop().toLowerCase();
 
+    imageUrls.forEach(u => URL.revokeObjectURL(u));
+    imageUrls = [];
+    if (['xlsx', 'xlsm', 'xlsb'].includes(ext)) {
+      imageUrls = await extractImages(buffer);
+    }
+
     let workbook;
     if (ext === 'csv') {
       const text = new TextDecoder().decode(buffer);
@@ -79,6 +86,42 @@ function renderWorkbook(wb) {
 
   contentEl.hidden = false;
   switchSheet(wb.SheetNames[0]);
+  renderImages(imageUrls);
+}
+
+async function extractImages(buffer) {
+  if (typeof JSZip === 'undefined') return [];
+  try {
+    const zip = await JSZip.loadAsync(buffer);
+    const urls = [];
+    for (const [name, file] of Object.entries(zip.files)) {
+      if (!name.startsWith('xl/media/') || file.dir) continue;
+      const fileExt = name.split('.').pop().toLowerCase();
+      if (!['png', 'jpg', 'jpeg', 'gif', 'bmp', 'webp'].includes(fileExt)) continue;
+      const mime = { png: 'image/png', gif: 'image/gif', bmp: 'image/bmp', webp: 'image/webp' }[fileExt] || 'image/jpeg';
+      const data = await file.async('arraybuffer');
+      urls.push(URL.createObjectURL(new Blob([data], { type: mime })));
+    }
+    return urls;
+  } catch {
+    return [];
+  }
+}
+
+function renderImages(urls) {
+  const existing = document.getElementById('image-gallery');
+  if (existing) existing.remove();
+  if (!urls.length) return;
+  const gallery = document.createElement('div');
+  gallery.id = 'image-gallery';
+  gallery.className = 'image-gallery';
+  urls.forEach(url => {
+    const img = document.createElement('img');
+    img.src = url;
+    img.className = 'gallery-img';
+    gallery.appendChild(img);
+  });
+  document.getElementById('sheet-content').after(gallery);
 }
 
 // Recompute !ref from real cell keys to defend against files that declare
