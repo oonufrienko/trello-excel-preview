@@ -52,10 +52,32 @@ async function downloadAttachment(attachment) {
   });
   if (token) params.set('token', token);
 
-  try {
-    const res = await fetch(`/api/proxy?${params}`);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 30000);
 
+  let res;
+  try {
+    res = await fetch(`/api/proxy?${params}`, { signal: controller.signal });
+  } catch (e) {
+    clearTimeout(timeoutId);
+    alert(e.name === 'AbortError'
+      ? 'Download timed out. Please try again or use the file directly from Trello.'
+      : `Download failed: ${e.message}`);
+    return;
+  }
+  clearTimeout(timeoutId);
+
+  if (!res.ok) {
+    let detail = res.statusText;
+    try {
+      const err = await res.json();
+      detail = err.detail || err.error || detail;
+    } catch {}
+    alert(`Download failed (${res.status}): ${detail}`);
+    return;
+  }
+
+  try {
     const blob = await res.blob();
     const objectUrl = URL.createObjectURL(blob);
     const a = document.createElement('a');
