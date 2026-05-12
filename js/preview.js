@@ -14,8 +14,31 @@ async function loadPreview() {
 
     const params = new URLSearchParams({ url: data.url });
     if (data.token) params.set('token', data.token);
-    const res = await fetch(`/api/proxy?${params}`);
-    if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 12000);
+
+    let res;
+    try {
+      res = await fetch(`/api/proxy?${params}`, { signal: controller.signal });
+    } catch (e) {
+      clearTimeout(timeoutId);
+      throw new Error(
+        e.name === 'AbortError'
+          ? 'Request timed out. The file may be too large or the server is slow.'
+          : `Network error: ${e.message}`
+      );
+    }
+    clearTimeout(timeoutId);
+
+    if (!res.ok) {
+      let detail = res.statusText;
+      try {
+        const err = await res.json();
+        detail = err.detail || err.error || detail;
+      } catch {}
+      throw new Error(`${res.status}: ${detail}`);
+    }
 
     const buffer = await res.arrayBuffer();
     const ext = (data.name || '').split('.').pop().toLowerCase();

@@ -1,3 +1,5 @@
+const MAX_FILE_BYTES = 25 * 1024 * 1024; // 25 MB
+
 const ALLOWED_HOSTNAMES = [
   'trello-attachments.s3.amazonaws.com',
   'attachments.trello.com',
@@ -74,9 +76,24 @@ export default async function handler(req, res) {
       });
     }
 
+    const contentLength = parseInt(upstream.headers.get('content-length') || '0', 10);
+    if (contentLength && contentLength > MAX_FILE_BYTES) {
+      return res.status(413).json({
+        error: 'File too large',
+        detail: `File is ${(contentLength / 1024 / 1024).toFixed(1)} MB; preview limit is 25 MB.`
+      });
+    }
+
     const contentType =
       upstream.headers.get('content-type') || 'application/octet-stream';
     const buffer = await upstream.arrayBuffer();
+
+    if (buffer.byteLength > MAX_FILE_BYTES) {
+      return res.status(413).json({
+        error: 'File too large',
+        detail: 'File exceeded 25 MB during download.'
+      });
+    }
 
     res.setHeader('Content-Type', contentType);
     res.setHeader('Access-Control-Allow-Origin', '*');
