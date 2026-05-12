@@ -289,19 +289,13 @@ body.preview-page {
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
 
-/* ── Embedded images gallery ── */
-.image-gallery {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding: 12px;
-  border-top: 1px solid var(--border);
+/* ── Embedded images positioned over their Excel anchors ── */
+.sheet-wrapper {
+  position: relative;
+  display: inline-block;
 }
-.gallery-img {
-  max-width: 300px;
-  max-height: 300px;
+.embedded-img {
+  position: absolute;
+  pointer-events: none;
   object-fit: contain;
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  background: #fff;
 }
