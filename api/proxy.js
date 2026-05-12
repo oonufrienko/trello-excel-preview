@@ -2,6 +2,7 @@ const ALLOWED_HOSTNAMES = [
   'trello-attachments.s3.amazonaws.com',
   'attachments.trello.com',
   'trello.com',
+  'api.trello.com',
   'cdn.trello.com',
   'trello-members.s3.amazonaws.com'
 ];
@@ -18,16 +19,33 @@ function isAllowedUrl(urlStr) {
   }
 }
 
-function addTrelloAuth(urlStr, token) {
+function buildTrelloFetch(urlStr, token) {
+  const apiKey = process.env.TRELLO_API_KEY || '';
   try {
     const u = new URL(urlStr);
-    if (u.hostname === 'trello.com' && u.pathname.startsWith('/1/')) {
-      u.searchParams.set('key', process.env.TRELLO_API_KEY || '');
-      if (token) u.searchParams.set('token', token);
-      return u.toString();
+    const isTrelloApi = (u.hostname === 'trello.com' || u.hostname === 'api.trello.com')
+      && u.pathname.startsWith('/1/');
+
+    if (!isTrelloApi || !apiKey || !token) {
+      return { url: urlStr, options: {} };
     }
-  } catch {}
-  return urlStr;
+
+    // Use api.trello.com (REST API host) with both query params + Authorization header
+    u.hostname = 'api.trello.com';
+    u.searchParams.set('key', apiKey);
+    u.searchParams.set('token', token);
+
+    return {
+      url: u.toString(),
+      options: {
+        headers: {
+          'Authorization': `OAuth oauth_consumer_key="${apiKey}", oauth_token="${token}"`
+        }
+      }
+    };
+  } catch {
+    return { url: urlStr, options: {} };
+  }
 }
 
 export default async function handler(req, res) {
@@ -41,13 +59,19 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Invalid or disallowed URL' });
   }
 
-  const fetchUrl = addTrelloAuth(url, token);
+  const { url: fetchUrl, options: fetchOptions } = buildTrelloFetch(url, token);
 
   try {
-    const upstream = await fetch(fetchUrl);
+    const upstream = await fetch(fetchUrl, fetchOptions);
 
     if (!upstream.ok) {
-      return res.status(upstream.status).json({ error: 'Upstream error' });
+      const detail = await upstream.text().catch(() => '');
+      console.error(`Proxy ${upstream.status} from: ${fetchUrl.replace(/token=[^&]+/, 'token=***')}`);
+      return res.status(upstream.status).json({
+        error: 'Upstream error',
+        status: upstream.status,
+        detail: detail.substring(0, 300)
+      });
     }
 
     const contentType =
@@ -66,6 +90,6 @@ export default async function handler(req, res) {
     res.send(Buffer.from(buffer));
   } catch (err) {
     console.error('Proxy error:', err);
-    res.status(500).json({ error: 'Proxy error' });
+    res.status(500).json({ error: 'Proxy error', detail: err.message });
   }
 }
