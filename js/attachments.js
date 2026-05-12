@@ -13,7 +13,9 @@ function esc(s) {
 }
 
 let _apiKey = null;
-let t = null;
+
+// Must be called synchronously — delays break the Trello iframe handshake
+const t = TrelloPowerUp.iframe();
 
 async function getApiKey() {
   if (_apiKey) return _apiKey;
@@ -114,16 +116,4 @@ async function renderList() {
   t.sizeTo('#app').catch(() => {});
 }
 
-async function init() {
-  try {
-    const key = await getApiKey();
-    t = TrelloPowerUp.iframe({ appKey: key, appName: 'Excel Preview' });
-    t.render(renderList);
-  } catch (err) {
-    console.error('Init failed:', err);
-    document.getElementById('app').innerHTML =
-      '<div class="error-state">Power-Up failed to initialize.</div>';
-  }
-}
-
-init();
+t.render(renderList);
