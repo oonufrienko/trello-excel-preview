@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <rect width="24" height="24" rx="3" fill="#217346"/>
+  <!-- Grid lines -->
+  <rect x="12" y="6" width="7" height="12" rx="0" fill="none" stroke="#1a5c38" stroke-width="0.5"/>
+  <line x1="15.5" y1="6" x2="15.5" y2="18" stroke="#1a5c38" stroke-width="0.5"/>
+  <line x1="12" y1="10" x2="19" y2="10" stroke="#1a5c38" stroke-width="0.5"/>
+  <line x1="12" y1="14" x2="19" y2="14" stroke="#1a5c38" stroke-width="0.5"/>
+  <!-- X letter -->
+  <path d="M5 7.5 L9 12 L5 16.5 L6.8 16.5 L10 13.1 L13.2 16.5 L15 16.5 L11 12 L15 7.5 L13.2 7.5 L10 10.9 L6.8 7.5 Z" fill="white"/>
+</svg>

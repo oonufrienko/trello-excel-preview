@@ -1,0 +1,9 @@
+{
+  "name": "trello-excel-preview",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Trello Power-Up for previewing Excel files attached to cards",
+  "engines": {
+    "node": ">=18"
+  }
+}
