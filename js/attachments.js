@@ -12,31 +12,24 @@ function esc(s) {
     .replace(/>/g, '&gt;');
 }
 
-let _apiKey = null;
-
 // appKey injected server-side into window.TRELLO_APP_KEY — enables t.getRestApi()
 const t = TrelloPowerUp.iframe({ appKey: window.TRELLO_APP_KEY || '', appName: 'Excel Preview' });
 
-async function getApiKey() {
-  if (_apiKey) return _apiKey;
-  const res = await fetch('/api/config');
-  if (!res.ok) throw new Error('Could not load config');
-  const json = await res.json();
-  _apiKey = json.apiKey;
-  return _apiKey;
-}
-
-async function openPreview(attachment) {
-  let userToken = null;
+async function ensureToken() {
   try {
     const isAuth = await t.getRestApi().isAuthorized();
     if (!isAuth) {
       await t.getRestApi().authorize({ scope: 'read,write' });
     }
-    userToken = await t.getRestApi().getToken();
+    return await t.getRestApi().getToken();
   } catch (err) {
     console.warn('Could not get user token:', err);
+    return null;
   }
+}
+
+async function openPreview(attachment) {
+  const userToken = await ensureToken();
 
   await t.set('card', 'private', 'excel-preview-data', {
     url: attachment.url,
@@ -52,31 +45,78 @@ async function openPreview(attachment) {
 }
 
 async function downloadAttachment(attachment) {
-  const a = document.createElement('a');
-  a.href = `/api/proxy?url=${encodeURIComponent(attachment.url)}&download=${encodeURIComponent(attachment.name)}`;
-  a.download = attachment.name;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
+  const token = await ensureToken();
+  const params = new URLSearchParams({
+    url: attachment.url,
+    download: attachment.name
+  });
+  if (token) params.set('token', token);
+
+  try {
+    const res = await fetch(`/api/proxy?${params}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    const blob = await res.blob();
+    const objectUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = objectUrl;
+    a.download = attachment.name;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+  } catch (err) {
+    console.error('Download failed:', err);
+    alert(`Failed to download: ${err.message}`);
+  }
+}
+
+async function renameAttachment(attachment) {
+  const newName = window.prompt('Rename file to:', attachment.name);
+  if (newName === null) return;
+  const trimmed = newName.trim();
+  if (!trimmed || trimmed === attachment.name) return;
+
+  try {
+    const token = await ensureToken();
+    if (!token) {
+      alert('Authorization required to rename.');
+      return;
+    }
+
+    const { card } = t.getContext();
+    const url = new URL(`https://api.trello.com/1/cards/${card}/attachments/${attachment.id}`);
+    url.searchParams.set('key', window.TRELLO_APP_KEY || '');
+    url.searchParams.set('token', token);
+    url.searchParams.set('name', trimmed);
+
+    const res = await fetch(url.toString(), { method: 'PUT' });
+
+    if (!res.ok) {
+      const text = await res.text().catch(() => '');
+      throw new Error(`HTTP ${res.status}${text ? ': ' + text.substring(0, 100) : ''}`);
+    }
+
+    await renderList();
+  } catch (err) {
+    console.error('Rename failed:', err);
+    alert(`Failed to rename: ${err.message}`);
+  }
 }
 
 async function deleteAttachment(attachment) {
   if (!window.confirm(`Delete "${attachment.name}"?`)) return;
 
-  const btn = document.querySelector(`[data-delete-id="${attachment.id}"]`);
-  if (btn) { btn.disabled = true; btn.textContent = '…'; }
-
   try {
-    const key = await getApiKey();
-    const isAuth = await t.getRestApi().isAuthorized();
-    if (!isAuth) {
-      await t.getRestApi().authorize({ scope: 'read,write' });
+    const token = await ensureToken();
+    if (!token) {
+      alert('Authorization required to delete.');
+      return;
     }
-    const token = await t.getRestApi().getToken();
-    const { card } = t.getContext();
 
+    const { card } = t.getContext();
     const res = await fetch(
-      `https://api.trello.com/1/cards/${card}/attachments/${attachment.id}?key=${key}&token=${token}`,
+      `https://api.trello.com/1/cards/${card}/attachments/${attachment.id}?key=${window.TRELLO_APP_KEY || ''}&token=${token}`,
       { method: 'DELETE' }
     );
     if (!res.ok) throw new Error(`Trello API error ${res.status}`);
@@ -84,9 +124,38 @@ async function deleteAttachment(attachment) {
     await renderList();
   } catch (err) {
     console.error('Delete failed:', err);
-    alert('Failed to delete. Please try again.');
-    if (btn) { btn.disabled = false; btn.textContent = 'Delete'; }
+    alert(`Failed to delete: ${err.message}`);
   }
+}
+
+function showActionsPopup(attachment, mouseEvent) {
+  t.popup({
+    title: 'File actions',
+    mouseEvent: mouseEvent,
+    items: [
+      {
+        text: 'Download',
+        callback: (popupT) => {
+          popupT.closePopup();
+          downloadAttachment(attachment);
+        }
+      },
+      {
+        text: 'Rename',
+        callback: (popupT) => {
+          popupT.closePopup();
+          renameAttachment(attachment);
+        }
+      },
+      {
+        text: 'Delete',
+        callback: (popupT) => {
+          popupT.closePopup();
+          deleteAttachment(attachment);
+        }
+      }
+    ]
+  });
 }
 
 function renderItem(attachment) {
@@ -98,15 +167,12 @@ function renderItem(attachment) {
       <span class="file-name" title="${esc(attachment.name)}">${esc(attachment.name)}</span>
     </div>
     <div class="attachment-actions">
-      <button class="btn btn-primary">Preview</button>
-      <button class="btn btn-secondary">Download</button>
-      <button class="btn btn-danger" data-delete-id="${esc(attachment.id)}">Delete</button>
+      <button class="btn btn-primary btn-preview">Preview</button>
+      <button class="btn btn-icon btn-more" aria-label="More actions" title="More actions">⋯</button>
     </div>
   `;
-  const [previewBtn, downloadBtn, deleteBtn] = div.querySelectorAll('.btn');
-  previewBtn.onclick = () => openPreview(attachment);
-  downloadBtn.onclick = () => downloadAttachment(attachment);
-  deleteBtn.onclick = () => deleteAttachment(attachment);
+  div.querySelector('.btn-preview').onclick = () => openPreview(attachment);
+  div.querySelector('.btn-more').onclick = (e) => showActionsPopup(attachment, e);
   return div;
 }
 

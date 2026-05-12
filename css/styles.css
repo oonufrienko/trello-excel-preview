@@ -70,6 +70,22 @@ body {
   line-height: 1.4;
 }
 
+/* Preview window: force white background + black text regardless of system theme */
+body.preview-page {
+  --bg: #ffffff;
+  --surface: #f4f5f7;
+  --border: #dfe1e6;
+  --text: #000000;
+  --text-muted: #5e6c84;
+  --secondary-bg: #f4f5f7;
+  --secondary-hover: #ebecf0;
+  --secondary-text: #000000;
+  --table-header: #f4f5f7;
+  --table-stripe: #fafbfc;
+  --tab-active-bg: #0052cc;
+  --tab-active-text: #ffffff;
+}
+
 /* ── Shared states ── */
 .loading {
   padding: 16px;
@@ -129,6 +145,19 @@ body {
   color: var(--danger-text);
 }
 .btn-danger:hover:not(:disabled) { background: var(--danger-hover); }
+
+.btn-icon {
+  width: 28px;
+  padding: 4px;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -1px;
+  background: var(--secondary-bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+.btn-icon:hover:not(:disabled) { background: var(--secondary-hover); }
 
 /* ── Attachment list section ── */
 .attachment-list {
