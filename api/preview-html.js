@@ -13,7 +13,7 @@ export default function handler(req, res) {
   <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
   <script src="https://p.trellocdn.com/power-up.min.js"></script>
 </head>
-<body>
+<body class="preview-page">
   <div id="app" class="preview-container">
     <div id="loading" class="loading">Loading file…</div>
     <div id="error" class="error-state" hidden></div>

@@ -70,6 +70,22 @@ body {
   line-height: 1.4;
 }
 
+/* Preview window: force white background + black text regardless of system theme */
+body.preview-page {
+  --bg: #ffffff;
+  --surface: #f4f5f7;
+  --border: #dfe1e6;
+  --text: #000000;
+  --text-muted: #5e6c84;
+  --secondary-bg: #f4f5f7;
+  --secondary-hover: #ebecf0;
+  --secondary-text: #000000;
+  --table-header: #f4f5f7;
+  --table-stripe: #fafbfc;
+  --tab-active-bg: #0052cc;
+  --tab-active-text: #ffffff;
+}
+
 /* ── Shared states ── */
 .loading {
   padding: 16px;
