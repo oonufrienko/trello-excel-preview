@@ -288,3 +288,14 @@ body.preview-page {
 ::-webkit-scrollbar-track { background: var(--surface); }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* ── Embedded images positioned over their Excel anchors ── */
+.sheet-wrapper {
+  position: relative;
+  display: inline-block;
+}
+.embedded-img {
+  position: absolute;
+  pointer-events: none;
+  object-fit: contain;
+}

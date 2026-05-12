@@ -10,6 +10,7 @@ export default function handler(req, res) {
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="/css/styles.css">
   <script>window.TRELLO_APP_KEY = "${key}";</script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
   <script src="https://p.trellocdn.com/power-up.min.js"></script>
 </head>
