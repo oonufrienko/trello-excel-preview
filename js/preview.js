@@ -327,6 +327,42 @@ function positionImages(wrapper, table, anchors, rangeStart) {
   });
 }
 
+// Build a <colgroup> from sheet['!cols'] so Excel column widths survive into
+// HTML. Without this, SheetJS lets the browser auto-size columns by content,
+// which either leaves narrow files visually adrift or lets a single long-text
+// cell stretch a whole column. Returns '' if widths are not available.
+function buildColgroup(sheet) {
+  const cols = sheet['!cols'];
+  const ref = sheet['!ref'];
+  if (!ref) return '';
+  const range = XLSX.utils.decode_range(ref);
+  const numCols = range.e.c - range.s.c + 1;
+  if (numCols <= 0) return '';
+
+  // sheet['!cols'] is indexed by absolute column (0=A); slice the trimmed range.
+  // Fallback: if no !cols at all, skip — let browser auto-size.
+  if (!Array.isArray(cols) || !cols.length) return '';
+
+  const parts = [];
+  let anyWidth = false;
+  for (let c = range.s.c; c <= range.e.c; c++) {
+    const col = cols[c];
+    let px = null;
+    if (col) {
+      if (typeof col.wpx === 'number') px = col.wpx;
+      else if (typeof col.wch === 'number') px = Math.round(col.wch * 7);
+    }
+    if (px && px > 0) {
+      anyWidth = true;
+      parts.push(`<col style="width:${px}px">`);
+    } else {
+      parts.push('<col>');
+    }
+  }
+  if (!anyWidth) return '';
+  return `<colgroup>${parts.join('')}</colgroup>`;
+}
+
 // Recompute !ref from real cell keys to defend against files that declare
 // a bogus full-sheet dimension (e.g. A1:N1048576) — those make sheet_to_html
 // generate millions of empty <td>s and freeze the browser.
@@ -377,11 +413,16 @@ function switchSheet(sheetName) {
       '<div class="empty-state">This sheet is too large to preview. ' +
       'Please use Download to view the file.</div>';
   } else {
-    const tableHtml = XLSX.utils.sheet_to_html(sheet, {
+    let tableHtml = XLSX.utils.sheet_to_html(sheet, {
       id: 'excel-table',
       editable: false,
       header: ''
     });
+    const colgroup = buildColgroup(sheet);
+    if (colgroup) {
+      // Inject right after the opening <table ...> tag
+      tableHtml = tableHtml.replace(/(<table[^>]*>)/, `$1${colgroup}`);
+    }
     contentEl.innerHTML = `<div class="sheet-wrapper">${tableHtml}</div>`;
 
     const anchors = currentAnchors[sheetName];
