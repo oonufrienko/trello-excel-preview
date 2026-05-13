@@ -256,8 +256,9 @@ body.preview-page {
 .sheet-content table {
   border-collapse: collapse;
   font-size: 12px;
+  table-layout: fixed;
   width: max-content;
-  min-width: 100%;
+  max-width: 100%;
 }
 
 .sheet-content th,
@@ -265,7 +266,9 @@ body.preview-page {
   border: 1px solid var(--border);
   padding: 4px 10px;
   text-align: left;
-  white-space: nowrap;
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: anywhere;
   color: var(--text);
   background: var(--bg);
 }
@@ -292,7 +295,10 @@ body.preview-page {
 /* ── Embedded images positioned over their Excel anchors ── */
 .sheet-wrapper {
   position: relative;
-  display: inline-block;
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 auto;
 }
 .embedded-img {
   position: absolute;
