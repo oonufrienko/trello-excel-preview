@@ -2,3 +2,12 @@
 .env.local
 .vercel
 node_modules
+bad*
+
+# Playwright e2e
+storageState.json
+playwright-report/
+test-results/
+tests/fixtures/real/
+tests/fixtures/generated/
+tests/fixtures/.attachment-ids.json
