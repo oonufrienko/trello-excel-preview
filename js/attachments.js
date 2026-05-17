@@ -126,6 +126,11 @@ async function renameAttachment(attachment) {
   }
 }
 
+// Trello's t.card('attachments') caches within a single iframe session, so
+// after a successful delete the row would re-appear on the next renderList
+// until the iframe is recreated. Track deleted IDs and filter them out.
+const deletedAttachmentIds = new Set();
+
 function buildAttachmentUrl(card, attachmentId, token) {
   const url = new URL(`https://api.trello.com/1/cards/${card}/attachments/${attachmentId}`);
   url.searchParams.set('key', window.TRELLO_APP_KEY || '');
@@ -184,6 +189,7 @@ async function deleteAttachment(attachment) {
       }
     }
 
+    deletedAttachmentIds.add(attachment.id);
     await renderList();
   } catch (err) {
     console.error('Delete failed:', err);
@@ -243,7 +249,7 @@ async function renderList() {
   const app = document.getElementById('app');
   try {
     const card = await t.card('attachments');
-    const files = (card.attachments || []).filter(isExcel);
+    const files = (card.attachments || []).filter(a => isExcel(a) && !deletedAttachmentIds.has(a.id));
     app.innerHTML = '';
     if (!files.length) {
       app.innerHTML = '<div class="empty-state">No Excel files attached.</div>';
