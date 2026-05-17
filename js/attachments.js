@@ -126,6 +126,13 @@ async function renameAttachment(attachment) {
   }
 }
 
+function buildAttachmentUrl(card, attachmentId, token) {
+  const url = new URL(`https://api.trello.com/1/cards/${card}/attachments/${attachmentId}`);
+  url.searchParams.set('key', window.TRELLO_APP_KEY || '');
+  url.searchParams.set('token', token);
+  return url;
+}
+
 async function deleteAttachment(attachment) {
   if (!window.confirm(`Delete "${attachment.name}"?`)) return;
 
@@ -137,11 +144,45 @@ async function deleteAttachment(attachment) {
     }
 
     const { card } = t.getContext();
-    const res = await fetch(
-      `https://api.trello.com/1/cards/${card}/attachments/${attachment.id}?key=${window.TRELLO_APP_KEY || ''}&token=${token}`,
-      { method: 'DELETE' }
-    );
-    if (!res.ok) throw new Error(`Trello API error ${res.status}`);
+    const url = buildAttachmentUrl(card, attachment.id, token);
+
+    const res = await fetch(url.toString(), {
+      method: 'DELETE',
+      headers: { 'Accept': 'application/json' }
+    });
+
+    // Trello's DELETE attachment endpoint occasionally returns 500 even when
+    // the deletion succeeded server-side (post-deletion side effects fail but
+    // the row is gone). Poll the card's attachment LIST via a direct REST
+    // call (no SDK caching) for up to ~3 seconds; if our attachment is gone,
+    // treat the DELETE as successful.
+    if (!res.ok) {
+      const listUrl = new URL(`https://api.trello.com/1/cards/${card}/attachments`);
+      listUrl.searchParams.set('key', window.TRELLO_APP_KEY || '');
+      listUrl.searchParams.set('token', token);
+      listUrl.searchParams.set('fields', 'id');
+
+      let gone = false;
+      for (let i = 0; i < 6; i++) {
+        await new Promise(r => setTimeout(r, 500));
+        try {
+          const listRes = await fetch(listUrl.toString(), {
+            headers: { 'Accept': 'application/json' },
+            cache: 'no-store'
+          });
+          if (listRes.ok) {
+            const list = await listRes.json();
+            if (Array.isArray(list) && !list.some(a => a.id === attachment.id)) {
+              gone = true;
+              break;
+            }
+          }
+        } catch { /* keep polling */ }
+      }
+      if (!gone) {
+        throw new Error(`Trello API error ${res.status}`);
+      }
+    }
 
     await renderList();
   } catch (err) {

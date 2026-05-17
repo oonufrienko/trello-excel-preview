@@ -9,13 +9,12 @@ test('Download: triggers blob download with original filename', async ({ page, f
 
   await page.goto(`https://trello.com/c/${info.cardShortLink}`);
   const powerUp = page.frameLocator('iframe[src*="trello-excel-preview"]').first();
-  await powerUp.locator(`text=${FIXTURE}`).first().waitFor({ state: 'visible' });
-  await powerUp.locator('.btn-more').first().click();
-
-  const popup = page.frameLocator('iframe[src*="trello-excel-preview"]').nth(1);
+  const row = powerUp.locator('.attachment-item', { hasText: FIXTURE });
+  await row.waitFor({ state: 'visible' });
+  await row.locator('.btn-more').click();
 
   const downloadPromise = page.waitForEvent('download', { timeout: 30_000 });
-  await popup.locator('text=Download').click();
+  await page.locator('text=Download').click();
   const download = await downloadPromise;
 
   expect(download.suggestedFilename()).toBe(FIXTURE);

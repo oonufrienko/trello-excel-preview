@@ -3,10 +3,8 @@
 // the deletion succeeded; our code should detect that and stay quiet.
 import { test, expect } from './_setup.mjs';
 
-// We need a fixture that's safe to delete and re-upload. The seed script
-// re-uploads anything missing on each run, so destroying a fixture between
-// test runs is fine.
-const DELETABLE_FIXTURE = 'simple-2col.xlsx';
+// Use a fixture no other spec depends on; seed-board re-uploads it on next run.
+const DELETABLE_FIXTURE = 'large-5mb.xlsx';
 
 test('Delete: no "500" alert when Trello returns 500-but-deleted', async ({ page, fixtureIds }) => {
   const info = fixtureIds[DELETABLE_FIXTURE];
@@ -25,19 +23,22 @@ test('Delete: no "500" alert when Trello returns 500-but-deleted', async ({ page
 
   // Power-Up "Excel Files" attachment-section iframe
   const powerUp = page.frameLocator('iframe[src*="trello-excel-preview"]').first();
+  const row = powerUp.locator('.attachment-item', { hasText: DELETABLE_FIXTURE });
+  await row.waitFor({ state: 'visible' });
+  await row.locator('.btn-more').click();
 
-  // Click "⋯" on our fixture row.
-  await powerUp.locator(`text=${DELETABLE_FIXTURE}`).first().waitFor({ state: 'visible' });
-  await powerUp.locator('.btn-more').first().click();
+  // t.popup({items}) renders the items via Trello's UI in the main page DOM.
+  await page.locator('text=Delete').click();
 
-  // Trello opens a popup as a NEW iframe — find it and click Delete inside.
-  const popup = page.frameLocator('iframe[src*="trello-excel-preview"]').nth(1);
-  await popup.locator('text=Delete').click();
+  // Give the delete + verify-poll path time to complete.
+  await page.waitForTimeout(4000);
 
-  // The row should disappear from the list within a few seconds.
-  await expect(powerUp.locator(`text=${DELETABLE_FIXTURE}`)).toBeHidden({ timeout: 8000 });
-
-  // CRITICAL: no alert mentioning "500" or "Failed to delete".
+  // CRITICAL contract — no alert about "500" / "Failed to delete".
+  // (Asserted FIRST: an alert means the user-visible bug fired even if the
+  // row eventually disappears via Trello's own refresh.)
   const bad = dialogs.find(d => d.type === 'alert' && /500|failed to delete/i.test(d.message));
   expect(bad, `Got unwanted alert: ${bad?.message}`).toBeUndefined();
+
+  // And the row should be gone after Trello's state syncs.
+  await expect(row).toBeHidden({ timeout: 8000 });
 });

@@ -11,8 +11,9 @@ test('Layout: narrow table is centered with grey backdrop around it', async ({ p
 
   await page.goto(`https://trello.com/c/${info.cardShortLink}`);
   const powerUp = page.frameLocator('iframe[src*="trello-excel-preview"]').first();
-  await powerUp.locator(`text=${FIXTURE}`).first().waitFor({ state: 'visible' });
-  await powerUp.locator(`text=${FIXTURE}`).first().locator('..').locator('text=Preview').click();
+  const row = powerUp.locator('.attachment-item', { hasText: FIXTURE });
+  await row.waitFor({ state: 'visible' });
+  await row.locator('.btn-preview').click();
 
   const preview = page.frameLocator('iframe[src*="trello-excel-preview"][src*="preview-html"]');
   await expect(preview.locator('table').first()).toBeVisible({ timeout: 15_000 });

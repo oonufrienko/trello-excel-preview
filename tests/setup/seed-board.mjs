@@ -104,6 +104,10 @@ async function main() {
   requireEnv();
   console.log(`Seeding board ${TRELLO_TEST_BOARD_ID}`);
 
+  // Trello list/card creation requires the long board ID, not the short link
+  const board = await trello('GET', `/boards/${TRELLO_TEST_BOARD_ID}`, { fields: 'id,name' });
+  console.log(`  board: ${board.name} (id ${board.id})`);
+
   const fixtures = await listFixtures();
   if (!fixtures.length) {
     console.error('No fixtures found. Run `npm run generate-fixtures` first.');
@@ -111,7 +115,7 @@ async function main() {
   }
 
   const ids = await loadIdsFile();
-  const list = await findOrCreateList(TRELLO_TEST_BOARD_ID, 'Test Fixtures');
+  const list = await findOrCreateList(board.id, 'Test Fixtures');
 
   for (const fx of fixtures) {
     const cardName = `[${fx.kind}] ${fx.file}`;

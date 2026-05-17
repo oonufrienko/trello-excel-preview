@@ -21,8 +21,9 @@ for (const fixture of CASES) {
     await page.goto(`https://trello.com/c/${info.cardShortLink}`);
 
     const powerUp = page.frameLocator('iframe[src*="trello-excel-preview"]').first();
-    await powerUp.locator(`text=${fixture}`).first().waitFor({ state: 'visible' });
-    await powerUp.locator(`text=${fixture}`).first().locator('..').locator('text=Preview').click();
+    const row = powerUp.locator('.attachment-item', { hasText: fixture });
+    await row.waitFor({ state: 'visible' });
+    await row.locator('.btn-preview').click();
 
     // Preview modal iframe
     const previewModal = page.frameLocator('iframe[src*="trello-excel-preview"][src*="preview-html"]');
