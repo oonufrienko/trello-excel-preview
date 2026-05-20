@@ -1,5 +1,45 @@
 const MAX_FILE_BYTES = 25 * 1024 * 1024; // 25 MB
 
+// Rate limit: 30 proxy requests per minute per client IP.
+// In-memory map; per Vercel-instance cache. Good enough for Hobby — a single
+// abusive client gets throttled, even if multiple instances run, each cap is
+// the same. Switch to Upstash/Edge Config if we ever leave Hobby tier.
+const RATE_WINDOW_MS = 60_000;
+const RATE_LIMIT = 30;
+const rateBuckets = new Map(); // ip -> { count, resetAt }
+
+function rateLimitCheck(ip) {
+  const now = Date.now();
+  let bucket = rateBuckets.get(ip);
+  if (!bucket || bucket.resetAt < now) {
+    bucket = { count: 0, resetAt: now + RATE_WINDOW_MS };
+    rateBuckets.set(ip, bucket);
+  }
+  bucket.count += 1;
+
+  // Opportunistic cleanup so the Map doesn't grow unbounded across cold-starts.
+  if (rateBuckets.size > 5000) {
+    for (const [key, b] of rateBuckets) {
+      if (b.resetAt < now) rateBuckets.delete(key);
+    }
+  }
+
+  return {
+    allowed: bucket.count <= RATE_LIMIT,
+    remaining: Math.max(0, RATE_LIMIT - bucket.count),
+    resetIn: Math.max(0, Math.ceil((bucket.resetAt - now) / 1000))
+  };
+}
+
+function clientIp(req) {
+  // Vercel forwards real client IP via x-forwarded-for (first hop).
+  const fwd = req.headers['x-forwarded-for'];
+  if (typeof fwd === 'string' && fwd.length > 0) {
+    return fwd.split(',')[0].trim();
+  }
+  return req.socket && req.socket.remoteAddress || 'unknown';
+}
+
 const ALLOWED_HOSTNAMES = [
   'trello-attachments.s3.amazonaws.com',
   'attachments.trello.com',
@@ -53,6 +93,18 @@ function buildTrelloFetch(urlStr, token) {
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  const ip = clientIp(req);
+  const limit = rateLimitCheck(ip);
+  res.setHeader('X-RateLimit-Limit', String(RATE_LIMIT));
+  res.setHeader('X-RateLimit-Remaining', String(limit.remaining));
+  if (!limit.allowed) {
+    res.setHeader('Retry-After', String(limit.resetIn));
+    return res.status(429).json({
+      error: 'Too many requests',
+      detail: `Rate limit ${RATE_LIMIT}/min exceeded. Try again in ${limit.resetIn}s.`
+    });
   }
 
   const { url, download, token } = req.query;

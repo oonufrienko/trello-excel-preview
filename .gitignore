@@ -2,3 +2,21 @@
 .env.local
 .vercel
 node_modules
+
+# OS / IDE
+.DS_Store
+.claude/
+
+# Test artefacts (per-run, not source)
+storageState.json
+test-results/
+playwright-report/
+tests/fixtures/generated/
+tests/fixtures/real/
+tests/fixtures/.attachment-ids.json
+
+# Local fixtures with real data (never commit)
+bad_excel/
+
+# Marketplace screenshots (uploaded directly to Atlassian, not via git)
+marketing/screenshots/
