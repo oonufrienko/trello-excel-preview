@@ -51,12 +51,27 @@ Use macOS Cmd+Shift+4, crop to 1280×720, save as PNG. Drop them into `marketing
 
 ### 4. Land the CI workflow
 
-The current `GITHUB_TOKEN` in `.env` lacks the `workflow` scope, so the
-`.github/workflows/e2e.yml` file could not be created from here. The same
-file already lives on the `feature/e2e-tests` branch. To enable e2e on PRs:
+The current `GITHUB_TOKEN` in `.env` has only `repo` scope, not `workflow`. Pushing `.github/workflows/*.yml` requires a token with `workflow`, so this step must happen in a browser or with a re-scoped token. The file is already committed on `feature/e2e-tests` at commit `1805293`.
 
-- [ ] Locally: `git checkout feature/e2e-tests -- .github/workflows/e2e.yml` on `main`, commit, and push from a session that has a token with `workflow` scope (e.g., your normal `gh auth login`).
-- [ ] OR open a PR from `feature/e2e-tests` to `main` and merge through GitHub UI.
+**Easiest path — GitHub web UI (no token regeneration needed):**
+
+1. Open the file on `feature/e2e-tests`:
+   https://github.com/oonufrienko/trello-excel-preview/blob/feature/e2e-tests/.github/workflows/e2e.yml
+2. Click **Raw** → **Copy** the full text.
+3. Open the **main** branch tree: https://github.com/oonufrienko/trello-excel-preview/tree/main
+4. Click **Add file → Create new file**. Name it `.github/workflows/e2e.yml`. Paste the copied content. Commit directly to `main`.
+5. **Don't** merge `feature/e2e-tests` into `main` directly — that branch also contains the obsolete `fix(delete)` polling workaround (no longer needed since Trello fixed the backend) and would re-introduce stale code in `js/attachments.js`.
+
+**Alternative — re-scope the local token:**
+
+- [ ] Generate a new GitHub PAT (https://github.com/settings/tokens) with `repo` + `workflow` scopes, replace `GITHUB_TOKEN` in `.env`, then `git checkout feature/e2e-tests -- .github/workflows/e2e.yml` on `main` → commit → push.
+
+**Required GitHub Actions secrets (already noted in `tests/README.md`):**
+
+- `TRELLO_API_KEY`
+- `TRELLO_USER_TOKEN`
+- `TRELLO_TEST_BOARD_ID`
+- `TRELLO_STORAGE_STATE_B64` — base64 of local `storageState.json` (`base64 -i storageState.json | pbcopy`)
 
 After landing, the workflow runs on every PR to `main` and nightly at 03:17 UTC.
 
