@@ -3,7 +3,26 @@
   "version": "1.0.0",
   "private": true,
   "description": "Trello Power-Up for previewing Excel files attached to cards",
+  "homepage": "https://trello-excel-preview.vercel.app",
+  "bugs": {
+    "email": "onufrienko.alex@gmail.com"
+  },
+  "author": "Oleksandr Onufrienko <onufrienko.alex@gmail.com>",
+  "license": "UNLICENSED",
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
+  },
+  "scripts": {
+    "auth": "node tests/setup/auth.mjs",
+    "generate-fixtures": "node tests/generate-fixtures.mjs",
+    "seed-board": "node tests/setup/seed-board.mjs",
+    "test:e2e": "playwright test",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:ui": "playwright test --ui"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.60.0",
+    "dotenv": "^17.4.2",
+    "exceljs": "^4.4.0"
   }
 }

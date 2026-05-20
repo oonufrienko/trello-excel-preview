@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Privacy Policy — Simple Excel Preview</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <style>
+    body { background: #ffffff; color: #172b4d; line-height: 1.5; }
+    .legal { max-width: 720px; margin: 0 auto; padding: 32px 24px 64px; }
+    .legal h1 { font-size: 24px; margin-bottom: 4px; }
+    .legal h2 { font-size: 16px; margin-top: 28px; margin-bottom: 8px; }
+    .legal .updated { color: #5e6c84; font-size: 13px; margin-bottom: 24px; }
+    .legal p, .legal li { font-size: 14px; }
+    .legal ul { padding-left: 20px; margin: 6px 0 12px; }
+    .legal a { color: #0052cc; }
+    .legal .lang-switch { margin-bottom: 16px; }
+    .legal .lang-switch a { margin-right: 12px; font-size: 13px; }
+  </style>
+</head>
+<body>
+<main class="legal">
+  <div class="lang-switch">
+    <a href="#en">English</a><a href="#uk">Українська</a>
+  </div>
+
+  <section id="en">
+  <h1>Privacy Policy</h1>
+  <p class="updated">Last updated: 2026-05-20</p>
+
+  <p>This Privacy Policy describes how <strong>Simple Excel Preview</strong> (the “Power-Up”), a Trello Power-Up developed by Oleksandr Onufrienko, handles your information.</p>
+
+  <h2>1. What the Power-Up does</h2>
+  <p>The Power-Up renders a preview of spreadsheet files (XLSX, XLS, CSV, XLSM, XLSB, ODS, and related Excel formats) attached to your Trello cards. It also lets you download, rename, or delete those attachments from within the card.</p>
+
+  <h2>2. Data we collect</h2>
+  <p>We do <strong>not</strong> collect, store, sell, share, or transmit any personal data to third parties beyond what is strictly required to load the file you asked to preview. Specifically:</p>
+  <ul>
+    <li>No tracking pixels, analytics, advertising SDKs, or fingerprinting.</li>
+    <li>No user accounts, no email lists, no behavioural profiles.</li>
+    <li>No cookies set by the Power-Up.</li>
+  </ul>
+
+  <h2>3. What happens when you open a preview</h2>
+  <ul>
+    <li>The Power-Up reads the attachment URL and your name/file metadata from Trello’s card context.</li>
+    <li>It requests a short-lived Trello user token via the official Trello Power-Up SDK (<code>t.getRestApi().authorize()</code>). The token is stored only in Trello’s own card-private storage and only for the duration of the preview session.</li>
+    <li>The attachment is fetched through our proxy (<code>/api/proxy</code>) hosted on Vercel. The file passes through the proxy in memory and is streamed back to your browser. <strong>It is not written to disk and not retained.</strong></li>
+    <li>Parsing and rendering happen entirely in your browser (SheetJS + JSZip from public CDNs).</li>
+  </ul>
+
+  <h2>4. Server logs</h2>
+  <p>Our hosting provider (Vercel) records standard server logs: timestamp, request path, response status, and originating IP address, for the purpose of operating the service and protecting it from abuse. These logs are retained per Vercel’s retention policy and are not used for any other purpose.</p>
+
+  <h2>5. Third-party services</h2>
+  <p>The Power-Up loads the following third-party JavaScript libraries at runtime:</p>
+  <ul>
+    <li>Trello Power-Up SDK from <code>p.trellocdn.com</code></li>
+    <li>SheetJS from <code>cdn.sheetjs.com</code></li>
+    <li>JSZip from <code>cdnjs.cloudflare.com</code></li>
+  </ul>
+  <p>These CDNs may log standard request metadata under their own privacy policies.</p>
+
+  <h2>6. Data subject rights</h2>
+  <p>Because we do not maintain a database of users, there is no personal profile to access, export, or delete. If you want to stop using the Power-Up, simply remove it from your Trello board (Show menu → Power-Ups → disable).</p>
+
+  <h2>7. Children’s privacy</h2>
+  <p>The Power-Up is not directed to children under 13 and we do not knowingly collect data from them.</p>
+
+  <h2>8. Changes to this policy</h2>
+  <p>We may update this policy. Material changes will be reflected by updating the “Last updated” date above and, where appropriate, in the Power-Up’s changelog.</p>
+
+  <h2>9. Contact</h2>
+  <p>Questions, requests, or concerns: <a href="mailto:onufrienko.alex@gmail.com">onufrienko.alex@gmail.com</a>.</p>
+  </section>
+
+  <hr style="margin: 48px 0 32px;">
+
+  <section id="uk">
+  <h1>Політика приватності</h1>
+  <p class="updated">Останнє оновлення: 2026-05-20</p>
+
+  <p>Ця Політика приватності описує як <strong>Simple Excel Preview</strong> (далі — «Power-Up»), Trello Power-Up від Oleksandr Onufrienko, поводиться з вашою інформацією.</p>
+
+  <h2>1. Що робить Power-Up</h2>
+  <p>Power-Up показує попередній перегляд таблиць (XLSX, XLS, CSV, XLSM, XLSB, ODS та інших Excel-форматів), які прикріплені до карток Trello. Також дозволяє завантажити, перейменувати або видалити вкладення прямо з картки.</p>
+
+  <h2>2. Які дані ми збираємо</h2>
+  <p>Ми <strong>не</strong> збираємо, не зберігаємо, не продаємо, не передаємо третім сторонам жодних персональних даних понад те, що потрібно для самого завантаження файлу, який ви відкриваєте. Зокрема:</p>
+  <ul>
+    <li>Жодних трекерів, аналітики, рекламних SDK, фінгерпринтингу.</li>
+    <li>Жодних облікових записів, email-розсилок, профайлів поведінки.</li>
+    <li>Power-Up не встановлює cookie.</li>
+  </ul>
+
+  <h2>3. Що відбувається коли ви відкриваєте перегляд</h2>
+  <ul>
+    <li>Power-Up читає URL вкладення та метадані файлу з контексту картки Trello.</li>
+    <li>Він запитує короткоживучий токен користувача через офіційний Trello Power-Up SDK (<code>t.getRestApi().authorize()</code>). Токен зберігається лише у власному card-private storage Trello і лише на час сесії перегляду.</li>
+    <li>Файл проксується через наш ендпоінт (<code>/api/proxy</code>) на Vercel. Файл проходить через проксі в пам'яті і повертається у ваш браузер. <strong>На диск не записується, не зберігається.</strong></li>
+    <li>Парсинг і рендеринг відбуваються повністю у вашому браузері (SheetJS + JSZip з публічних CDN).</li>
+  </ul>
+
+  <h2>4. Серверні логи</h2>
+  <p>Наш хостинг-провайдер (Vercel) веде стандартні серверні логи: час, шлях запиту, статус відповіді, IP-адреса джерела — для функціонування сервісу та захисту від абуза. Зберігаються згідно з політикою Vercel і не використовуються в інших цілях.</p>
+
+  <h2>5. Сторонні сервіси</h2>
+  <p>Power-Up підвантажує наступні сторонні JavaScript-бібліотеки під час роботи:</p>
+  <ul>
+    <li>Trello Power-Up SDK з <code>p.trellocdn.com</code></li>
+    <li>SheetJS з <code>cdn.sheetjs.com</code></li>
+    <li>JSZip з <code>cdnjs.cloudflare.com</code></li>
+  </ul>
+  <p>Ці CDN можуть логувати стандартні метадані запитів згідно з власними політиками.</p>
+
+  <h2>6. Права суб'єктів даних</h2>
+  <p>Оскільки ми не маємо бази даних користувачів, немає й персонального профілю для доступу, експорту чи видалення. Щоб припинити користуватися Power-Up — просто вимкніть його у вашій дошці Trello (Show menu → Power-Ups → disable).</p>
+
+  <h2>7. Приватність дітей</h2>
+  <p>Power-Up не призначений для дітей до 13 років, і ми свідомо не збираємо їхні дані.</p>
+
+  <h2>8. Зміни цієї політики</h2>
+  <p>Ми можемо оновлювати цю політику. Суттєві зміни відображаються у даті «Останнє оновлення» вище та, де доцільно, у changelog Power-Up.</p>
+
+  <h2>9. Контакт</h2>
+  <p>Питання, запити, занепокоєння: <a href="mailto:onufrienko.alex@gmail.com">onufrienko.alex@gmail.com</a>.</p>
+  </section>
+</main>
+</body>
+</html>
