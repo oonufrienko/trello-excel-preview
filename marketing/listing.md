@@ -43,7 +43,9 @@ Privacy by design:
 
 Ideal for teams that move project budgets, price lists, invoices, inventory, or task lists through Trello and don't want every team-mate to download and open Excel just to read a few cells.
 
-Need help or have a feature request? Email onufrienko.alex@gmail.com — every message is read by the developer.
+Need help or have a feature request? Email onufrienko.alex@gmail.com — every message is read personally.
+
+Built with Claude (Anthropic AI), product direction by Oleksandr Onufrienko.
 ```
 
 (1497 chars — under the 1500 limit)

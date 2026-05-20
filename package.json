@@ -8,6 +8,9 @@
     "email": "onufrienko.alex@gmail.com"
   },
   "author": "Oleksandr Onufrienko <onufrienko.alex@gmail.com>",
+  "contributors": [
+    { "name": "Claude (Anthropic)", "url": "https://www.anthropic.com/claude" }
+  ],
   "license": "UNLICENSED",
   "engines": {
     "node": ">=20"

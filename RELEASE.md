@@ -1,6 +1,6 @@
 # Release / Marketplace Submission Checklist
 
-This document is the **handover** for shipping Simple Excel Preview to the Atlassian Marketplace. It lists what is automated/ready and what the developer (Oleksandr) must do manually in browser UIs we can't drive from CI.
+This document is the **handover** for shipping Simple Excel Preview to the Atlassian Marketplace. It lists what is automated/ready and what the publisher (Oleksandr) must do manually in browser UIs we can't drive from CI.
 
 ## ✅ Ready in this repo
 
