@@ -68,7 +68,7 @@ After landing, the workflow runs on every PR to `main` and nightly at 03:17 UTC.
 
 ## 🔵 Known limitations to keep on the public roadmap
 
-- Embedded image positioning may drift on non-first sheets of multi-sheet workbooks.
+- Embedded image positioning may drift slightly from the original Excel layout (more visible on non-first sheets of multi-sheet workbooks; can also affect the first sheet on files with custom column widths or row heights).
 - Old `.xls` (BIFF binary) format renders without embedded images.
 - Preview is capped at 25 MB (file-size proxy guard).
 
