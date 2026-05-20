@@ -49,7 +49,18 @@ Use macOS Cmd+Shift+4, crop to 1280×720, save as PNG. Drop them into `marketing
 - [ ] Upload screenshots from step 1.
 - [ ] Hit Submit. Average review time: 2–4 weeks. Atlassian may come back with revision requests.
 
-### 4. Post-launch operations
+### 4. Land the CI workflow
+
+The current `GITHUB_TOKEN` in `.env` lacks the `workflow` scope, so the
+`.github/workflows/e2e.yml` file could not be created from here. The same
+file already lives on the `feature/e2e-tests` branch. To enable e2e on PRs:
+
+- [ ] Locally: `git checkout feature/e2e-tests -- .github/workflows/e2e.yml` on `main`, commit, and push from a session that has a token with `workflow` scope (e.g., your normal `gh auth login`).
+- [ ] OR open a PR from `feature/e2e-tests` to `main` and merge through GitHub UI.
+
+After landing, the workflow runs on every PR to `main` and nightly at 03:17 UTC.
+
+### 5. Post-launch operations
 
 - [ ] Add `https://trello-excel-preview.vercel.app/api/health` to UptimeRobot (or any free uptime monitor).
 - [ ] Skim Vercel logs weekly for the first month: look for 5xx spikes.
