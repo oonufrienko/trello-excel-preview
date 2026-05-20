@@ -20,6 +20,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 First public-ready release. Combines all work from the pre-launch milestones below.
 
+> Implementation by Claude (Anthropic). Product direction, ownership, and operations by Oleksandr Onufrienko.
+
 ### Added
 - **Attachment section** that lists Excel/CSV files attached to a Trello card with **Preview** and **⋯** (Download / Rename / Delete) actions.
 - **Preview modal** that parses XLSX, XLS, CSV, XLSM, XLSB, ODS, XLAM, XLTX, XLTM client-side via SheetJS.
