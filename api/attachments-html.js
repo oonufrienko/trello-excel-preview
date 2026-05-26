@@ -1,7 +1,17 @@
 export default function handler(req, res) {
   const key = process.env.TRELLO_API_KEY || '';
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
-  res.setHeader('Content-Security-Policy', 'frame-ancestors https://trello.com https://*.trello.com');
+  res.setHeader('Content-Security-Policy', [
+    "default-src 'self'",
+    "script-src 'self' 'unsafe-inline' https://p.trellocdn.com",
+    "style-src 'self' 'unsafe-inline'",
+    "img-src 'self' https://*.trello.com https://*.amazonaws.com",
+    "connect-src 'self' https://api.trello.com",
+    "font-src 'self'",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "frame-ancestors https://trello.com https://*.trello.com"
+  ].join('; '));
   res.setHeader('Cache-Control', 'no-store');
   res.send(`<!DOCTYPE html>
 <html>
