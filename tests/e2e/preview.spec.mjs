@@ -10,7 +10,7 @@ const CASES = [
 ];
 
 for (const fixture of CASES) {
-  test(`Preview: ${fixture} renders without console errors`, async ({ page, fixtureIds }) => {
+  test(`Preview: ${fixture} renders without console errors`, async ({ page, fixtureIds, cspViolations }) => {
     const info = fixtureIds[fixture];
     expect(info, `Fixture ${fixture} not seeded`).toBeTruthy();
 
@@ -38,5 +38,8 @@ for (const fixture of CASES) {
       e.includes('preview.js') || e.includes('attachments.js')
     );
     expect(ourErrors, ourErrors.join('\n')).toEqual([]);
+
+    // CSP must not block any legitimate resource load.
+    expect(cspViolations, cspViolations.join('\n')).toEqual([]);
   });
 }
