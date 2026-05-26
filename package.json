@@ -9,7 +9,10 @@
   },
   "author": "Oleksandr Onufrienko <onufrienko.alex@gmail.com>",
   "contributors": [
-    { "name": "Claude (Anthropic)", "url": "https://www.anthropic.com/claude" }
+    {
+      "name": "Claude (Anthropic)",
+      "url": "https://www.anthropic.com/claude"
+    }
   ],
   "license": "UNLICENSED",
   "engines": {
@@ -17,6 +20,7 @@
   },
   "scripts": {
     "auth": "node tests/setup/auth.mjs",
+    "bundle-vendor": "esbuild node_modules/xlsx-calc/src/index.js --bundle --format=iife --global-name=XLSX_CALC --minify --banner:js=\"/* xlsx-calc bundled for browser via esbuild. License: MIT (https://github.com/fabiooshiro/xlsx-calc) */\" --outfile=js/xlsx-calc.bundle.js",
     "generate-fixtures": "node tests/generate-fixtures.mjs",
     "seed-board": "node tests/setup/seed-board.mjs",
     "test:e2e": "playwright test",
@@ -26,6 +30,8 @@
   "devDependencies": {
     "@playwright/test": "^1.60.0",
     "dotenv": "^17.4.2",
-    "exceljs": "^4.4.0"
+    "esbuild": "^0.28.0",
+    "exceljs": "^4.4.0",
+    "xlsx-calc": "^0.9.2"
   }
 }
