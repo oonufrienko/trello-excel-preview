@@ -34,6 +34,11 @@ export const test = base.extend({
   // If PREVIEW_HOST is set, transparently rewrite all requests to
   // trello-excel-preview.vercel.app -> that host. Lets the suite validate
   // a preview deploy without touching the Trello Power-Up admin config.
+  //
+  // Also installs a securitypolicyviolation listener in every frame, so
+  // CSP blocks emit a clearly-tagged console.error caught by the
+  // cspViolations fixture. Without this, source-map fetches and other
+  // browser-internal CSP blocks only surface when DevTools is open.
   context: async ({ context }, use) => {
     const previewHost = process.env.PREVIEW_HOST;
     if (previewHost) {
@@ -43,6 +48,13 @@ export const test = base.extend({
         return route.continue({ url: u.toString() });
       });
     }
+    await context.addInitScript(() => {
+      document.addEventListener('securitypolicyviolation', (e) => {
+        console.error(
+          `[csp-violation] ${e.violatedDirective} blocked ${e.blockedURI} (source: ${e.sourceFile || 'inline'})`
+        );
+      });
+    });
     await use(context);
   },
 
@@ -51,7 +63,7 @@ export const test = base.extend({
   // violations would fire). Tests can assert: expect(cspViolations).toEqual([]).
   cspViolations: async ({ page }, use) => {
     const violations = [];
-    const isCsp = (text) => /Content Security Policy|Refused to (load|execute|connect|frame|apply)/i.test(text);
+    const isCsp = (text) => /Content Security Policy|Refused to (load|execute|connect|frame|apply)|\[csp-violation\]/i.test(text);
     page.on('console', msg => {
       if (msg.type() === 'error' && isCsp(msg.text())) violations.push(msg.text());
     });
