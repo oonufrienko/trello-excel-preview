@@ -66,7 +66,10 @@ async function loadPreview() {
       const text = new TextDecoder().decode(buffer);
       workbook = XLSX.read(text, { type: 'string' });
     } else {
-      workbook = XLSX.read(buffer, { type: 'array' });
+      // sheetStubs keeps formula-only cells (no cached <v>) so we can render
+      // the formula text instead of an empty <td>.
+      workbook = XLSX.read(buffer, { type: 'array', sheetStubs: true });
+      fillFormulaStubs(workbook);
     }
 
     currentWorkbook = workbook;
@@ -361,6 +364,27 @@ function buildColgroup(sheet) {
   }
   if (!anyWidth) return '';
   return `<colgroup>${parts.join('')}</colgroup>`;
+}
+
+// Files generated programmatically often store formulas without a cached
+// value, which SheetJS surfaces as cells with `f` set but no `w`/usable `v`.
+// Fall back to the formula text so the cell is not blank.
+function fillFormulaStubs(wb) {
+  for (const name of wb.SheetNames) {
+    const sheet = wb.Sheets[name];
+    if (!sheet) continue;
+    for (const key of Object.keys(sheet)) {
+      if (key[0] === '!') continue;
+      const cell = sheet[key];
+      if (!cell || !cell.f) continue;
+      const hasValue = cell.w || (cell.v !== undefined && cell.v !== null && cell.v !== '' && cell.t !== 'z');
+      if (hasValue) continue;
+      const text = '=' + cell.f;
+      cell.t = 's';
+      cell.v = text;
+      cell.w = text;
+    }
+  }
 }
 
 // Recompute !ref from real cell keys to defend against files that declare

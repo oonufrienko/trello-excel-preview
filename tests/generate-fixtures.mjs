@@ -130,6 +130,24 @@ async function large5mb() {
   await wb.xlsx.writeFile(join(OUT_DIR, 'large-5mb.xlsx'));
 }
 
+// Formulas without cached results — emulates files produced by tools that
+// don't pre-compute values (e.g. openpyxl, ExcelJS without `result`).
+// Without the fillFormulaStubs fix, these cells render as blank <td>s.
+async function formulasNoCache() {
+  const wb = new ExcelJS.Workbook();
+  const ws = wb.addWorksheet('Calc');
+  ws.columns = [
+    { header: 'A', key: 'a', width: 12 },
+    { header: 'B', key: 'b', width: 12 },
+    { header: 'Sum', key: 'c', width: 16 }
+  ];
+  for (let r = 1; r <= 5; r++) {
+    ws.addRow({ a: r * 10, b: r * 3 });
+    ws.getCell(`C${r + 1}`).value = { formula: `A${r + 1}+B${r + 1}` };
+  }
+  await wb.xlsx.writeFile(join(OUT_DIR, 'formulas-no-cache.xlsx'));
+}
+
 async function csvFile() {
   const lines = ['name,qty'];
   for (let i = 1; i <= 30; i++) lines.push(`Product ${i},${i * 5}`);
@@ -142,6 +160,7 @@ async function main() {
   await simple2col();           console.log('  simple-2col.xlsx');
   await multiSheet();           console.log('  multi-sheet.xlsx');
   await multiSheetWithImages(); console.log('  with-images-multi.xlsx');
+  await formulasNoCache();      console.log('  formulas-no-cache.xlsx');
   await oversizedDim();         console.log('  oversized-dim.xlsx');
   await large5mb();             console.log('  large-5mb.xlsx');
   await csvFile();              console.log('  data.csv');
