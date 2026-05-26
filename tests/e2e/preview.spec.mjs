@@ -4,6 +4,7 @@ import { test, expect } from './_setup.mjs';
 const CASES = [
   'multi-sheet.xlsx',
   'with-images-multi.xlsx',
+  'formulas-no-cache.xlsx',
   'oversized-dim.xlsx',
   'data.csv'
 ];
