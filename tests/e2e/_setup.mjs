@@ -29,6 +29,36 @@ export const test = base.extend({
   fixtureIds: async ({}, use) => {
     const ids = await loadFixtureIds();
     await use(ids);
+  },
+
+  // If PREVIEW_HOST is set, transparently rewrite all requests to
+  // trello-excel-preview.vercel.app -> that host. Lets the suite validate
+  // a preview deploy without touching the Trello Power-Up admin config.
+  context: async ({ context }, use) => {
+    const previewHost = process.env.PREVIEW_HOST;
+    if (previewHost) {
+      await context.route('https://trello-excel-preview.vercel.app/**', route => {
+        const u = new URL(route.request().url());
+        u.host = previewHost;
+        return route.continue({ url: u.toString() });
+      });
+    }
+    await use(context);
+  },
+
+  // Auto-collect CSP violations + general console errors per test.
+  // Capture from page + every subframe (the Power-Up iframe is where
+  // violations would fire). Tests can assert: expect(cspViolations).toEqual([]).
+  cspViolations: async ({ page }, use) => {
+    const violations = [];
+    const isCsp = (text) => /Content Security Policy|Refused to (load|execute|connect|frame|apply)/i.test(text);
+    page.on('console', msg => {
+      if (msg.type() === 'error' && isCsp(msg.text())) violations.push(msg.text());
+    });
+    page.on('pageerror', err => {
+      if (isCsp(err.message)) violations.push(err.message);
+    });
+    await use(violations);
   }
 });
 

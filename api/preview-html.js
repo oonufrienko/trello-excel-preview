@@ -6,7 +6,7 @@ export default function handler(req, res) {
     "script-src 'self' 'unsafe-inline' https://cdn.sheetjs.com https://cdnjs.cloudflare.com https://p.trellocdn.com",
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' blob: https://*.trello.com https://*.amazonaws.com",
-    "connect-src 'self' https://api.trello.com",
+    "connect-src 'self' https://trello.com https://*.trello.com",
     "font-src 'self'",
     "object-src 'none'",
     "base-uri 'self'",
