@@ -151,8 +151,17 @@ export default async function handler(req, res) {
     res.setHeader('Cache-Control', 'no-store');
 
     if (download) {
-      const safe = String(download).replace(/[^\w.\-() ]/g, '_');
-      res.setHeader('Content-Disposition', `attachment; filename="${safe}"`);
+      // Strip CRLF/quotes to prevent header injection, then expose two
+      // names: ASCII-only fallback (filename=) for legacy clients +
+      // UTF-8 percent-encoded (filename*=) for everyone else (RFC 5987).
+      // This lets non-ASCII names like "Рахунок.xlsx" survive download.
+      const stripped = String(download).replace(/[\r\n"\\]/g, '');
+      const ascii = stripped.replace(/[^\x20-\x7e]/g, '_');
+      const utf8 = encodeURIComponent(stripped);
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename="${ascii}"; filename*=UTF-8''${utf8}`
+      );
     }
 
     res.send(Buffer.from(buffer));
