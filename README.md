@@ -21,7 +21,6 @@ Marketplace: pending submission.
 ## Known limitations
 
 - **Embedded images may drift** from their original Excel position. More visible on non-first sheets of multi-sheet workbooks; can also affect the first sheet on files with custom column widths or row heights.
-- **Formulas without cached values** are computed client-side via [xlsx-calc](https://github.com/fabiooshiro/xlsx-calc) (lazy-loaded only when needed). Most common functions are supported (arithmetic, `SUM`, `IF`, `VLOOKUP`, etc.). Cells with unsupported functions fall back to showing the formula text (`=GETPIVOTDATA(...)`) instead of the computed result.
 - **Cell styling** (bold, italic, font colors, background fills) is not rendered. Only numeric formats, alignment via defaults, and merged cells are honoured.
 - **Old `.xls`** (BIFF binary) format renders without embedded images.
 - **Preview is capped at 25 MB** (file-size proxy guard). Larger files must be downloaded.

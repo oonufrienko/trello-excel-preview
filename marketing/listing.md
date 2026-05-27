@@ -99,7 +99,6 @@ Capture from production (`https://trello-excel-preview.vercel.app`) once the Mar
 ## Known limitations to disclose (optional, but honest)
 
 - Embedded images may drift from their original Excel position. More visible on non-first sheets of multi-sheet workbooks; can also affect the first sheet on files with custom column widths or row heights.
-- Formulas without cached values are computed client-side (common functions like SUM, IF, VLOOKUP, arithmetic). Cells with unsupported functions show the formula text instead of the result.
 - Cell styling (bold, italic, font colors, background fills) is not rendered.
 - Files larger than 25 MB are blocked from preview (use Download).
 - Old `.xls` binary format renders without embedded images.

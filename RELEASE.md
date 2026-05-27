@@ -84,7 +84,6 @@ After landing, the workflow runs on every PR to `main` and nightly at 03:17 UTC.
 ## 🔵 Known limitations to keep on the public roadmap
 
 - Embedded images may drift from their original Excel position (more visible on non-first sheets of multi-sheet workbooks; can also affect the first sheet on files with custom column widths or row heights).
-- Formulas without cached values are computed client-side via xlsx-calc (lazy-loaded). Common functions (arithmetic, SUM, IF, VLOOKUP, etc.) work. Cells with unsupported functions fall back to showing formula text instead of the result.
 - Cell styling (bold, italic, font colors, background fills) is not rendered.
 - Old `.xls` (BIFF binary) format renders without embedded images.
 - Preview is capped at 25 MB (file-size proxy guard).
