@@ -2,6 +2,7 @@ const t = TrelloPowerUp.iframe({ appKey: window.TRELLO_APP_KEY || '', appName: '
 
 let currentWorkbook = null;
 let currentAnchors = {}; // { [sheetName]: [{ type, from, to?, ext?, blobUrl }] }
+let currentStyles = {};  // { [sheetName]: { [addr]: { font, bgColor, alignment } } }
 let blobUrls = [];
 
 const MAX_PREVIEW_CELLS = 200000;
@@ -49,15 +50,20 @@ async function loadPreview() {
     blobUrls.forEach(u => URL.revokeObjectURL(u));
     blobUrls = [];
     currentAnchors = {};
+    currentStyles = {};
 
     if (['xlsx', 'xlsm', 'xlsb'].includes(ext) && typeof JSZip !== 'undefined') {
       try {
         const zip = await JSZip.loadAsync(buffer);
-        const parsed = await parseAnchors(zip);
-        currentAnchors = parsed.anchors;
-        blobUrls = parsed.urls;
+        const [anchorsResult, stylesResult] = await Promise.all([
+          parseAnchors(zip),
+          parseStyles(zip).catch(e => { console.warn('Style parsing failed:', e); return {}; })
+        ]);
+        currentAnchors = anchorsResult.anchors;
+        blobUrls = anchorsResult.urls;
+        currentStyles = stylesResult;
       } catch (e) {
-        console.warn('Image extraction failed:', e);
+        console.warn('XLSX extras extraction failed:', e);
       }
     }
 
@@ -67,8 +73,9 @@ async function loadPreview() {
       workbook = XLSX.read(text, { type: 'string' });
     } else {
       // sheetStubs keeps formula-only cells (no cached <v>) so we can
-      // attempt to compute them client-side. Anything xlsx-calc cannot
-      // evaluate falls back to formula text via fillFormulaStubs.
+      // attempt to compute them client-side. (Visual styles like bold/
+      // italic/color come from parseStyles via JSZip — community
+      // SheetJS doesn't expose them in cell.s.)
       workbook = XLSX.read(buffer, { type: 'array', sheetStubs: true });
       if (workbookHasUncomputedFormulas(workbook)) {
         try {
@@ -110,6 +117,127 @@ function renderWorkbook(wb) {
 
   contentEl.hidden = false;
   switchSheet(wb.SheetNames[0]);
+}
+
+// ── XLSX cell-style parsing ───────────────────────────────────────────────
+// SheetJS community surfaces only fill info via cell.s. Font / alignment
+// require parsing xl/styles.xml directly. We index fonts[], fills[],
+// cellXfs[] from styles.xml, then for each sheet pull the `s=` attribute
+// off every <c> element to map address → effective style.
+// Returns: { [sheetName]: { [addr]: { bold, italic, ... } } }
+async function parseStyles(zip) {
+  const parseXml = async (path) => {
+    const f = zip.files[path];
+    if (!f) return null;
+    return new DOMParser().parseFromString(await f.async('text'), 'application/xml');
+  };
+  const childrenOfFirst = (doc, tag) => {
+    const el = doc && doc.getElementsByTagName(tag)[0];
+    return el ? Array.from(el.children) : [];
+  };
+  const firstChild = (parent, tag) =>
+    parent && parent.getElementsByTagName(tag)[0] || null;
+  const colorOf = (el) => {
+    if (!el) return null;
+    const rgb = el.getAttribute('rgb');
+    if (!rgb) return null;
+    // strip alpha byte if present (ARGB → RGB)
+    return (rgb.length === 8 ? rgb.slice(2) : rgb).toUpperCase();
+  };
+
+  const stylesDoc = await parseXml('xl/styles.xml');
+  if (!stylesDoc) return {};
+
+  const rawFonts = childrenOfFirst(stylesDoc, 'fonts').map(fontEl => ({
+    bold: !!firstChild(fontEl, 'b'),
+    italic: !!firstChild(fontEl, 'i'),
+    underline: !!firstChild(fontEl, 'u'),
+    strike: !!firstChild(fontEl, 'strike'),
+    color: colorOf(firstChild(fontEl, 'color')),
+    size: parseFloat(firstChild(fontEl, 'sz')?.getAttribute('val') || '0') || null,
+  }));
+  // fonts[0] is the workbook default. Treat per-font size as "no
+  // opinion" when it matches the default — we don't want to force a
+  // px font-size on every cell just because Excel writes sz=11 by
+  // default. Same logic for color (default font is usually colorless).
+  const defaultSize = rawFonts[0]?.size || null;
+  const fonts = rawFonts.map((f, i) => i === 0 ? f : ({
+    ...f,
+    size: (f.size && f.size !== defaultSize) ? f.size : null,
+  }));
+
+  const fills = childrenOfFirst(stylesDoc, 'fills').map(fillEl => {
+    const pf = firstChild(fillEl, 'patternFill');
+    if (!pf) return null;
+    return {
+      patternType: pf.getAttribute('patternType') || 'none',
+      fgColor: colorOf(firstChild(pf, 'fgColor')),
+      bgColor: colorOf(firstChild(pf, 'bgColor')),
+    };
+  });
+
+  const cellXfs = childrenOfFirst(stylesDoc, 'cellXfs').map(xfEl => {
+    const alignEl = firstChild(xfEl, 'alignment');
+    return {
+      fontId: parseInt(xfEl.getAttribute('fontId') || '0', 10),
+      fillId: parseInt(xfEl.getAttribute('fillId') || '0', 10),
+      alignment: alignEl ? {
+        horizontal: alignEl.getAttribute('horizontal') || null,
+        vertical: alignEl.getAttribute('vertical') || null,
+      } : null,
+    };
+  });
+
+  // Map sheet name → worksheet XML path via workbook + rels.
+  const wbDoc = await parseXml('xl/workbook.xml');
+  if (!wbDoc) return {};
+  const relsDoc = await parseXml('xl/_rels/workbook.xml.rels');
+  const relsMap = {};
+  if (relsDoc) {
+    Array.from(relsDoc.getElementsByTagName('Relationship')).forEach(r => {
+      relsMap[r.getAttribute('Id')] = r.getAttribute('Target');
+    });
+  }
+  const RELS_NS = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships';
+
+  const result = {};
+  for (const sheetEl of Array.from(wbDoc.getElementsByTagName('sheet'))) {
+    const sheetName = sheetEl.getAttribute('name');
+    const rId = sheetEl.getAttributeNS(RELS_NS, 'id') || sheetEl.getAttribute('r:id');
+    if (!sheetName || !rId || !relsMap[rId]) continue;
+    let path = relsMap[rId];
+    if (!path.startsWith('xl/')) path = 'xl/' + path.replace(/^\//, '');
+    const sheetDoc = await parseXml(path);
+    if (!sheetDoc) continue;
+
+    const sheetStyles = {};
+    for (const cEl of Array.from(sheetDoc.getElementsByTagName('c'))) {
+      const addr = cEl.getAttribute('r');
+      const sAttr = cEl.getAttribute('s');
+      if (!addr || !sAttr) continue;
+      const xf = cellXfs[parseInt(sAttr, 10)];
+      if (!xf) continue;
+      // fontId 0 is the workbook default — let the base CSS handle it.
+      // Only non-default font references can contribute an actionable font.
+      const font = xf.fontId !== 0 ? fonts[xf.fontId] : null;
+      const fill = fills[xf.fillId];
+      const bgColor = (fill && fill.patternType === 'solid')
+        ? (fill.fgColor || fill.bgColor) : null;
+      const fontHasStyle = font && (font.bold || font.italic || font.underline ||
+                                     font.strike || font.color || font.size);
+      const hasStyle = fontHasStyle || bgColor
+                      || (xf.alignment && (xf.alignment.horizontal || xf.alignment.vertical));
+      if (!hasStyle) continue;
+      sheetStyles[addr] = {
+        font: fontHasStyle ? font : null,
+        bgColor,
+        alignment: xf.alignment,
+      };
+    }
+    result[sheetName] = sheetStyles;
+  }
+
+  return result;
 }
 
 // ── XLSX drawing parsing ──────────────────────────────────────────────────
@@ -506,6 +634,43 @@ function trimSheetRange(sheet) {
   return { rows: maxR - minR + 1, cols: maxC - minC + 1, empty: false };
 }
 
+// ── Cell styling: bold/italic/color/fill/alignment ───────────────────────
+// SheetJS sheet_to_html strips formatting — we re-apply it from the
+// styles map built by parseStyles(). data-r="A1" on each td lets us
+// look up the source cell. We set individual style properties (not
+// cssText) so the CSS rule for data-t="n" nowrap is preserved.
+function applyCellStyles(table, sheetStyles) {
+  if (!sheetStyles) return;
+  for (const td of table.querySelectorAll('td[data-r]')) {
+    const s = sheetStyles[td.getAttribute('data-r')];
+    if (!s) continue;
+
+    if (s.font) {
+      if (s.font.bold) td.style.fontWeight = '700';
+      if (s.font.italic) td.style.fontStyle = 'italic';
+      const decor = [];
+      if (s.font.underline) decor.push('underline');
+      if (s.font.strike) decor.push('line-through');
+      if (decor.length) td.style.textDecoration = decor.join(' ');
+      if (s.font.color) td.style.color = '#' + s.font.color;
+      if (s.font.size) {
+        // Excel font size is in points; CSS uses px. 1pt ≈ 1.333px.
+        td.style.fontSize = Math.round(s.font.size * 4 / 3) + 'px';
+      }
+    }
+
+    if (s.bgColor) td.style.backgroundColor = '#' + s.bgColor;
+
+    if (s.alignment) {
+      if (s.alignment.horizontal) td.style.textAlign = s.alignment.horizontal;
+      if (s.alignment.vertical) {
+        td.style.verticalAlign = s.alignment.vertical === 'center'
+          ? 'middle' : s.alignment.vertical;
+      }
+    }
+  }
+}
+
 function switchSheet(sheetName) {
   const wb = currentWorkbook;
   const sheet = wb.Sheets[sheetName];
@@ -531,6 +696,9 @@ function switchSheet(sheetName) {
       tableHtml = tableHtml.replace(/(<table[^>]*>)/, `$1${colgroup}`);
     }
     contentEl.innerHTML = `<div class="sheet-wrapper">${tableHtml}</div>`;
+
+    const tableEl = contentEl.querySelector('table');
+    if (tableEl) applyCellStyles(tableEl, currentStyles[sheetName]);
 
     const anchors = currentAnchors[sheetName];
     if (anchors && anchors.length) {
