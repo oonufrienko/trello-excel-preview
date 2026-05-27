@@ -18,6 +18,9 @@ export default function handler(req, res) {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+  <link rel="dns-prefetch" href="https://cdn.sheetjs.com">
+  <link rel="dns-prefetch" href="https://p.trellocdn.com">
   <link rel="stylesheet" href="/css/styles.css">
   <script>window.TRELLO_APP_KEY = "${key}";</script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
