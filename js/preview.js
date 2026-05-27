@@ -79,6 +79,7 @@ async function loadPreview() {
         }
       }
       fillFormulaStubs(workbook);
+      applyFormulaCellFormats(workbook);
     }
 
     currentWorkbook = workbook;
@@ -408,6 +409,32 @@ function workbookHasUncomputedFormulas(wb) {
     }
   }
   return false;
+}
+
+// Apply a sensible default number format to formula cells whose source
+// workbook didn't set one (common with openpyxl / ExcelJS exports).
+// xlsx-calc sets .v but not .w; without .z, sheet_to_html shows raw
+// JS numbers like `622110.3`. Default '#,##0.00' = thousands-comma +
+// 2 decimals. If the cell has its own .z (percent, date), respect it.
+function applyFormulaCellFormats(wb) {
+  if (!window.XLSX || !XLSX.SSF || !XLSX.SSF.format) return;
+  for (const name of wb.SheetNames) {
+    const sheet = wb.Sheets[name];
+    if (!sheet) continue;
+    for (const key of Object.keys(sheet)) {
+      if (key[0] === '!') continue;
+      const cell = sheet[key];
+      if (!cell || !cell.f) continue;
+      if (typeof cell.v !== 'number' || !Number.isFinite(cell.v)) continue;
+      const fmt = (cell.z && cell.z !== 'General') ? cell.z : '#,##0.00';
+      try {
+        cell.w = XLSX.SSF.format(fmt, cell.v);
+        cell.t = 'n';
+      } catch {
+        // Bad format string — leave the cell unformatted.
+      }
+    }
+  }
 }
 
 // Files generated programmatically often store formulas without a cached

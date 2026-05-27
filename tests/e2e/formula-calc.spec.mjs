@@ -20,14 +20,14 @@ test('Formula calc: =A2+B2 renders as computed value (not formula text)', async 
   const table = previewModal.locator('table').first();
   await expect(table).toBeVisible({ timeout: 15_000 });
 
-  // Wait for xlsx-calc lazy load + computation to complete.
-  // The cell text should be "13" (10+3), not "=A2+B2".
+  // Wait for xlsx-calc lazy load + computation + default formatting.
+  // Expected: "13.00" (10+3) formatted as #,##0.00, not "=A2+B2".
   const sumCell = previewModal.locator('table tr').nth(1).locator('td').nth(2);
-  await expect(sumCell).toHaveText('13', { timeout: 5_000 });
+  await expect(sumCell).toHaveText('13.00', { timeout: 5_000 });
 
   // Spot-check the other computed values.
-  await expect(previewModal.locator('table tr').nth(2).locator('td').nth(2)).toHaveText('26');
-  await expect(previewModal.locator('table tr').nth(5).locator('td').nth(2)).toHaveText('65');
+  await expect(previewModal.locator('table tr').nth(2).locator('td').nth(2)).toHaveText('26.00');
+  await expect(previewModal.locator('table tr').nth(5).locator('td').nth(2)).toHaveText('65.00');
 
   expect(cspViolations, cspViolations.join('\n')).toEqual([]);
 });
