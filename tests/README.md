@@ -13,8 +13,8 @@ npx playwright install chromium
 
 ## Setup (one-time)
 
-1. Create a private Trello board named "Power-Up Excel Preview — Tests".
-2. Add the Excel Preview Power-Up to it (Show Menu → Power-Ups → enable).
+1. Create a private Trello board named "Power-Up Excel Viewer — Tests".
+2. Add the Excel Viewer Power-Up to it (Show Menu → Power-Ups → enable).
 3. Copy the board short ID from the URL (`https://trello.com/b/{SHORTID}/...`).
 4. Generate a fresh user token at:
    ```

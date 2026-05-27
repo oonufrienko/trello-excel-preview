@@ -1,4 +1,4 @@
-# Simple Excel Preview
+# Simple Excel Viewer
 
 A Trello Power-Up that previews spreadsheet attachments (Excel, CSV, ODS) directly inside a Trello card — no downloads, no extra apps.
 

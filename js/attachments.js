@@ -13,7 +13,7 @@ function esc(s) {
 }
 
 // appKey injected server-side into window.TRELLO_APP_KEY — enables t.getRestApi()
-const t = TrelloPowerUp.iframe({ appKey: window.TRELLO_APP_KEY || '', appName: 'Excel Preview' });
+const t = TrelloPowerUp.iframe({ appKey: window.TRELLO_APP_KEY || '', appName: 'Excel Viewer' });
 
 async function ensureToken() {
   try {
