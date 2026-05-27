@@ -174,19 +174,26 @@ async function parseAnchors(zip) {
   const getREmbed = (el) =>
     el && (el.getAttributeNS(RELS_NS, 'embed') || el.getAttribute('r:embed'));
 
+  // Cache stores the in-flight Promise (not the resolved URL), so concurrent
+  // requests for the same media path share a single decompression — important
+  // when we extract anchors in parallel (a single image referenced from
+  // multiple anchors decompresses once, not N times).
   const blobCache = new Map();
-  const getBlobUrl = async (mediaPath) => {
+  const getBlobUrl = (mediaPath) => {
     if (blobCache.has(mediaPath)) return blobCache.get(mediaPath);
-    const file = zip.files[mediaPath];
-    if (!file) return null;
-    const ext = mediaPath.split('.').pop().toLowerCase();
-    if (!['png', 'jpg', 'jpeg', 'gif', 'bmp', 'webp'].includes(ext)) return null;
-    const mime = { png: 'image/png', gif: 'image/gif', bmp: 'image/bmp', webp: 'image/webp' }[ext] || 'image/jpeg';
-    const data = await file.async('arraybuffer');
-    const url = URL.createObjectURL(new Blob([data], { type: mime }));
-    blobCache.set(mediaPath, url);
-    result.urls.push(url);
-    return url;
+    const promise = (async () => {
+      const file = zip.files[mediaPath];
+      if (!file) return null;
+      const ext = mediaPath.split('.').pop().toLowerCase();
+      if (!['png', 'jpg', 'jpeg', 'gif', 'bmp', 'webp'].includes(ext)) return null;
+      const mime = { png: 'image/png', gif: 'image/gif', bmp: 'image/bmp', webp: 'image/webp' }[ext] || 'image/jpeg';
+      const data = await file.async('arraybuffer');
+      const url = URL.createObjectURL(new Blob([data], { type: mime }));
+      result.urls.push(url);
+      return url;
+    })();
+    blobCache.set(mediaPath, promise);
+    return promise;
   };
 
   const wbDoc = await readXml('xl/workbook.xml');
@@ -222,49 +229,53 @@ async function parseAnchors(zip) {
     const drawingFile = drawingPath.split('/').pop();
     const drawingRels = await readRels(`${drawingDir}/_rels/${drawingFile}.rels`);
 
-    const anchors = [];
     const root = drawingDoc.documentElement;
 
-    for (const aEl of findDirects(root, 'twoCellAnchor')) {
+    // Build both anchor sets in parallel. Each blob extraction is a
+    // JSZip decompression — serial awaits were the bottleneck for
+    // workbooks with many images.
+    const twoCellPromises = findDirects(root, 'twoCellAnchor').map(async (aEl) => {
       const fromEl = findDirect(aEl, 'from');
       const toEl = findDirect(aEl, 'to');
       const blipEl = findDeep(aEl, 'blip');
-      if (!fromEl || !toEl || !blipEl) continue;
+      if (!fromEl || !toEl || !blipEl) return null;
       const imgRId = getREmbed(blipEl);
-      if (!imgRId || !drawingRels[imgRId]) continue;
+      if (!imgRId || !drawingRels[imgRId]) return null;
       const imgPath = resolvePath(drawingPath, drawingRels[imgRId]);
       const blobUrl = await getBlobUrl(imgPath);
-      if (!blobUrl) continue;
-      anchors.push({
+      if (!blobUrl) return null;
+      return {
         type: 'two',
         from: { col: intOf(fromEl, 'col'), row: intOf(fromEl, 'row'),
                 colOff: intOf(fromEl, 'colOff'), rowOff: intOf(fromEl, 'rowOff') },
         to:   { col: intOf(toEl, 'col'),   row: intOf(toEl, 'row'),
                 colOff: intOf(toEl, 'colOff'),   rowOff: intOf(toEl, 'rowOff') },
         blobUrl
-      });
-    }
+      };
+    });
 
-    for (const aEl of findDirects(root, 'oneCellAnchor')) {
+    const oneCellPromises = findDirects(root, 'oneCellAnchor').map(async (aEl) => {
       const fromEl = findDirect(aEl, 'from');
       const extEl = findDirect(aEl, 'ext');
       const blipEl = findDeep(aEl, 'blip');
-      if (!fromEl || !extEl || !blipEl) continue;
+      if (!fromEl || !extEl || !blipEl) return null;
       const imgRId = getREmbed(blipEl);
-      if (!imgRId || !drawingRels[imgRId]) continue;
+      if (!imgRId || !drawingRels[imgRId]) return null;
       const imgPath = resolvePath(drawingPath, drawingRels[imgRId]);
       const blobUrl = await getBlobUrl(imgPath);
-      if (!blobUrl) continue;
-      anchors.push({
+      if (!blobUrl) return null;
+      return {
         type: 'one',
         from: { col: intOf(fromEl, 'col'), row: intOf(fromEl, 'row'),
                 colOff: intOf(fromEl, 'colOff'), rowOff: intOf(fromEl, 'rowOff') },
         ext: { cx: parseInt(extEl.getAttribute('cx'), 10) || 0,
                cy: parseInt(extEl.getAttribute('cy'), 10) || 0 },
         blobUrl
-      });
-    }
+      };
+    });
 
+    const anchors = (await Promise.all([...twoCellPromises, ...oneCellPromises]))
+      .filter(a => a);
     result.anchors[sheetName] = anchors;
   }
 
