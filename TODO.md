@@ -11,12 +11,8 @@ SheetJS community `sheet_to_html()` strips all formatting. To render styles:
 
 Estimated effort: ~100–150 lines in `js/preview.js`. Main risk is variance between Excel / LibreOffice / Google Sheets exports — each writes the style block slightly differently. Needs fixture coverage in `tests/e2e/`.
 
-## Formula calculation
+## Formula calculation — DONE (2026-05-26)
 
-`fix/formula-empty-cells` (shipped 2026-05-26) shows the formula text (`=A1+B1`) when a cell has no cached value. The next step is to **evaluate** the formula in the browser so users see the actual result, regardless of how the file was generated. Options, roughly in order of pragmatism:
+Shipped on branch `feature/formula-calc`: [xlsx-calc](https://github.com/fabiooshiro/xlsx-calc) (MIT) is lazy-loaded from cdn.jsdelivr.net only when the workbook contains formulas without cached values. Files saved by Excel/LibreOffice (vast majority) skip the load entirely.
 
-- **[HyperFormula](https://hyperformula.handsontable.com/)** — Apache-2.0, ~300 KB minified. Most realistic; covers 380+ functions, dependency graph, array formulas. Cost: bundle size and license footprint.
-- **[formula-parser](https://github.com/handsontable/formula-parser)** — MIT, smaller, but feature-incomplete (no array formulas, fewer functions).
-- **Custom mini-parser** for the top ~20 functions (`SUM`, `AVERAGE`, `IF`, `VLOOKUP`, `COUNTIF`, …). Only worth it if we cap the bundle aggressively and accept gaps; likely more code to maintain than the libraries above.
-
-Decision criteria: how often files come in *without* cached values (rare in practice — most spreadsheet apps cache; the offenders are server-side exports). If usage is occasional, ship HyperFormula behind a lazy `import()` so the first preview without a formula doesn't pay the bundle cost.
+Cells with formulas xlsx-calc cannot evaluate (rare functions, errored deps) fall back to showing the formula text — the previous `fillFormulaStubs` behavior, kept as a safety net.

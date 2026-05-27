@@ -274,6 +274,14 @@ body.preview-page {
   background: var(--bg);
 }
 
+/* Numbers and dates: keep on a single line. SheetJS marks cells with
+   data-t="n" / "d" — formatted values like "1,040,691.57" must not
+   break on the thousands comma. Long text cells keep wrapping. */
+.sheet-content td[data-t="n"],
+.sheet-content td[data-t="d"] {
+  white-space: nowrap;
+}
+
 .sheet-content tr:first-child th,
 .sheet-content tr:first-child td {
   background: var(--table-header);
