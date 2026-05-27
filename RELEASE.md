@@ -1,6 +1,6 @@
 # Release / Marketplace Submission Checklist
 
-This document is the **handover** for shipping Simple Excel Preview to the Atlassian Marketplace. It lists what is automated/ready and what the publisher (Oleksandr) must do manually in browser UIs we can't drive from CI.
+This document is the **handover** for shipping Simple Excel Viewer to the Atlassian Marketplace. It lists what is automated/ready and what the publisher (Oleksandr) must do manually in browser UIs we can't drive from CI.
 
 ## ✅ Ready in this repo
 
@@ -34,7 +34,7 @@ Use macOS Cmd+Shift+4, crop to 1280×720, save as PNG. Drop them into `marketing
 ### 2. Trello Power-Up admin (https://trello.com/power-ups/admin)
 
 - [ ] Confirm **Iframe Connector URL** = `https://trello-excel-preview.vercel.app/`
-- [ ] Confirm **Name** = `Simple Excel Preview`
+- [ ] Confirm **Name** = `Simple Excel Viewer`
 - [ ] Confirm **Author** = `Oleksandr Onufrienko`
 - [ ] Confirm **Support contact** email = `onufrienko.alex@gmail.com`
 - [ ] Confirm **Privacy Policy URL** = `https://trello-excel-preview.vercel.app/privacy.html`

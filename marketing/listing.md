@@ -1,6 +1,6 @@
 # Marketplace Listing Copy
 
-Drafts for the Atlassian Marketplace submission for **Simple Excel Preview**.
+Drafts for the Atlassian Marketplace submission for **Simple Excel Viewer**.
 
 Paste these strings into the relevant fields in https://trello.com/power-ups/admin and the Atlassian Marketplace listing form.
 
@@ -9,7 +9,7 @@ Paste these strings into the relevant fields in https://trello.com/power-ups/adm
 ## Public name (≤ 50 chars)
 
 ```
-Simple Excel Preview
+Simple Excel Viewer
 ```
 
 ## Tagline / short description (≤ 120 chars)
@@ -23,7 +23,7 @@ Preview Excel, CSV and other spreadsheets attached to Trello cards — no downlo
 ## Long description (≤ 1500 chars)
 
 ```
-Simple Excel Preview shows the contents of spreadsheet attachments right inside your Trello card. Click Preview on any .xlsx, .xls, .csv, .xlsm, .xlsb, or .ods file and the spreadsheet opens in a clean, read-only viewer — without leaving Trello and without installing Excel or a third-party desktop app.
+Simple Excel Viewer shows the contents of spreadsheet attachments right inside your Trello card. Click Preview on any .xlsx, .xls, .csv, .xlsm, .xlsb, or .ods file and the spreadsheet opens in a clean, read-only viewer — without leaving Trello and without installing Excel or a third-party desktop app.
 
 What you get:
 

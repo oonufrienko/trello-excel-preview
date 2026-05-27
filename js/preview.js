@@ -1,4 +1,4 @@
-const t = TrelloPowerUp.iframe({ appKey: window.TRELLO_APP_KEY || '', appName: 'Excel Preview' });
+const t = TrelloPowerUp.iframe({ appKey: window.TRELLO_APP_KEY || '', appName: 'Excel Viewer' });
 
 let currentWorkbook = null;
 let currentAnchors = {}; // { [sheetName]: [{ type, from, to?, ext?, blobUrl }] }
