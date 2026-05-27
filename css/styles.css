@@ -314,3 +314,30 @@ body.preview-page {
   pointer-events: none;
   object-fit: contain;
 }
+
+/* ── Preview-modal footer (credit + Ko-fi support link) ── */
+.preview-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 16px;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+  font-size: 12px;
+  color: var(--text-muted);
+  flex-wrap: wrap;
+}
+.preview-footer .kofi-link {
+  color: var(--text-muted);
+  text-decoration: none;
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg);
+  white-space: nowrap;
+}
+.preview-footer .kofi-link:hover {
+  color: var(--primary);
+  border-color: var(--primary);
+}

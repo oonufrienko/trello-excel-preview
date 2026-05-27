@@ -1,3 +1,8 @@
+// Set via env var KOFI_URL to enable a donation link in the preview
+// modal footer. Falls back to a placeholder if unset — user replaces
+// with their real Ko-fi URL once registered.
+const KOFI_URL = process.env.KOFI_URL || 'https://ko-fi.com/TODO_KOFI_HANDLE';
+
 export default function handler(req, res) {
   const key = process.env.TRELLO_API_KEY || '';
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
@@ -31,6 +36,10 @@ export default function handler(req, res) {
     <div id="sheet-tabs" class="sheet-tabs" hidden></div>
     <div id="sheet-content" class="sheet-content" hidden></div>
   </div>
+  <footer class="preview-footer">
+    <span>Built with Claude (Anthropic AI). Product direction by Oleksandr Onufrienko.</span>
+    <a href="${KOFI_URL}" target="_blank" rel="noopener noreferrer" class="kofi-link">☕ Support on Ko-fi</a>
+  </footer>
   <script src="/js/preview.js"></script>
 </body>
 </html>`);
