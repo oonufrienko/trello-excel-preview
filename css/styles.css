@@ -409,6 +409,22 @@ body.preview-page {
   margin-bottom: 6px;
   line-height: 1.5;
 }
+.welcome-container .welcome-kofi {
+  margin-top: 16px;
+  padding: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 13px;
+}
+.welcome-container .welcome-kofi a {
+  color: var(--primary);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.welcome-container .welcome-kofi a:hover {
+  text-decoration: underline;
+}
 .welcome-container .welcome-footer {
   margin-top: 16px;
   padding-top: 12px;
