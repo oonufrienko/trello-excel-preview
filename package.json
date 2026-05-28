@@ -9,10 +9,7 @@
   },
   "author": "Oleksandr Onufrienko <onufrienko.alex@gmail.com>",
   "contributors": [
-    {
-      "name": "Claude (Anthropic)",
-      "url": "https://www.anthropic.com/claude"
-    }
+    { "name": "AI" }
   ],
   "license": "UNLICENSED",
   "engines": {

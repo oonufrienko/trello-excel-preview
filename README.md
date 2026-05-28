@@ -48,4 +48,4 @@ Exploratory follow-ups for some of these are tracked in [TODO.md](TODO.md).
 
 Bug reports, feature requests: **onufrienko.alex@gmail.com**
 
-Implementation by Claude (Anthropic). Product direction, ownership, and operations by Oleksandr Onufrienko.
+Implementation by AI. Product direction, ownership, and delivery by Oleksandr Onufrienko.
