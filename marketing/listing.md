@@ -68,6 +68,12 @@ onufrienko.alex@gmail.com
 https://trello-excel-preview.vercel.app/privacy.html
 ```
 
+## Terms of Use URL
+
+```
+https://trello-excel-preview.vercel.app/terms.html
+```
+
 ## Author
 
 ```
