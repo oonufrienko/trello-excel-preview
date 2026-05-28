@@ -1,7 +1,4 @@
-// Set via env var KOFI_URL to enable a donation link in the preview
-// modal footer. Falls back to a placeholder if unset — user replaces
-// with their real Ko-fi URL once registered.
-const KOFI_URL = process.env.KOFI_URL || 'https://ko-fi.com/TODO_KOFI_HANDLE';
+const KOFI_URL = process.env.KOFI_URL || 'https://ko-fi.com/river44';
 
 export default function handler(req, res) {
   const key = process.env.TRELLO_API_KEY || '';
