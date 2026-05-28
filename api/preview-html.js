@@ -40,7 +40,7 @@ export default function handler(req, res) {
     <div id="sheet-content" class="sheet-content" hidden></div>
   </div>
   <footer class="preview-footer">
-    <span>Built with Claude (Anthropic AI). Product direction by Oleksandr Onufrienko.</span>
+    <span>Built with AI. Product direction by Oleksandr Onufrienko.</span>
     <a href="${KOFI_URL}" target="_blank" rel="noopener noreferrer" class="kofi-link">☕ Support on Ko-fi</a>
   </footer>
   <script src="/js/preview.js"></script>

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Welcome — Simple Excel Viewer</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <script src="https://p.trellocdn.com/power-up.min.js"></script>
+</head>
+<body class="welcome-page">
+  <div class="welcome-container">
+    <h2>Thanks for adding Simple Excel Viewer 👋</h2>
+    <p>You can now preview spreadsheets directly inside Trello cards.</p>
+    <ol>
+      <li>Attach an Excel or CSV file to any card (XLSX, XLS, CSV, XLSM, XLSB, ODS).</li>
+      <li>Open the card — an <strong>Excel Files</strong> section appears with a <strong>Preview</strong> button.</li>
+      <li>Click <strong>Preview</strong> to open the file in a read-only, in-card viewer.</li>
+    </ol>
+    <p>Rename and Delete actions require a one-time authorization the first time you use them. You can disconnect any time from the Power-Up <strong>Settings</strong>.</p>
+    <div class="welcome-footer">
+      <button id="welcome-close" class="btn btn-primary">Got it</button>
+    </div>
+  </div>
+  <script>
+    const t = TrelloPowerUp.iframe();
+    document.getElementById('welcome-close').onclick = () => t.closeModal();
+  </script>
+</body>
+</html>
