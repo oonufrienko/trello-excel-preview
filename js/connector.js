@@ -31,7 +31,11 @@ TrelloPowerUp.initialize({
   },
 
   'show-authorization': function (t) {
-    return t.getRestApi().authorize({ scope: 'read,write' });
+    return t.popup({
+      title: 'Authorize Simple Excel Viewer',
+      url: t.signUrl(window.location.origin + '/api/auth-html'),
+      height: 200
+    });
   },
 
   'show-settings': function (t) {

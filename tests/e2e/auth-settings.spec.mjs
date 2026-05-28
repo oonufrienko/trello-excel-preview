@@ -41,6 +41,23 @@ test('/api/settings-html serves the settings popup UI', async ({ request }) => {
   expect(html).toContain('/terms.html');
 });
 
+test('/api/auth-html serves authorize popup UI', async ({ request }) => {
+  const res = await request.get(`${HOST}/api/auth-html`);
+  expect(res.status()).toBe(200);
+  expect(res.headers()['content-security-policy']).toBeTruthy();
+  const html = await res.text();
+  expect(html).toContain('Authorize');
+  expect(html).toContain('/js/auth.js');
+});
+
+test('/js/auth.js calls authorize() from popup context', async ({ request }) => {
+  const res = await request.get(`${HOST}/js/auth.js`);
+  expect(res.status()).toBe(200);
+  const js = await res.text();
+  expect(js).toMatch(/authorize\(\{ ?scope/);
+  expect(js).toMatch(/closePopup/);
+});
+
 test('/js/settings.js exposes authorize + clearToken handlers', async ({ request }) => {
   const res = await request.get(`${HOST}/js/settings.js`);
   expect(res.status()).toBe(200);
