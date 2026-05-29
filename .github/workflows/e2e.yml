@@ -1,0 +1,69 @@
+name: e2e
+
+on:
+  pull_request:
+    branches: [main]
+  schedule:
+    # Nightly at 03:17 UTC — catches Trello/SheetJS-side breakage without
+    # an active PR. Off-peak time keeps Trello rate-limit headroom.
+    - cron: '17 3 * * *'
+  workflow_dispatch: {}
+
+jobs:
+  playwright:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Restore storageState.json
+        run: |
+          mkdir -p ./
+          echo "$TRELLO_STORAGE_STATE_B64" | base64 -d > ./storageState.json
+          test -s ./storageState.json
+        env:
+          TRELLO_STORAGE_STATE_B64: ${{ secrets.TRELLO_STORAGE_STATE_B64 }}
+
+      - name: Generate synthetic fixtures
+        run: npm run generate-fixtures
+
+      - name: Seed test board
+        run: npm run seed-board
+        env:
+          TRELLO_API_KEY: ${{ secrets.TRELLO_API_KEY }}
+          TRELLO_USER_TOKEN: ${{ secrets.TRELLO_USER_TOKEN }}
+          TRELLO_TEST_BOARD_ID: ${{ secrets.TRELLO_TEST_BOARD_ID }}
+
+      - name: Run Playwright
+        run: npx playwright test
+        env:
+          TRELLO_API_KEY: ${{ secrets.TRELLO_API_KEY }}
+          TRELLO_USER_TOKEN: ${{ secrets.TRELLO_USER_TOKEN }}
+          TRELLO_TEST_BOARD_ID: ${{ secrets.TRELLO_TEST_BOARD_ID }}
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14
