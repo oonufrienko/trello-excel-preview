@@ -127,6 +127,18 @@ async function main() {
       continue;
     }
 
+    // No valid cache (e.g. CI, where .attachment-ids.json is gitignored).
+    // Reuse an existing attachment with the same name instead of uploading
+    // a duplicate — keeps the board free of dupes that break strict-mode
+    // locators in the e2e suite.
+    const existing = await trello('GET', `/cards/${card.id}/attachments`, { fields: 'id,name' });
+    const match = existing.find(a => a.name === fx.file);
+    if (match) {
+      ids[fx.file] = { cardId: card.id, cardShortLink: card.shortLink, attachmentId: match.id, kind: fx.kind };
+      console.log(`  = ${fx.file} (reused existing att ${match.id})`);
+      continue;
+    }
+
     const att = await uploadAttachment(card.id, fx.fullPath);
     ids[fx.file] = { cardId: card.id, cardShortLink: card.shortLink, attachmentId: att.id, kind: fx.kind };
     console.log(`  + ${fx.file} → card ${card.shortLink} att ${att.id}`);
