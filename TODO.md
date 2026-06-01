@@ -2,6 +2,24 @@
 
 Items here are non-blocking experiments. Each one is its own branch when picked up.
 
+## Post-launch operations
+
+### UptimeRobot monitoring on /api/health — TODO
+
+Set up free external uptime monitoring so production downtime triggers an email alert.
+
+1. Sign up / log in at https://uptimerobot.com (free tier: 50 monitors, 5-min interval).
+2. **+ Add New Monitor**:
+   - Monitor Type: **HTTP(s)**
+   - Friendly Name: `Excel Viewer — health`
+   - URL: `https://trello-excel-preview.vercel.app/api/health`
+   - Monitoring Interval: **5 minutes**
+3. (Recommended) Advanced → **Keyword monitoring**: type **exists**, keyword `"status":"ok"` — alerts on broken body, not just 5xx.
+4. **Alert Contacts**: enable email `onufrienko.alex@gmail.com`.
+5. Create Monitor.
+
+`/api/health` returns `{"status":"ok","version":...}` with HTTP 200 (verified 2026-05-29). Note `uptimeSeconds` resets to 0 on Vercel cold-starts — monitor on HTTP status + the `status:ok` keyword, not on uptime value.
+
 ## Cell styles (bold / italic / colors / fills) — SHIPPED BROKEN (2026-05-27)
 
 A first cut shipped on `feature/cell-styles` (merged into main 2026-05-27). It works on ExcelJS-generated workbooks (Node sanity test passed) but **not on real Excel/LibreOffice files** — visual check on user's quarterly report showed neither bold headers nor yellow fills. The broken parser is *inert* (returns empty styles map → applyCellStyles no-op → same rendering as before the feature), so no rollback was done.
