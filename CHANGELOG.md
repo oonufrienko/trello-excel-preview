@@ -7,13 +7,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ## [Unreleased]
 
 ### Added
+- **Formula calculation**: cells with formulas but no cached value are now computed client-side via [xlsx-calc](https://github.com/fabiooshiro/xlsx-calc) (MIT), lazy-loaded only when such cells exist. Computed numbers get `#,##0.00` formatting; unsupported formulas fall back to showing the formula text.
+- **Authorization capabilities** (Marketplace guideline #9): `authorization-status`, `show-authorization` (opens an Authorize popup), and `show-settings` (Connect/Disconnect panel at `/api/settings-html`).
+- **On-enable welcome modal** (`welcome.html`) shown the first time the Power-Up is enabled on a board.
+- **Terms of Use** page (`terms.html`, EN + UA) linked from the Privacy Policy.
+- **Ko-fi support links** in the preview footer and welcome modal, plus `.github/FUNDING.yml`.
 - `/api/health` endpoint for uptime monitoring (returns `{ status, version, uptimeSeconds, timestamp }`).
 - Rate limiting on `/api/proxy` (30 requests/min per IP, returns `429` with `Retry-After`).
 - Playwright e2e test infrastructure with safety guard against running on non-test boards.
-- GitHub Actions workflow that runs e2e tests on pull requests to `main`.
-- Marketplace assets (privacy policy, listing copy, 1024×1024 icon).
+- GitHub Actions workflow that runs e2e tests on pull requests to `main` and nightly at 03:17 UTC.
+- Marketplace assets (privacy policy, listing copy, 1024×1024 icon, demo gif).
 
 ### Changed
+- Product name: **Simple Excel Preview → Simple Excel Viewer** across all user-facing artifacts.
+- Attribution wording: **"Claude (Anthropic)" → "AI"** in privacy, terms, listing, README, and the preview footer.
+- Root connector frame served via `api/index-html.js` (replacing static `index.html`) so the Trello app key is injected server-side, enabling `t.getRestApi()`.
 - CHANGELOG migrated from per-branch notes to Keep a Changelog format.
 
 ## [1.0.0] — 2026-05-13

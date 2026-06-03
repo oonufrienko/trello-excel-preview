@@ -2,6 +2,8 @@
 
 This document is the **handover** for shipping Simple Excel Viewer to the Atlassian Marketplace. It lists what is automated/ready and what the publisher (Oleksandr) must do manually in browser UIs we can't drive from CI.
 
+> **Status (2026-06-03): submitted to Atlassian Marketplace, awaiting review.** All manual steps below are done; this file is kept as the record + future-release runbook.
+
 ## ✅ Ready in this repo
 
 | Artifact | Location |
@@ -19,17 +21,9 @@ This document is the **handover** for shipping Simple Excel Viewer to the Atlass
 
 These cannot be done from CI/CLI — they require the developer to log into the relevant admin UI.
 
-### 1. Take 4–5 production screenshots (1280×720)
+### 1. Production screenshots (1280×720) — ✅ DONE
 
-Open https://trello-excel-preview.vercel.app/ via the Trello Power-Up on a test card, capture:
-
-- [ ] **Excel files section on a card** — list with Preview + ⋯ buttons.
-- [ ] **Preview modal — multi-sheet xlsx** — tabs visible, table rendered.
-- [ ] **Preview modal — embedded images** — catalog file with photos on the table.
-- [ ] **Actions popup** — ⋯ menu open showing Download / Rename / Delete.
-- [ ] *(Optional)* **413 too-large state** — error UI for files > 25 MB.
-
-Use macOS Cmd+Shift+4, crop to 1280×720, save as PNG. Drop them into `marketing/screenshots/` (gitignored — they're submitted directly to Marketplace).
+5 screenshots captured into `marketing/screenshots/` (gitignored — submitted directly to Marketplace), plus a demo gif at `marketing/power-up-gif-screenshot.gif`.
 
 ### 2. Trello Power-Up admin (https://trello.com/power-ups/admin)
 
@@ -39,41 +33,29 @@ Use macOS Cmd+Shift+4, crop to 1280×720, save as PNG. Drop them into `marketing
 - [ ] Confirm **Support contact** email = `onufrienko.alex@gmail.com`
 - [ ] Confirm **Privacy Policy URL** = `https://trello-excel-preview.vercel.app/privacy.html`
 - [ ] Upload **Icon** = `marketing/icon-1024.png`
-- [ ] Set **Capabilities** = at least `attachment-sections`
+- [ ] Set **Capabilities** = all five declared in `js/connector.js`: `attachment-sections`, `authorization-status`, `show-authorization`, `show-settings`, `on-enable` (the last four are required by guideline #9 for a Power-Up that authorizes the user for Rename/Delete)
+- [ ] Add **Allowed Origins** for the production host (and any Vercel preview hosts used for testing) so `show-authorization` returns succeed
 
 ### 3. Atlassian Marketplace listing form
 
 - [ ] Paste **Tagline** from `marketing/listing.md` (≤ 120 chars).
 - [ ] Paste **Long description** from `marketing/listing.md` (≤ 1500 chars).
+- [ ] Set **Privacy Policy URL** = `https://trello-excel-preview.vercel.app/privacy.html`
+- [ ] Set **Terms of Use URL** = `https://trello-excel-preview.vercel.app/terms.html`
 - [ ] Pick **Category** = `File Management`.
 - [ ] Upload screenshots from step 1.
 - [ ] Hit Submit. Average review time: 2–4 weeks. Atlassian may come back with revision requests.
 
-### 4. Land the CI workflow
+### 4. CI workflow — ✅ DONE
 
-The current `GITHUB_TOKEN` in `.env` has only `repo` scope, not `workflow`. Pushing `.github/workflows/*.yml` requires a token with `workflow`, so this step must happen in a browser or with a re-scoped token. The file is already committed on `feature/e2e-tests` at commit `1805293`.
+`.github/workflows/e2e.yml` lives on `main` (runs on every PR to `main` and nightly at 03:17 UTC). The local git token was re-scoped with `workflow` permission, so workflow files can now be pushed from the CLI.
 
-**Easiest path — GitHub web UI (no token regeneration needed):**
-
-1. Open the file on `feature/e2e-tests`:
-   https://github.com/oonufrienko/trello-excel-preview/blob/feature/e2e-tests/.github/workflows/e2e.yml
-2. Click **Raw** → **Copy** the full text.
-3. Open the **main** branch tree: https://github.com/oonufrienko/trello-excel-preview/tree/main
-4. Click **Add file → Create new file**. Name it `.github/workflows/e2e.yml`. Paste the copied content. Commit directly to `main`.
-5. **Don't** merge `feature/e2e-tests` into `main` directly — that branch also contains the obsolete `fix(delete)` polling workaround (no longer needed since Trello fixed the backend) and would re-introduce stale code in `js/attachments.js`.
-
-**Alternative — re-scope the local token:**
-
-- [ ] Generate a new GitHub PAT (https://github.com/settings/tokens) with `repo` + `workflow` scopes, replace `GITHUB_TOKEN` in `.env`, then `git checkout feature/e2e-tests -- .github/workflows/e2e.yml` on `main` → commit → push.
-
-**Required GitHub Actions secrets (already noted in `tests/README.md`):**
+**GitHub Actions secrets configured** (repository secrets at Settings → Secrets and variables → Actions):
 
 - `TRELLO_API_KEY`
 - `TRELLO_USER_TOKEN`
 - `TRELLO_TEST_BOARD_ID`
-- `TRELLO_STORAGE_STATE_B64` — base64 of local `storageState.json` (`base64 -i storageState.json | pbcopy`)
-
-After landing, the workflow runs on every PR to `main` and nightly at 03:17 UTC.
+- `TRELLO_STORAGE_STATE_B64` — base64 of local `storageState.json` (`base64 -i storageState.json | pbcopy`). Regenerate when Trello cookies expire (~30 days) — re-run `npm run auth`, then update this secret.
 
 ### 5. Post-launch operations
 
@@ -83,7 +65,8 @@ After landing, the workflow runs on every PR to `main` and nightly at 03:17 UTC.
 
 ## 🔵 Known limitations to keep on the public roadmap
 
-- Embedded images may drift from their original Excel position (more visible on non-first sheets of multi-sheet workbooks; can also affect the first sheet on files with custom column widths or row heights).
+- Embedded image positions may not match the original Excel layout exactly (drift, more visible on non-first sheets or on files with custom column widths/row heights).
+- Charts and graphs are not rendered — only cell data. Files with embedded charts have not been tested.
 - Cell styling (bold, italic, font colors, background fills) is not rendered.
 - Old `.xls` (BIFF binary) format renders without embedded images.
 - Preview is capped at 25 MB (file-size proxy guard).

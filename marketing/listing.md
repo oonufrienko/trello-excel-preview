@@ -104,7 +104,8 @@ Capture from production (`https://trello-excel-preview.vercel.app`) once the Mar
 
 ## Known limitations to disclose (optional, but honest)
 
-- Embedded images may drift from their original Excel position. More visible on non-first sheets of multi-sheet workbooks; can also affect the first sheet on files with custom column widths or row heights.
+- Embedded image positions may not match the original Excel layout exactly. Images can drift, more visibly on non-first sheets of multi-sheet workbooks or on files with custom column widths or row heights.
+- Charts and graphs are not rendered — only cell data. Files with embedded charts have not been tested and chart objects will not appear in the preview.
 - Cell styling (bold, italic, font colors, background fills) is not rendered.
 - Files larger than 25 MB are blocked from preview (use Download).
 - Old `.xls` binary format renders without embedded images.
