@@ -20,6 +20,7 @@
     "bundle-vendor": "esbuild node_modules/xlsx-calc/src/index.js --bundle --format=iife --global-name=XLSX_CALC --minify --banner:js=\"/* xlsx-calc bundled for browser via esbuild. License: MIT (https://github.com/fabiooshiro/xlsx-calc) */\" --outfile=js/xlsx-calc.bundle.js",
     "generate-fixtures": "node tests/generate-fixtures.mjs",
     "seed-board": "node tests/setup/seed-board.mjs",
+    "unseed-real": "node tests/setup/unseed-real.mjs",
     "test:e2e": "playwright test",
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:ui": "playwright test --ui"
