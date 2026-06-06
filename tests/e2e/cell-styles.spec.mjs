@@ -30,7 +30,8 @@ test(`Cell styles: ${STYLED_FIXTURE} renders bold + filled cells`, async ({ page
   // both counts were 0 because the td[data-r] selector matched nothing.
   const counts = await modal.locator('table').first().evaluate((table) => {
     let bold = 0, filled = 0;
-    for (const td of table.querySelectorAll('td[id^="sjs-"]')) {
+    // sheet_to_html tags cells id="excel-table-A1"; address is the suffix.
+    for (const td of table.querySelectorAll('td[id]')) {
       const w = td.style.fontWeight;
       if (w === '700' || w === 'bold') bold++;
       if (td.style.backgroundColor) filled++;

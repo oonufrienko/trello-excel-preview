@@ -643,14 +643,18 @@ function trimSheetRange(sheet) {
 
 // ── Cell styling: bold/italic/color/fill/alignment ───────────────────────
 // SheetJS sheet_to_html strips formatting — we re-apply it from the
-// styles map built by parseStyles(). It tags each td with id="sjs-A1"
-// (cell address after the "sjs-" prefix), which we use to look up the
-// source cell. We set individual style properties (not cssText) so the
-// CSS rule for data-t="n" nowrap is preserved.
+// styles map built by parseStyles(). It tags each td with id="<prefix>-A1"
+// where <prefix> is the `id` option we pass to sheet_to_html (here
+// "excel-table", so cells are "excel-table-A1"). The cell address is the
+// suffix after the last "-" (addresses like A1 / B12 never contain "-").
+// We set individual style properties (not cssText) so the CSS rule for
+// data-t="n" nowrap is preserved.
 function applyCellStyles(table, sheetStyles) {
   if (!sheetStyles) return;
-  for (const td of table.querySelectorAll('td[id^="sjs-"]')) {
-    const s = sheetStyles[td.id.slice(4)];
+  for (const td of table.querySelectorAll('td[id]')) {
+    const dash = td.id.lastIndexOf('-');
+    if (dash < 0) continue;
+    const s = sheetStyles[td.id.slice(dash + 1)];
     if (!s) continue;
 
     if (s.font) {
