@@ -20,21 +20,21 @@ Set up free external uptime monitoring so production downtime triggers an email 
 
 `/api/health` returns `{"status":"ok","version":...}` with HTTP 200 (verified 2026-05-29). Note `uptimeSeconds` resets to 0 on Vercel cold-starts — monitor on HTTP status + the `status:ok` keyword, not on uptime value.
 
-## Cell styles (bold / italic / colors / fills) — SHIPPED BROKEN (2026-05-27)
+## Cell styles (bold / italic / colors / fills) — FIXED (2026-06-06)
 
-A first cut shipped on `feature/cell-styles` (merged into main 2026-05-27). It works on ExcelJS-generated workbooks (Node sanity test passed) but **not on real Excel/LibreOffice files** — visual check on user's quarterly report showed neither bold headers nor yellow fills. The broken parser is *inert* (returns empty styles map → applyCellStyles no-op → same rendering as before the feature), so no rollback was done.
+Shipped working on `fix/cell-styles-v2` (merged into main `621ac60`, deployed to production, user-verified on real files hr_budget.xlsx / sales_report.xlsx).
 
-Bugs in `parseStyles()` to fix in follow-up branch (`feature/cell-styles-v2`):
+**The real root cause was none of the originally-suspected OOXML issues** (xfId chain / theme / indexed colors). `parseStyles()` extracted styles correctly all along (proven in Node: 204 styled cells across 3 sheets). The bug was the **selector in `applyCellStyles()`** — it never matched the rendered cells:
 
-1. **Missing `xfId` chain traversal.** OOXML has two xf arrays: `cellStyleXfs` (named master styles) and `cellXfs` (per-cell). Real Excel often writes named-style cells where `cellXfs[N]` only carries an `xfId` pointer into `cellStyleXfs`. Need to resolve the chain and honor `applyFont` / `applyFill` / `applyAlignment` override flags.
+1. First it queried `td[data-r]` — SheetJS `sheet_to_html` never emits `data-r`.
+2. Then `td[id^="sjs-"]` — but `switchSheet` calls `sheet_to_html(sheet, { id: 'excel-table' })`, and that `id` option becomes the cell-id **prefix**, so cells are `id="excel-table-A1"`, not `sjs-A1`.
+3. Final fix: read the address as the **suffix after the last `-`** (addresses like `A1`/`B12` never contain `-`) — prefix-agnostic, works regardless of the `sheet_to_html` id option.
 
-2. **Boolean parsing.** `<b/>` and `<b val="1"/>` mean true; `<b val="0"/>` means false. Current code treats all three as true. Same for `<i>`, `<u>`, `<strike>`. Fix: `el && el.getAttribute('val') !== '0'`.
+Also fixed: boolean font props now honor `<b val="0"/>` / `<b val="false"/>` as false (LibreOffice emits explicit-false forms).
 
-3. **Theme colors.** `<color theme="N"/>` is common. Resolving needs to parse `xl/theme/theme1.xml` and map theme index → hex. ~30 lines of optional work.
+Regression coverage: real fixtures in `tests/fixtures/real/` (gitignored), `tests/e2e/cell-styles.spec.mjs`, and `npm run unseed-real` to clean private fixture cards off the shared test board.
 
-4. **Indexed colors.** `<color indexed="N"/>` — legacy 64-color palette. Hardcode the first 16 colors as a lookup.
-
-Estimate: 150–250 lines. Add a real-Excel fixture (or a redacted copy of the user's quarterly report) for regression coverage.
+**Still not resolved (real future limitation, not hit by our test files):** theme colors (`<color theme="N"/>`) and indexed colors (`<color indexed="N"/>`) are not resolved — only `rgb=` colors render. Files relying on theme/indexed palettes will show those cells uncolored. Fixing needs parsing `xl/theme/theme1.xml` (theme) and a hardcoded 64-color palette (indexed). Pick up only if a real file needs it.
 
 ## Formula calculation — DONE (2026-05-26)
 
