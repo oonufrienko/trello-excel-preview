@@ -4,21 +4,15 @@ Items here are non-blocking experiments. Each one is its own branch when picked 
 
 ## Post-launch operations
 
-### UptimeRobot monitoring on /api/health — TODO
+### UptimeRobot monitoring on /api/health — DONE (2026-06-06)
 
-Set up free external uptime monitoring so production downtime triggers an email alert.
+External uptime monitoring is live: UptimeRobot pings
+`https://trello-excel-preview.vercel.app/api/health` every 5 min and emails
+`onufrienko.alex@gmail.com` if production goes down.
 
-1. Sign up / log in at https://uptimerobot.com (free tier: 50 monitors, 5-min interval).
-2. **+ Add New Monitor**:
-   - Monitor Type: **HTTP(s)**
-   - Friendly Name: `Excel Viewer — health`
-   - URL: `https://trello-excel-preview.vercel.app/api/health`
-   - Monitoring Interval: **5 minutes**
-3. (Recommended) Advanced → **Keyword monitoring**: type **exists**, keyword `"status":"ok"` — alerts on broken body, not just 5xx.
-4. **Alert Contacts**: enable email `onufrienko.alex@gmail.com`.
-5. Create Monitor.
-
-`/api/health` returns `{"status":"ok","version":...}` with HTTP 200 (verified 2026-05-29). Note `uptimeSeconds` resets to 0 on Vercel cold-starts — monitor on HTTP status + the `status:ok` keyword, not on uptime value.
+`/api/health` returns `{"status":"ok","version":...}` with HTTP 200. Note
+`uptimeSeconds` resets to 0 on Vercel cold-starts — the monitor watches HTTP
+status (+ optional `"status":"ok"` keyword), not the uptime value.
 
 ## Cell styles (bold / italic / colors / fills) — FIXED (2026-06-06)
 
