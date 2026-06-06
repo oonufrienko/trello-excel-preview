@@ -137,6 +137,13 @@ async function parseStyles(zip) {
   };
   const firstChild = (parent, tag) =>
     parent && parent.getElementsByTagName(tag)[0] || null;
+  // Boolean font props: <b/> and <b val="1"/> mean true; <b val="0"/>
+  // and <b val="false"/> mean explicit false (LibreOffice writes these).
+  const boolAttr = (el) => {
+    if (!el) return false;
+    const v = el.getAttribute('val');
+    return v !== '0' && v !== 'false';
+  };
   const colorOf = (el) => {
     if (!el) return null;
     const rgb = el.getAttribute('rgb');
@@ -149,10 +156,10 @@ async function parseStyles(zip) {
   if (!stylesDoc) return {};
 
   const rawFonts = childrenOfFirst(stylesDoc, 'fonts').map(fontEl => ({
-    bold: !!firstChild(fontEl, 'b'),
-    italic: !!firstChild(fontEl, 'i'),
-    underline: !!firstChild(fontEl, 'u'),
-    strike: !!firstChild(fontEl, 'strike'),
+    bold: boolAttr(firstChild(fontEl, 'b')),
+    italic: boolAttr(firstChild(fontEl, 'i')),
+    underline: boolAttr(firstChild(fontEl, 'u')),
+    strike: boolAttr(firstChild(fontEl, 'strike')),
     color: colorOf(firstChild(fontEl, 'color')),
     size: parseFloat(firstChild(fontEl, 'sz')?.getAttribute('val') || '0') || null,
   }));
@@ -636,13 +643,18 @@ function trimSheetRange(sheet) {
 
 // ── Cell styling: bold/italic/color/fill/alignment ───────────────────────
 // SheetJS sheet_to_html strips formatting — we re-apply it from the
-// styles map built by parseStyles(). data-r="A1" on each td lets us
-// look up the source cell. We set individual style properties (not
-// cssText) so the CSS rule for data-t="n" nowrap is preserved.
+// styles map built by parseStyles(). It tags each td with id="<prefix>-A1"
+// where <prefix> is the `id` option we pass to sheet_to_html (here
+// "excel-table", so cells are "excel-table-A1"). The cell address is the
+// suffix after the last "-" (addresses like A1 / B12 never contain "-").
+// We set individual style properties (not cssText) so the CSS rule for
+// data-t="n" nowrap is preserved.
 function applyCellStyles(table, sheetStyles) {
   if (!sheetStyles) return;
-  for (const td of table.querySelectorAll('td[data-r]')) {
-    const s = sheetStyles[td.getAttribute('data-r')];
+  for (const td of table.querySelectorAll('td[id]')) {
+    const dash = td.id.lastIndexOf('-');
+    if (dash < 0) continue;
+    const s = sheetStyles[td.id.slice(dash + 1)];
     if (!s) continue;
 
     if (s.font) {
