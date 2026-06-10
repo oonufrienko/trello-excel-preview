@@ -440,40 +440,120 @@ function buildCellGrid(table) {
   return grid;
 }
 
+// Build monotonic per-column-left and per-row-top pixel edges (relative to the
+// wrapper) from the laid-out grid. colEdges[c] is the left edge of logical
+// column c; colEdges[numCols] is the right edge of the last column. Same for
+// rowEdges with tops/bottom. Because each edge accumulates real cell sizes
+// column-by-column (row-by-row), the arrays are monotonically increasing —
+// merged cells cannot make a later column/row land before an earlier one.
+function buildGridEdges(grid, wrapperRect) {
+  const numRows = grid.length;
+  const numCols = grid.reduce((m, row) => Math.max(m, row ? row.length : 0), 0);
+
+  // Column left-edges: scan the first row, reading each distinct cell's rect.
+  // A merged cell spans multiple logical columns but reports one rect; we
+  // distribute its width evenly so every logical column gets an edge.
+  const colEdges = new Array(numCols + 1);
+  colEdges[0] = 0;
+  for (let c = 0; c < numCols; c++) {
+    let span = 1, w = 0;
+    for (let r = 0; r < numRows; r++) {
+      const cell = grid[r] && grid[r][c];
+      if (cell && (grid[r][c - 1] !== cell)) { // left edge of this cell in row r
+        const rect = cell.getBoundingClientRect();
+        let s = 1;
+        while (grid[r][c + s] === cell) s++;
+        span = s;
+        w = rect.width / s;
+        break;
+      }
+    }
+    colEdges[c + 1] = colEdges[c] + (w || 0);
+    // skip the columns covered by a horizontal merge — they share the edge step
+    for (let k = 1; k < span && c + 1 < numCols; k++) {
+      colEdges[c + 2] = colEdges[c + 1] + w;
+      c++;
+    }
+  }
+
+  const rowEdges = new Array(numRows + 1);
+  rowEdges[0] = 0;
+  for (let r = 0; r < numRows; r++) {
+    let span = 1, h = 0;
+    const row = grid[r] || [];
+    for (let c = 0; c < numCols; c++) {
+      const cell = row[c];
+      if (cell && (!(grid[r - 1] && grid[r - 1][c] === cell))) { // top edge in col c
+        const rect = cell.getBoundingClientRect();
+        let s = 1;
+        while (grid[r + s] && grid[r + s][c] === cell) s++;
+        span = s;
+        h = rect.height / s;
+        break;
+      }
+    }
+    rowEdges[r + 1] = rowEdges[r] + (h || 0);
+    for (let k = 1; k < span && r + 1 < numRows; k++) {
+      rowEdges[r + 2] = rowEdges[r + 1] + h;
+      r++;
+    }
+  }
+
+  return { colEdges, rowEdges, numRows, numCols };
+}
+
 function positionImages(wrapper, table, anchors, rangeStart) {
   const grid = buildCellGrid(table);
   const wrapperRect = wrapper.getBoundingClientRect();
+  const { colEdges, rowEdges, numRows, numCols } = buildGridEdges(grid, wrapperRect);
 
-  anchors.forEach(a => {
-    const fromR = a.from.row - rangeStart.r;
+  const clamp = (v, max) => v < 0 ? 0 : (v > max ? max : v);
+  const colX = (c, off) => colEdges[clamp(c, numCols)] + (off || 0) / EMU_PER_PX;
+  const rowY = (r, off) => rowEdges[clamp(r, numRows)] + (off || 0) / EMU_PER_PX;
+  // Average cell sizes — used to size anchors whose row/col span lies entirely
+  // in the empty top rows trimSheetRange removed.
+  const avgRowH = numRows ? rowEdges[numRows] / numRows : 18;
+  const avgColW = numCols ? colEdges[numCols] / numCols : 64;
+
+  // Compute each anchor's geometry up front. Anchors whose whole row span sits
+  // in the trimmed-away top rows (to.row <= rangeStart.r) belong ABOVE the
+  // table — header logos. We reserve a band above the table for them so they
+  // don't overlap the first visible row.
+  const placed = anchors.map(a => {
     const fromC = a.from.col - rangeStart.c;
-    if (fromR < 0 || fromC < 0) return;
+    const toR = a.type === 'two' ? a.to.row - rangeStart.r : null;
+    const toC = a.type === 'two' ? a.to.col - rangeStart.c : null;
+    const aboveTable = a.type === 'two' && toR <= 0; // entire row span trimmed
 
-    const fromCell = grid[fromR] && grid[fromR][fromC];
-    if (!fromCell) return;
-
-    const fromRect = fromCell.getBoundingClientRect();
-    const left = fromRect.left - wrapperRect.left + (a.from.colOff || 0) / EMU_PER_PX;
-    const top  = fromRect.top  - wrapperRect.top  + (a.from.rowOff || 0) / EMU_PER_PX;
-
+    const left = colX(fromC, a.from.colOff);
     let width, height;
     if (a.type === 'two') {
-      const toR = a.to.row - rangeStart.r;
-      const toC = a.to.col - rangeStart.c;
-      const toCell = grid[toR] && grid[toR][toC];
-      if (toCell) {
-        const toRect = toCell.getBoundingClientRect();
-        width  = (toRect.left - wrapperRect.left + (a.to.colOff || 0) / EMU_PER_PX) - left;
-        height = (toRect.top  - wrapperRect.top  + (a.to.rowOff || 0) / EMU_PER_PX) - top;
-      } else {
-        width  = fromRect.width * 3;
-        height = fromRect.height * 3;
-      }
+      width  = colX(toC, a.to.colOff) - left;
+      height = rowY(toR, a.to.rowOff) - rowY(a.from.row - rangeStart.r, a.from.rowOff);
+      if (toC <= 0) width  = Math.max(width,  (a.to.col - a.from.col) * avgColW);
+      if (aboveTable) height = Math.max(0, (a.to.row - a.from.row) * avgRowH);
     } else {
       width  = a.ext.cx / EMU_PER_PX;
       height = a.ext.cy / EMU_PER_PX;
     }
-    if (width <= 0 || height <= 0) return;
+    return { a, left, width, height, aboveTable };
+  }).filter(p => p.width > 0 && p.height > 0);
+
+  // Reserve a top band tall enough for the tallest header logo, and push the
+  // table down by that much so logos sit in the header instead of over data.
+  // Use padding-top on the wrapper (not margin-top on the table) so the gap
+  // can't collapse out of the wrapper; absolute images are positioned from the
+  // wrapper's border-box, so top:0 is the very top of the reserved band.
+  const bandH = placed.reduce((m, p) => p.aboveTable ? Math.max(m, p.height) : m, 0);
+  if (bandH > 0) wrapper.style.paddingTop = bandH + 'px';
+
+  placed.forEach(({ a, left, width, height, aboveTable }) => {
+    // Header logos: bottom-align inside the reserved band (so a logo anchored
+    // near the table top stays just above the first row). In-table images: top
+    // is the grid row edge, shifted down by the reserved band.
+    const top = aboveTable
+      ? Math.max(0, bandH - height)
+      : bandH + rowY(a.from.row - rangeStart.r, a.from.rowOff);
 
     const img = document.createElement('img');
     img.src = a.blobUrl;
