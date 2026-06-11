@@ -626,6 +626,13 @@ function positionImages(wrapper, table, anchors, rangeStart) {
         // aligned so the unrotated box + CSS rotation lands where Excel draws
         left = boxLeft + (boxW - width) / 2;
         top = boxTop + (boxH - height) / 2;
+      } else if (!aboveTable && boxW > 0 && boxH > 0) {
+        // Our text rows are shorter than Excel's, so the intrinsic size can
+        // spill onto the rows below the anchor. Shrink (never grow) to the
+        // anchor box, keeping proportions.
+        const scale = Math.min(1, boxW / width, boxH / height);
+        width *= scale;
+        height *= scale;
       }
     }
     return { a, left, top, width, height, aboveTable };
