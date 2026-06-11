@@ -366,47 +366,114 @@ async function parseAnchors(zip) {
 
     const root = drawingDoc.documentElement;
 
-    // Build both anchor sets in parallel. Each blob extraction is a
-    // JSZip decompression — serial awaits were the bottleneck for
-    // workbooks with many images.
-    const twoCellPromises = findDirects(root, 'twoCellAnchor').map(async (aEl) => {
-      const fromEl = findDirect(aEl, 'from');
-      const toEl = findDirect(aEl, 'to');
-      const blipEl = findDeep(aEl, 'blip');
-      if (!fromEl || !toEl || !blipEl) return null;
+    const attrInt = (el, name) => el ? (parseInt(el.getAttribute(name), 10) || 0) : 0;
+
+    // Per-pic shape transform from xdr:pic/xdr:spPr/a:xfrm: rotation
+    // (1/60000 deg → deg), flips, intrinsic size (EMU) and position (needed
+    // only for pics inside groups, in the group's child coordinate space).
+    const readXfrm = (picEl) => {
+      const spPr = findDirect(picEl, 'spPr');
+      const xfrm = spPr ? findDirect(spPr, 'xfrm') : null;
+      const off = xfrm ? findDirect(xfrm, 'off') : null;
+      const ext = xfrm ? findDirect(xfrm, 'ext') : null;
+      return {
+        rot: xfrm ? (parseInt(xfrm.getAttribute('rot'), 10) || 0) / 60000 : 0,
+        flipH: !!xfrm && xfrm.getAttribute('flipH') === '1',
+        flipV: !!xfrm && xfrm.getAttribute('flipV') === '1',
+        cx: attrInt(ext, 'cx'), cy: attrInt(ext, 'cy'),
+        offX: attrInt(off, 'x'), offY: attrInt(off, 'y')
+      };
+    };
+
+    // Collect every pic under an anchor, descending into grpSp groups. A pic
+    // inside a group gets `box` — the group's fraction of the anchor box plus
+    // its child coordinate space (chOff/chExt) — so the pic's own xfrm can be
+    // mapped to a fractional sub-box of the anchor later.
+    const collectPics = (anchorEl) => {
+      const pics = [];
+      const walk = (el, box) => {
+        for (const child of el.children) {
+          if (child.localName === 'pic') {
+            pics.push({ picEl: child, box });
+          } else if (child.localName === 'grpSp') {
+            const grpPr = findDirect(child, 'grpSpPr');
+            const xfrm = grpPr ? findDirect(grpPr, 'xfrm') : null;
+            if (!xfrm) continue;
+            const chOff = findDirect(xfrm, 'chOff');
+            const chExt = findDirect(xfrm, 'chExt');
+            const sub = {
+              x: 0, y: 0, w: 1, h: 1,
+              cx0: attrInt(chOff, 'x'), cy0: attrInt(chOff, 'y'),
+              cw: attrInt(chExt, 'cx') || 1, ch: attrInt(chExt, 'cy') || 1
+            };
+            if (box) { // nested group: its off/ext live in the parent's child space
+              const off = findDirect(xfrm, 'off');
+              const ext = findDirect(xfrm, 'ext');
+              sub.x = box.x + (attrInt(off, 'x') - box.cx0) / box.cw * box.w;
+              sub.y = box.y + (attrInt(off, 'y') - box.cy0) / box.ch * box.h;
+              sub.w = attrInt(ext, 'cx') / box.cw * box.w;
+              sub.h = attrInt(ext, 'cy') / box.ch * box.h;
+            }
+            walk(child, sub);
+          }
+        }
+      };
+      walk(anchorEl, null);
+      return pics;
+    };
+
+    // One output entry per pic (an anchor with a group yields several).
+    // Media that exists but the browser can't decode (e.g. WMF) becomes a
+    // placeholder entry, so the user still sees the image's place and size.
+    const buildEntries = (aEl, base) => collectPics(aEl).map(async ({ picEl, box }) => {
+      const blipEl = findDeep(picEl, 'blip');
+      if (!blipEl) return null;
       const imgRId = getREmbed(blipEl);
       if (!imgRId || !drawingRels[imgRId]) return null;
       const imgPath = resolvePath(drawingPath, drawingRels[imgRId]);
+      const x = readXfrm(picEl);
+      const entry = { ...base, rot: x.rot, flipH: x.flipH, flipV: x.flipV, cx: x.cx, cy: x.cy };
+      if (box) {
+        entry.rel = {
+          x: box.x + (x.offX - box.cx0) / box.cw * box.w,
+          y: box.y + (x.offY - box.cy0) / box.ch * box.h,
+          w: x.cx / box.cw * box.w,
+          h: x.cy / box.ch * box.h
+        };
+      }
       const blobUrl = await getBlobUrl(imgPath);
-      if (!blobUrl) return null;
-      return {
+      if (blobUrl) return { ...entry, blobUrl };
+      if (zip.files[imgPath]) return { ...entry, placeholder: imgPath.split('.').pop().toUpperCase() };
+      return null;
+    });
+
+    // Build both anchor sets in parallel. Each blob extraction is a
+    // JSZip decompression — serial awaits were the bottleneck for
+    // workbooks with many images.
+    const twoCellPromises = findDirects(root, 'twoCellAnchor').flatMap((aEl) => {
+      const fromEl = findDirect(aEl, 'from');
+      const toEl = findDirect(aEl, 'to');
+      if (!fromEl || !toEl) return [];
+      return buildEntries(aEl, {
         type: 'two',
         from: { col: intOf(fromEl, 'col'), row: intOf(fromEl, 'row'),
                 colOff: intOf(fromEl, 'colOff'), rowOff: intOf(fromEl, 'rowOff') },
         to:   { col: intOf(toEl, 'col'),   row: intOf(toEl, 'row'),
-                colOff: intOf(toEl, 'colOff'),   rowOff: intOf(toEl, 'rowOff') },
-        blobUrl
-      };
+                colOff: intOf(toEl, 'colOff'),   rowOff: intOf(toEl, 'rowOff') }
+      });
     });
 
-    const oneCellPromises = findDirects(root, 'oneCellAnchor').map(async (aEl) => {
+    const oneCellPromises = findDirects(root, 'oneCellAnchor').flatMap((aEl) => {
       const fromEl = findDirect(aEl, 'from');
       const extEl = findDirect(aEl, 'ext');
-      const blipEl = findDeep(aEl, 'blip');
-      if (!fromEl || !extEl || !blipEl) return null;
-      const imgRId = getREmbed(blipEl);
-      if (!imgRId || !drawingRels[imgRId]) return null;
-      const imgPath = resolvePath(drawingPath, drawingRels[imgRId]);
-      const blobUrl = await getBlobUrl(imgPath);
-      if (!blobUrl) return null;
-      return {
+      if (!fromEl || !extEl) return [];
+      return buildEntries(aEl, {
         type: 'one',
         from: { col: intOf(fromEl, 'col'), row: intOf(fromEl, 'row'),
                 colOff: intOf(fromEl, 'colOff'), rowOff: intOf(fromEl, 'rowOff') },
         ext: { cx: parseInt(extEl.getAttribute('cx'), 10) || 0,
-               cy: parseInt(extEl.getAttribute('cy'), 10) || 0 },
-        blobUrl
-      };
+               cy: parseInt(extEl.getAttribute('cy'), 10) || 0 }
+      });
     });
 
     const anchors = (await Promise.all([...twoCellPromises, ...oneCellPromises]))
@@ -521,22 +588,47 @@ function positionImages(wrapper, table, anchors, rangeStart) {
   // don't overlap the first visible row.
   const placed = anchors.map(a => {
     const fromC = a.from.col - rangeStart.c;
+    const fromR = a.from.row - rangeStart.r;
     const toR = a.type === 'two' ? a.to.row - rangeStart.r : null;
     const toC = a.type === 'two' ? a.to.col - rangeStart.c : null;
     const aboveTable = a.type === 'two' && toR <= 0; // entire row span trimmed
 
-    const left = colX(fromC, a.from.colOff);
-    let width, height;
+    // The anchor box as laid out in OUR grid.
+    const boxLeft = colX(fromC, a.from.colOff);
+    const boxTop = rowY(fromR, a.from.rowOff);
+    let boxW, boxH;
     if (a.type === 'two') {
-      width  = colX(toC, a.to.colOff) - left;
-      height = rowY(toR, a.to.rowOff) - rowY(a.from.row - rangeStart.r, a.from.rowOff);
-      if (toC <= 0) width  = Math.max(width,  (a.to.col - a.from.col) * avgColW);
-      if (aboveTable) height = Math.max(0, (a.to.row - a.from.row) * avgRowH);
+      boxW = colX(toC, a.to.colOff) - boxLeft;
+      boxH = rowY(toR, a.to.rowOff) - boxTop;
+      if (toC <= 0) boxW = Math.max(boxW, (a.to.col - a.from.col) * avgColW);
+      if (aboveTable) boxH = Math.max(0, (a.to.row - a.from.row) * avgRowH);
     } else {
-      width  = a.ext.cx / EMU_PER_PX;
-      height = a.ext.cy / EMU_PER_PX;
+      boxW = a.ext.cx / EMU_PER_PX;
+      boxH = a.ext.cy / EMU_PER_PX;
     }
-    return { a, left, width, height, aboveTable };
+
+    let left = boxLeft, top = boxTop, width = boxW, height = boxH;
+    if (a.rel) {
+      // group child: fractional sub-box of the anchor box
+      left = boxLeft + a.rel.x * boxW;
+      top = boxTop + a.rel.y * boxH;
+      width = a.rel.w * boxW;
+      height = a.rel.h * boxH;
+    } else if (a.type === 'two' && a.cx > 0 && a.cy > 0) {
+      // Size from the pic's own xfrm: our grid's column widths differ from
+      // Excel's, so stretching from→to distorts (and editAs="oneCell" anchors
+      // must not scale with cells at all). The intrinsic EMU size is what
+      // Excel actually shows.
+      width = a.cx / EMU_PER_PX;
+      height = a.cy / EMU_PER_PX;
+      if (a.rot) {
+        // rotated: the anchor box is the rotated bounding box — keep centers
+        // aligned so the unrotated box + CSS rotation lands where Excel draws
+        left = boxLeft + (boxW - width) / 2;
+        top = boxTop + (boxH - height) / 2;
+      }
+    }
+    return { a, left, top, width, height, aboveTable };
   }).filter(p => p.width > 0 && p.height > 0);
 
   // Reserve a top band tall enough for the tallest header logo, and push the
@@ -547,22 +639,30 @@ function positionImages(wrapper, table, anchors, rangeStart) {
   const bandH = placed.reduce((m, p) => p.aboveTable ? Math.max(m, p.height) : m, 0);
   if (bandH > 0) wrapper.style.paddingTop = bandH + 'px';
 
-  placed.forEach(({ a, left, width, height, aboveTable }) => {
+  placed.forEach(({ a, left, top, width, height, aboveTable }) => {
     // Header logos: bottom-align inside the reserved band (so a logo anchored
     // near the table top stays just above the first row). In-table images: top
     // is the grid row edge, shifted down by the reserved band.
-    const top = aboveTable
-      ? Math.max(0, bandH - height)
-      : bandH + rowY(a.from.row - rangeStart.r, a.from.rowOff);
+    const finalTop = aboveTable ? Math.max(0, bandH - height) : bandH + top;
 
-    const img = document.createElement('img');
-    img.src = a.blobUrl;
-    img.className = 'embedded-img';
-    img.style.left = left + 'px';
-    img.style.top = top + 'px';
-    img.style.width = width + 'px';
-    img.style.height = height + 'px';
-    wrapper.appendChild(img);
+    const el = document.createElement(a.placeholder ? 'div' : 'img');
+    el.className = 'embedded-img';
+    if (a.placeholder) {
+      el.classList.add('embedded-img-missing');
+      el.textContent = a.placeholder; // e.g. "WMF" — format we can't decode
+    } else {
+      el.src = a.blobUrl;
+    }
+    el.style.left = left + 'px';
+    el.style.top = finalTop + 'px';
+    el.style.width = width + 'px';
+    el.style.height = height + 'px';
+    const t = [];
+    if (a.rot) t.push(`rotate(${a.rot}deg)`);
+    if (a.flipH) t.push('scaleX(-1)');
+    if (a.flipV) t.push('scaleY(-1)');
+    if (t.length) el.style.transform = t.join(' ');
+    wrapper.appendChild(el);
   });
 }
 
