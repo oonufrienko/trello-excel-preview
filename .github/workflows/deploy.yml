@@ -1,0 +1,102 @@
+name: deploy
+
+# CD: на кожен push у main зібрати ПРОДОВИЙ білд без перемикання домену
+# (vercel --prod --skip-domain), прогнати ПОВНИЙ e2e-сьют саме проти цього
+# білда (PREVIEW_HOST прозоро переписує прод-хост на нього), і тільки якщо
+# все зелене — промоутнути перевірений деплой на production-домен.
+# Тести гейтують рівно той артефакт, який поїде користувачам.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+concurrency:
+  group: prod-deploy
+  cancel-in-progress: false
+
+env:
+  # Ідентифікатори проєкту (не секрети) — дозволяють vercel CLI працювати
+  # без локальної папки .vercel/.
+  VERCEL_ORG_ID: team_i8VbzTWKRuzPhOtsS49yRAgi
+  VERCEL_PROJECT_ID: prj_Ie3XBspzfh7eMheHHxTu6fx3frhV
+
+jobs:
+  test-and-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Restore storageState.json
+        run: |
+          echo "$TRELLO_STORAGE_STATE_B64" | base64 -d > ./storageState.json
+          test -s ./storageState.json
+        env:
+          TRELLO_STORAGE_STATE_B64: ${{ secrets.TRELLO_STORAGE_STATE_B64 }}
+
+      - name: Stage production build (no domain switch)
+        id: stage
+        run: |
+          url=$(npx vercel@54.11.1 deploy --prod --skip-domain --yes --token "$VERCEL_TOKEN")
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          echo "Staged: $url"
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+
+      - name: Generate synthetic fixtures
+        run: npm run generate-fixtures
+
+      - name: Seed test board
+        run: npm run seed-board
+        env:
+          TRELLO_API_KEY: ${{ secrets.TRELLO_API_KEY }}
+          TRELLO_USER_TOKEN: ${{ secrets.TRELLO_USER_TOKEN }}
+          TRELLO_TEST_BOARD_ID: ${{ secrets.TRELLO_TEST_BOARD_ID }}
+
+      - name: Run full e2e against the staged build
+        run: |
+          host="${{ steps.stage.outputs.url }}"
+          PREVIEW_HOST="${host#https://}" npx playwright test
+        env:
+          TRELLO_API_KEY: ${{ secrets.TRELLO_API_KEY }}
+          TRELLO_USER_TOKEN: ${{ secrets.TRELLO_USER_TOKEN }}
+          TRELLO_TEST_BOARD_ID: ${{ secrets.TRELLO_TEST_BOARD_ID }}
+
+      - name: Promote the tested build to production
+        run: npx vercel@54.11.1 promote "${{ steps.stage.outputs.url }}" --yes --token "$VERCEL_TOKEN"
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+
+      - name: Verify production
+        run: |
+          sleep 10
+          curl -sf https://trello-excel-preview.vercel.app/api/health
+          echo
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-deploy
+          path: playwright-report/
+          retention-days: 14

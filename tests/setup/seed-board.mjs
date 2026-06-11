@@ -73,11 +73,10 @@ async function uploadAttachment(cardId, filePath) {
   return res.json();
 }
 
-async function attachmentExists(cardId, attachmentId) {
+async function getAttachment(cardId, attachmentId) {
   try {
-    await trello('GET', `/cards/${cardId}/attachments/${attachmentId}`);
-    return true;
-  } catch { return false; }
+    return await trello('GET', `/cards/${cardId}/attachments/${attachmentId}`);
+  } catch { return null; }
 }
 
 async function loadIdsFile() {
@@ -122,9 +121,19 @@ async function main() {
     const card = await findOrCreateCard(list.id, cardName);
 
     const cached = ids[fx.file];
-    if (cached && cached.cardId === card.id && await attachmentExists(card.id, cached.attachmentId)) {
-      console.log(`  ✓ ${fx.file} (cached)`);
-      continue;
+    if (cached && cached.cardId === card.id) {
+      const att = await getAttachment(card.id, cached.attachmentId);
+      if (att) {
+        // A failed rename.spec run can leave the attachment as "renamed-*";
+        // restore the canonical name so the suite starts from a clean state.
+        if (att.name !== fx.file) {
+          await trello('PUT', `/cards/${card.id}/attachments/${cached.attachmentId}`, { name: fx.file });
+          console.log(`  ✓ ${fx.file} (name restored from "${att.name}")`);
+        } else {
+          console.log(`  ✓ ${fx.file} (cached)`);
+        }
+        continue;
+      }
     }
 
     // No valid cache (e.g. CI, where .attachment-ids.json is gitignored).
