@@ -183,6 +183,34 @@ async function formulasNoCache() {
   await wb.xlsx.writeFile(join(OUT_DIR, 'formulas-no-cache.xlsx'));
 }
 
+// Fills/fonts referencing theme-palette colors (theme= + tint= instead of
+// rgb=) — Excel's default color picker writes these. Regression for the
+// colorOf() theme resolution in preview.js. B2 keeps a direct ARGB fill so
+// the rgb path is covered by the same fixture.
+async function themeColorsFixture() {
+  const wb = new ExcelJS.Workbook();
+  const ws = wb.addWorksheet('Styles');
+  ws.getColumn(1).width = 24;
+  ws.getColumn(2).width = 16;
+  const solid = (fgColor) => ({ type: 'pattern', pattern: 'solid', fgColor });
+  ws.getCell('A1').value = 'Заголовок';
+  ws.getCell('A1').font = { bold: true, color: { theme: 1 } };
+  ws.getCell('A1').fill = solid({ theme: 8, tint: 0.4 });   // accent5 40% lighter
+  ws.getCell('B1').value = 'Сума';
+  ws.getCell('B1').fill = solid({ theme: 8, tint: 0.4 });
+  ws.getCell('A2').value = 'Сірий рядок';
+  ws.getCell('A2').fill = solid({ theme: 0, tint: -0.15 }); // white 15% darker
+  ws.getCell('B2').value = 123;
+  ws.getCell('B2').fill = solid({ argb: 'FFFFC000' });
+  ws.getCell('A3').value = 'Акцентний текст';
+  ws.getCell('A3').font = { color: { theme: 5 } };          // accent2, no tint
+  for (let r = 4; r <= 8; r++) {
+    ws.getCell(`A${r}`).value = `Рядок ${r}`;
+    ws.getCell(`B${r}`).value = r * 10;
+  }
+  await wb.xlsx.writeFile(join(OUT_DIR, 'theme-colors.xlsx'));
+}
+
 async function csvFile() {
   const lines = ['name,qty'];
   for (let i = 1; i <= 30; i++) lines.push(`Product ${i},${i * 5}`);
@@ -197,6 +225,7 @@ async function main() {
   await multiSheetWithImages(); console.log('  with-images-multi.xlsx');
   await twoCellAnchorImage();   console.log('  two-cell-anchor.xlsx');
   await formulasNoCache();      console.log('  formulas-no-cache.xlsx');
+  await themeColorsFixture();   console.log('  theme-colors.xlsx');
   await oversizedDim();         console.log('  oversized-dim.xlsx');
   await large5mb();             console.log('  large-5mb.xlsx');
   await csvFile();              console.log('  data.csv');

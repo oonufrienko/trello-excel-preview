@@ -77,6 +77,13 @@ async function loadPreview() {
       // italic/color come from parseStyles via JSZip — community
       // SheetJS doesn't expose them in cell.s.)
       workbook = XLSX.read(buffer, { type: 'array', sheetStubs: true });
+      // Old BIFF .xls files saved without a CODEPAGE record decode with the
+      // cp1252 default, so Cyrillic text surfaces as dense U+00C0–U+00FF
+      // mojibake ("Ïîñòà÷àëüíèê"). Detect that signature and re-read as
+      // cp1251 (the Windows-Cyrillic codepage such files actually use).
+      if (ext === 'xls' && looksLikeCp1251Mojibake(workbook)) {
+        workbook = XLSX.read(buffer, { type: 'array', sheetStubs: true, codepage: 1251 });
+      }
       if (workbookHasUncomputedFormulas(workbook)) {
         try {
           await loadXlsxCalc();
@@ -144,16 +151,89 @@ async function parseStyles(zip) {
     const v = el.getAttribute('val');
     return v !== '0' && v !== 'false';
   };
-  const colorOf = (el) => {
-    if (!el) return null;
-    const rgb = el.getAttribute('rgb');
-    if (!rgb) return null;
-    // strip alpha byte if present (ARGB → RGB)
-    return (rgb.length === 8 ? rgb.slice(2) : rgb).toUpperCase();
+  // Apply an ECMA-376 tint to a RRGGBB hex color: shift the HSL luminance
+  // (tint > 0 lightens toward white, tint < 0 darkens toward black). This
+  // matches how Excel renders theme-palette colors.
+  const applyTint = (hex, tint) => {
+    const r = parseInt(hex.slice(0, 2), 16) / 255;
+    const g = parseInt(hex.slice(2, 4), 16) / 255;
+    const b = parseInt(hex.slice(4, 6), 16) / 255;
+    const max = Math.max(r, g, b), min = Math.min(r, g, b);
+    let h = 0, s = 0, l = (max + min) / 2;
+    if (max !== min) {
+      const d = max - min;
+      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+      if (max === r) h = (g - b) / d + (g < b ? 6 : 0);
+      else if (max === g) h = (b - r) / d + 2;
+      else h = (r - g) / d + 4;
+      h /= 6;
+    }
+    l = tint < 0 ? l * (1 + tint) : l * (1 - tint) + tint;
+    let r2, g2, b2;
+    if (s === 0) {
+      r2 = g2 = b2 = l;
+    } else {
+      const hue = (p, q, t) => {
+        if (t < 0) t += 1;
+        if (t > 1) t -= 1;
+        if (t < 1 / 6) return p + (q - p) * 6 * t;
+        if (t < 1 / 2) return q;
+        if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+        return p;
+      };
+      const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+      const p = 2 * l - q;
+      r2 = hue(p, q, h + 1 / 3);
+      g2 = hue(p, q, h);
+      b2 = hue(p, q, h - 1 / 3);
+    }
+    const toHex = (v) => Math.round(v * 255).toString(16).padStart(2, '0').toUpperCase();
+    return toHex(r2) + toHex(g2) + toHex(b2);
+  };
+
+  // The `theme` attribute on <color>/<fgColor> indexes the theme's clrScheme
+  // with the dk/lt pairs swapped (Excel convention): 0=lt1, 1=dk1, 2=lt2,
+  // 3=dk2, 4..9=accent1..6, 10=hlink, 11=folHlink.
+  const THEME_SLOTS = ['lt1', 'dk1', 'lt2', 'dk2', 'accent1', 'accent2',
+                       'accent3', 'accent4', 'accent5', 'accent6', 'hlink', 'folHlink'];
+  const parseThemeColors = (themeDoc) => {
+    const scheme = themeDoc && themeDoc.getElementsByTagNameNS('*', 'clrScheme')[0];
+    if (!scheme) return [];
+    return THEME_SLOTS.map(name => {
+      const slot = scheme.getElementsByTagNameNS('*', name)[0];
+      if (!slot) return null;
+      const srgb = slot.getElementsByTagNameNS('*', 'srgbClr')[0];
+      if (srgb) return (srgb.getAttribute('val') || '').toUpperCase() || null;
+      const sys = slot.getElementsByTagNameNS('*', 'sysClr')[0];
+      return sys ? ((sys.getAttribute('lastClr') || '').toUpperCase() || null) : null;
+    });
   };
 
   const stylesDoc = await parseXml('xl/styles.xml');
   if (!stylesDoc) return {};
+
+  // Theme palette — Excel's default color picker writes theme+tint refs,
+  // not rgb, so without this most "normally" colored files lose all fills.
+  const themePath = zip.files['xl/theme/theme1.xml'] ? 'xl/theme/theme1.xml'
+    : Object.keys(zip.files).find(p => /^xl\/theme\/theme\d+\.xml$/.test(p));
+  const themeColors = parseThemeColors(themePath ? await parseXml(themePath) : null);
+
+  const colorOf = (el) => {
+    if (!el) return null;
+    const rgb = el.getAttribute('rgb');
+    // strip alpha byte if present (ARGB → RGB)
+    if (rgb) return (rgb.length === 8 ? rgb.slice(2) : rgb).toUpperCase();
+    const themeAttr = el.getAttribute('theme');
+    if (themeAttr === null) return null;
+    const idx = parseInt(themeAttr, 10);
+    const tint = parseFloat(el.getAttribute('tint') || '0') || 0;
+    // Untinted lt1/dk1 are the sheet's own background/text colors — return
+    // null so the page CSS (including dark mode) keeps control of them.
+    if (!tint && (idx === 0 || idx === 1)) return null;
+    const base = themeColors[idx];
+    if (!base) return null;
+    return tint ? applyTint(base, tint) : base;
+  };
 
   const rawFonts = childrenOfFirst(stylesDoc, 'fonts').map(fontEl => ({
     bold: boolAttr(firstChild(fontEl, 'b')),
@@ -727,6 +807,30 @@ function loadXlsxCalc() {
     document.head.appendChild(s);
   });
   return xlsxCalcLoading;
+}
+
+// Cp1251 text decoded as cp1252 lands almost entirely in U+00C0–U+00FF
+// ("Ïîñòà÷àëüíèê"); real Western European text uses that range sparsely.
+// A high density of such characters across the workbook's strings means the
+// file needs a cp1251 re-read.
+function looksLikeCp1251Mojibake(wb) {
+  let high = 0, total = 0;
+  for (const name of wb.SheetNames) {
+    const sheet = wb.Sheets[name];
+    if (!sheet) continue;
+    for (const key of Object.keys(sheet)) {
+      if (key[0] === '!') continue;
+      const v = sheet[key] && sheet[key].v;
+      if (typeof v !== 'string') continue;
+      for (let i = 0; i < v.length; i++) {
+        const c = v.charCodeAt(i);
+        if (c > 0x20) total++;
+        if (c >= 0xC0 && c <= 0xFF) high++;
+      }
+      if (total > 4000) return total > 20 && high / total > 0.4;
+    }
+  }
+  return total > 20 && high / total > 0.4;
 }
 
 function workbookHasUncomputedFormulas(wb) {

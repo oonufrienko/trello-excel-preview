@@ -28,7 +28,9 @@ Also fixed: boolean font props now honor `<b val="0"/>` / `<b val="false"/>` as 
 
 Regression coverage: real fixtures in `tests/fixtures/real/` (gitignored), `tests/e2e/cell-styles.spec.mjs`, and `npm run unseed-real` to clean private fixture cards off the shared test board.
 
-**Still not resolved (real future limitation, not hit by our test files):** theme colors (`<color theme="N"/>`) and indexed colors (`<color indexed="N"/>`) are not resolved — only `rgb=` colors render. Files relying on theme/indexed palettes will show those cells uncolored. Fixing needs parsing `xl/theme/theme1.xml` (theme) and a hardcoded 64-color palette (indexed). Pick up only if a real file needs it.
+**Theme colors — RESOLVED (2026-06-11, branch `fix/xls-encoding-theme-colors`):** a real file demanded it (card "1", «Олбрізсервіс…xlsx» — zero `rgb=` colors, everything `theme=`+`tint=`). `colorOf()` now resolves against `xl/theme/theme1.xml` (lt/dk slot swap, ECMA tint via HSL luminance); untinted theme-0/1 stay unresolved so dark mode keeps control. Regression: `theme-colors.xlsx` fixture + `cell-styles.spec.mjs` assertions. Same branch also fixed cp1251 mojibake in old `.xls` files without a CODEPAGE record (card "00", «Видаткова.xls»; fixture `vydatkova-cp1251.xls` + `xls-encoding.spec.mjs`).
+
+**Still not resolved:** indexed colors (`<color indexed="N"/>`, legacy 64-color palette) — not hit by any real file yet. Pick up only if one needs it.
 
 ## Embedded image positioning — robust geometry + header band — DONE (2026-06-10)
 

@@ -25,6 +25,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - CHANGELOG migrated from per-branch notes to Keep a Changelog format.
 
 ### Fixed
+- **Theme-palette colors now render.** Excel's default color picker writes `theme=` + `tint=` refs (not `rgb=`); fills and font colors are now resolved against `xl/theme/theme1.xml` with the ECMA tint formula. Untinted theme-0/1 (sheet default text/background) stay unresolved so dark mode keeps control. (Indexed legacy colors remain unresolved.)
+- **Cyrillic in old `.xls` files.** BIFF files saved without a CODEPAGE record decoded as cp1252 and showed mojibake; the dense U+00C0–U+00FF signature is now detected and the file is re-read as cp1251.
 - **Embedded images no longer vanish or stretch over text.** `twoCellAnchor` images are sized from the laid-out grid via monotonic column/row edges (merged cells can't produce negative sizes), then refined to the picture's own size from `a:xfrm/a:ext` and shrunk (never grown) to the anchor box so they can't spill onto text rows. Logos anchored in trimmed empty top rows render in a reserved header band above the table.
 - **Rotation and mirroring**: `a:xfrm rot`/`flipH`/`flipV` are applied as CSS transforms (rotated pictures are centered on their anchor box).
 - **Grouped pictures** (`grpSp`): every picture in a group renders in its own sub-box (previously only the first one appeared).
