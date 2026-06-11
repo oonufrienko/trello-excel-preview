@@ -22,7 +22,7 @@ Marketplace: submitted, awaiting review.
 
 ## Known limitations
 
-- **Embedded image positions may not match the original Excel layout exactly.** Images can drift, more visibly on non-first sheets of multi-sheet workbooks or on files with custom column widths or row heights.
+- **Embedded image placement is approximate.** Images render at their true size from the file (rotation, mirroring and picture groups supported), anchored to the right cell — but because browser column widths differ from Excel's, an image may sit a few pixels off or be scaled down to fit its anchor range. **WMF clip-art** (legacy vector format browsers can't decode) shows as a labelled placeholder of the correct size.
 - **Charts and graphs are not rendered** — only cell data. Files with embedded charts have not been tested; chart objects will not appear in the preview.
 - **Cell styling** (bold, italic, font colors, background fills) is not rendered. Only numeric formats, alignment via defaults, and merged cells are honoured.
 - **Old `.xls`** (BIFF binary) format renders without embedded images.

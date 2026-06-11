@@ -32,7 +32,7 @@ Regression coverage: real fixtures in `tests/fixtures/real/` (gitignored), `test
 
 ## Embedded image positioning — robust geometry + header band — DONE (2026-06-10)
 
-Shipped on branch `fix/images-positioning` (NOT yet merged — awaiting user OK to merge into main; preview-verified on the real price-list `КП Креп Тех…xlsx`, card "1234" on test board uPrZqiOc).
+Shipped on branch `fix/images-positioning` (merged into main 2026-06-11; verified on SEV DEV against the real price-list `КП Креп Тех…xlsx`, card "1234"/"2 - картинки" on test board uPrZqiOc).
 
 **Root cause:** `positionImages` sized `twoCellAnchor` images from the **DOM rect difference** of the to/from cells (`toCell.top − fromCell.top`). On files with merged cells and narrow anchor ranges, the `to` cell lands visually *above* the `from` cell → negative/sliver height → the `if (width<=0||height<=0) return` guard silently dropped the image. For `КП Креп Тех…xlsx` this dropped all 7 images (2 logos also died on the `fromR<0` guard, since `trimSheetRange` cut the empty top rows the logos sit in).
 
@@ -43,18 +43,20 @@ Shipped on branch `fix/images-positioning` (NOT yet merged — awaiting user OK 
 
 `oneCellAnchor` images (use `ext.cx/cy`) are untouched → no regression (`with-images-multi.xlsx` e2e green). Regression coverage: new `two-cell-anchor.xlsx` fixture (twoCell over a tall vertical merge — red before fix, green after) + assertion in `tests/e2e/images.spec.mjs`. Verified in a local Chromium harness: card "1234" went **0 → 7 images, all sane size**.
 
-## Other image files still misaligned on preview — INVESTIGATE (open)
+## Other image files still misaligned on preview — DONE (2026-06-11, "Images v2")
 
-After the fix above, the user checked OTHER image-bearing files **on the new preview (fix included)** and they still look wrong. Because the fix was already live on that preview, these are **distinct defects** with their own root causes — they will **not** all auto-fix when `fix/images-positioning` merges.
+Diagnosed on the real files from the test board («Прайс Спец Хомут, Інструмент КТ» 3.3 MB, «Прайс КТ Оптова» 9 MB, «КП Креп Тех (2)»). Four distinct root causes, all fixed in the shared algorithm on `fix/images-positioning` (commits `3a97f79` + `2b4aad0`), user-verified on SEV DEV:
 
-Likely-but-unconfirmed symptom classes to confirm (each would be fixed in the one shared positioning algorithm, never by hand-editing files): image shifted off position, wrong size (stretched/squashed), overlapping text / spilling outside the table, or still not visible at all.
+1. **Wrong size / overlapping text** — one root: twoCell anchors were stretched across OUR grid, whose column widths differ from Excel's (and most real anchors are `editAs="oneCell"` = "don't scale with cells"). Now the size comes from the pic's own `a:xfrm/a:ext` (EMU), then is shrunk (never grown) to the anchor box so it can't spill onto text rows. Text-overlap cell hits on «Прайс Спец Хомут»: 27 → 8.
+2. **Rotation/mirroring** — `a:xfrm rot` (1/60000°) + `flipH/flipV` were never parsed; now applied as CSS transforms, rotated pics centered on the anchor box (43 rotated + 6 flipped images in «Прайс КТ Оптова»).
+3. **Groups (`grpSp`)** — only the first blip per anchor was taken; now every pic in a group renders in its own sub-box (mapped via the group's `chOff/chExt` child space).
+4. **WMF main blips** (49+1 across the two price-lists) were silently dropped by the `getBlobUrl` whitelist. Browsers can't decode WMF; in-browser conversion (js-wmf) was tested on all 46 real WMFs and rejected — 23 blank, 23 unusable black silhouettes. Decision: render a same-size labelled placeholder. (`.wdp` files are only a14 HD-photo duplicates of PNG blips — safely ignored.)
 
-**Cannot diagnose without the real files.** Next step when picked up:
-1. Collect the specific problem files — seed them onto test board uPrZqiOc as cards (like "1234"), or drop into `tests/fixtures/real/` (gitignored).
-2. Note the visible symptom per file.
-3. Run the local instrumented harness (throwaway static server + stubbed `TrelloPowerUp`, the same one used to diagnose card "1234") to find each root cause **before** writing any fix.
+Regression coverage: hand-built `images-v2.xlsx` fixture (rotated 45° pic, 2-pic group, real WMF; in gitignored `tests/fixtures/real/`, card seeded) + assertions in `tests/e2e/images.spec.mjs`.
 
-Own branch off main when picked up. No per-file hardcoding. Relates to the older follow-ups: non-first-sheet image drift and overly-wide stretched rendering.
+**Known remaining limits (deliberate):**
+- `oneCellAnchor` images have no "to" box, so when our rows/columns are narrower than Excel's they can still partially cover a neighbouring cell (8 residual single-cell hits on «Прайс Спец Хомут»). Fully solvable only by replicating Excel's exact column widths — relates to the stretched-rendering follow-up.
+- **Charts (`graphicFrame`)** are not rendered at all (sales_chart.xlsx / sales_dashboard.xlsx show no chart) — user decided it's a separate future feature, own branch when picked up.
 
 ## Formula calculation — DONE (2026-05-26)
 
