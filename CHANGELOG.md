@@ -24,6 +24,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Root connector frame served via `api/index-html.js` (replacing static `index.html`) so the Trello app key is injected server-side, enabling `t.getRestApi()`.
 - CHANGELOG migrated from per-branch notes to Keep a Changelog format.
 
+### Fixed
+- **Embedded images no longer vanish or stretch over text.** `twoCellAnchor` images are sized from the laid-out grid via monotonic column/row edges (merged cells can't produce negative sizes), then refined to the picture's own size from `a:xfrm/a:ext` and shrunk (never grown) to the anchor box so they can't spill onto text rows. Logos anchored in trimmed empty top rows render in a reserved header band above the table.
+- **Rotation and mirroring**: `a:xfrm rot`/`flipH`/`flipV` are applied as CSS transforms (rotated pictures are centered on their anchor box).
+- **Grouped pictures** (`grpSp`): every picture in a group renders in its own sub-box (previously only the first one appeared).
+- **WMF images** (legacy Windows Metafile vector clip-art, undecodable by browsers) render as a same-size labelled placeholder instead of silently disappearing. In-browser WMF→canvas conversion was evaluated on 46 real files and rejected (half blank, half unusable).
+
 ## [1.0.0] — 2026-05-13
 
 First public-ready release. Combines all work from the pre-launch milestones below.

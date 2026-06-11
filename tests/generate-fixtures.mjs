@@ -103,6 +103,41 @@ async function multiSheetWithImages() {
   await wb.xlsx.writeFile(join(OUT_DIR, 'with-images-multi.xlsx'));
 }
 
+// A twoCellAnchor image (tl + br) over a region with merged cells, plus
+// empty top rows above the data. This reproduces the real price-list bug
+// where the old positionImages computed height from the to/from cell rect
+// difference and got a negative value under merges → image dropped.
+// Regression guard for the geometry-based sizing fix.
+async function twoCellAnchorImage() {
+  const wb = new ExcelJS.Workbook();
+  const ws = wb.addWorksheet('Anchored');
+  ws.columns = [
+    { header: '', key: 'a', width: 18 },
+    { header: '', key: 'b', width: 18 },
+    { header: '', key: 'c', width: 18 },
+    { header: '', key: 'd', width: 18 }
+  ];
+  // Leave rows 1-3 empty (only the image lives up there) so trimSheetRange
+  // cuts them — exercises the negative-from-index clamp path too.
+  for (let r = 5; r <= 16; r++) ws.addRow({ a: `Item ${r}`, b: r * 10, c: r * 2, d: r });
+  // A tall vertical merge in the image's `to` column that STARTS ABOVE the
+  // image's `from` row. With the old code, the `to` cell rect (top of the
+  // merge) lands above the `from` cell → negative height → image dropped.
+  // The geometry-based fix sizes from monotonic edges and survives this.
+  ws.mergeCells('C6:C15'); // tall merge spanning the anchor's `to` row
+  ws.mergeCells('A5:B5');
+
+  const png = flatColorPng(40, 40, [200, 30, 90]);
+  const imageId = wb.addImage({ buffer: png, extension: 'png' });
+  // tl + br → ExcelJS emits a twoCellAnchor. `to` col is the merged column C,
+  // whose displayed cell top is row 6 — above the image's `from` row 9.
+  ws.addImage(imageId, {
+    tl: { col: 1.2, row: 8.3 },  // from: col B, row 9
+    br: { col: 2.8, row: 12.7 }  // to:   col C (merged C6:C15), row 13
+  });
+  await wb.xlsx.writeFile(join(OUT_DIR, 'two-cell-anchor.xlsx'));
+}
+
 // Bogus dimension that historically froze the browser by inflating
 // the rendered range. Forced by writing a single far-down cell.
 async function oversizedDim() {
@@ -160,6 +195,7 @@ async function main() {
   await simple2col();           console.log('  simple-2col.xlsx');
   await multiSheet();           console.log('  multi-sheet.xlsx');
   await multiSheetWithImages(); console.log('  with-images-multi.xlsx');
+  await twoCellAnchorImage();   console.log('  two-cell-anchor.xlsx');
   await formulasNoCache();      console.log('  formulas-no-cache.xlsx');
   await oversizedDim();         console.log('  oversized-dim.xlsx');
   await large5mb();             console.log('  large-5mb.xlsx');

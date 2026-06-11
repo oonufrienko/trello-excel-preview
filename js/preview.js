@@ -366,47 +366,114 @@ async function parseAnchors(zip) {
 
     const root = drawingDoc.documentElement;
 
-    // Build both anchor sets in parallel. Each blob extraction is a
-    // JSZip decompression — serial awaits were the bottleneck for
-    // workbooks with many images.
-    const twoCellPromises = findDirects(root, 'twoCellAnchor').map(async (aEl) => {
-      const fromEl = findDirect(aEl, 'from');
-      const toEl = findDirect(aEl, 'to');
-      const blipEl = findDeep(aEl, 'blip');
-      if (!fromEl || !toEl || !blipEl) return null;
+    const attrInt = (el, name) => el ? (parseInt(el.getAttribute(name), 10) || 0) : 0;
+
+    // Per-pic shape transform from xdr:pic/xdr:spPr/a:xfrm: rotation
+    // (1/60000 deg → deg), flips, intrinsic size (EMU) and position (needed
+    // only for pics inside groups, in the group's child coordinate space).
+    const readXfrm = (picEl) => {
+      const spPr = findDirect(picEl, 'spPr');
+      const xfrm = spPr ? findDirect(spPr, 'xfrm') : null;
+      const off = xfrm ? findDirect(xfrm, 'off') : null;
+      const ext = xfrm ? findDirect(xfrm, 'ext') : null;
+      return {
+        rot: xfrm ? (parseInt(xfrm.getAttribute('rot'), 10) || 0) / 60000 : 0,
+        flipH: !!xfrm && xfrm.getAttribute('flipH') === '1',
+        flipV: !!xfrm && xfrm.getAttribute('flipV') === '1',
+        cx: attrInt(ext, 'cx'), cy: attrInt(ext, 'cy'),
+        offX: attrInt(off, 'x'), offY: attrInt(off, 'y')
+      };
+    };
+
+    // Collect every pic under an anchor, descending into grpSp groups. A pic
+    // inside a group gets `box` — the group's fraction of the anchor box plus
+    // its child coordinate space (chOff/chExt) — so the pic's own xfrm can be
+    // mapped to a fractional sub-box of the anchor later.
+    const collectPics = (anchorEl) => {
+      const pics = [];
+      const walk = (el, box) => {
+        for (const child of el.children) {
+          if (child.localName === 'pic') {
+            pics.push({ picEl: child, box });
+          } else if (child.localName === 'grpSp') {
+            const grpPr = findDirect(child, 'grpSpPr');
+            const xfrm = grpPr ? findDirect(grpPr, 'xfrm') : null;
+            if (!xfrm) continue;
+            const chOff = findDirect(xfrm, 'chOff');
+            const chExt = findDirect(xfrm, 'chExt');
+            const sub = {
+              x: 0, y: 0, w: 1, h: 1,
+              cx0: attrInt(chOff, 'x'), cy0: attrInt(chOff, 'y'),
+              cw: attrInt(chExt, 'cx') || 1, ch: attrInt(chExt, 'cy') || 1
+            };
+            if (box) { // nested group: its off/ext live in the parent's child space
+              const off = findDirect(xfrm, 'off');
+              const ext = findDirect(xfrm, 'ext');
+              sub.x = box.x + (attrInt(off, 'x') - box.cx0) / box.cw * box.w;
+              sub.y = box.y + (attrInt(off, 'y') - box.cy0) / box.ch * box.h;
+              sub.w = attrInt(ext, 'cx') / box.cw * box.w;
+              sub.h = attrInt(ext, 'cy') / box.ch * box.h;
+            }
+            walk(child, sub);
+          }
+        }
+      };
+      walk(anchorEl, null);
+      return pics;
+    };
+
+    // One output entry per pic (an anchor with a group yields several).
+    // Media that exists but the browser can't decode (e.g. WMF) becomes a
+    // placeholder entry, so the user still sees the image's place and size.
+    const buildEntries = (aEl, base) => collectPics(aEl).map(async ({ picEl, box }) => {
+      const blipEl = findDeep(picEl, 'blip');
+      if (!blipEl) return null;
       const imgRId = getREmbed(blipEl);
       if (!imgRId || !drawingRels[imgRId]) return null;
       const imgPath = resolvePath(drawingPath, drawingRels[imgRId]);
+      const x = readXfrm(picEl);
+      const entry = { ...base, rot: x.rot, flipH: x.flipH, flipV: x.flipV, cx: x.cx, cy: x.cy };
+      if (box) {
+        entry.rel = {
+          x: box.x + (x.offX - box.cx0) / box.cw * box.w,
+          y: box.y + (x.offY - box.cy0) / box.ch * box.h,
+          w: x.cx / box.cw * box.w,
+          h: x.cy / box.ch * box.h
+        };
+      }
       const blobUrl = await getBlobUrl(imgPath);
-      if (!blobUrl) return null;
-      return {
+      if (blobUrl) return { ...entry, blobUrl };
+      if (zip.files[imgPath]) return { ...entry, placeholder: imgPath.split('.').pop().toUpperCase() };
+      return null;
+    });
+
+    // Build both anchor sets in parallel. Each blob extraction is a
+    // JSZip decompression — serial awaits were the bottleneck for
+    // workbooks with many images.
+    const twoCellPromises = findDirects(root, 'twoCellAnchor').flatMap((aEl) => {
+      const fromEl = findDirect(aEl, 'from');
+      const toEl = findDirect(aEl, 'to');
+      if (!fromEl || !toEl) return [];
+      return buildEntries(aEl, {
         type: 'two',
         from: { col: intOf(fromEl, 'col'), row: intOf(fromEl, 'row'),
                 colOff: intOf(fromEl, 'colOff'), rowOff: intOf(fromEl, 'rowOff') },
         to:   { col: intOf(toEl, 'col'),   row: intOf(toEl, 'row'),
-                colOff: intOf(toEl, 'colOff'),   rowOff: intOf(toEl, 'rowOff') },
-        blobUrl
-      };
+                colOff: intOf(toEl, 'colOff'),   rowOff: intOf(toEl, 'rowOff') }
+      });
     });
 
-    const oneCellPromises = findDirects(root, 'oneCellAnchor').map(async (aEl) => {
+    const oneCellPromises = findDirects(root, 'oneCellAnchor').flatMap((aEl) => {
       const fromEl = findDirect(aEl, 'from');
       const extEl = findDirect(aEl, 'ext');
-      const blipEl = findDeep(aEl, 'blip');
-      if (!fromEl || !extEl || !blipEl) return null;
-      const imgRId = getREmbed(blipEl);
-      if (!imgRId || !drawingRels[imgRId]) return null;
-      const imgPath = resolvePath(drawingPath, drawingRels[imgRId]);
-      const blobUrl = await getBlobUrl(imgPath);
-      if (!blobUrl) return null;
-      return {
+      if (!fromEl || !extEl) return [];
+      return buildEntries(aEl, {
         type: 'one',
         from: { col: intOf(fromEl, 'col'), row: intOf(fromEl, 'row'),
                 colOff: intOf(fromEl, 'colOff'), rowOff: intOf(fromEl, 'rowOff') },
         ext: { cx: parseInt(extEl.getAttribute('cx'), 10) || 0,
-               cy: parseInt(extEl.getAttribute('cy'), 10) || 0 },
-        blobUrl
-      };
+               cy: parseInt(extEl.getAttribute('cy'), 10) || 0 }
+      });
     });
 
     const anchors = (await Promise.all([...twoCellPromises, ...oneCellPromises]))
@@ -440,49 +507,169 @@ function buildCellGrid(table) {
   return grid;
 }
 
+// Build monotonic per-column-left and per-row-top pixel edges (relative to the
+// wrapper) from the laid-out grid. colEdges[c] is the left edge of logical
+// column c; colEdges[numCols] is the right edge of the last column. Same for
+// rowEdges with tops/bottom. Because each edge accumulates real cell sizes
+// column-by-column (row-by-row), the arrays are monotonically increasing —
+// merged cells cannot make a later column/row land before an earlier one.
+function buildGridEdges(grid, wrapperRect) {
+  const numRows = grid.length;
+  const numCols = grid.reduce((m, row) => Math.max(m, row ? row.length : 0), 0);
+
+  // Column left-edges: scan the first row, reading each distinct cell's rect.
+  // A merged cell spans multiple logical columns but reports one rect; we
+  // distribute its width evenly so every logical column gets an edge.
+  const colEdges = new Array(numCols + 1);
+  colEdges[0] = 0;
+  for (let c = 0; c < numCols; c++) {
+    let span = 1, w = 0;
+    for (let r = 0; r < numRows; r++) {
+      const cell = grid[r] && grid[r][c];
+      if (cell && (grid[r][c - 1] !== cell)) { // left edge of this cell in row r
+        const rect = cell.getBoundingClientRect();
+        let s = 1;
+        while (grid[r][c + s] === cell) s++;
+        span = s;
+        w = rect.width / s;
+        break;
+      }
+    }
+    colEdges[c + 1] = colEdges[c] + (w || 0);
+    // skip the columns covered by a horizontal merge — they share the edge step
+    for (let k = 1; k < span && c + 1 < numCols; k++) {
+      colEdges[c + 2] = colEdges[c + 1] + w;
+      c++;
+    }
+  }
+
+  const rowEdges = new Array(numRows + 1);
+  rowEdges[0] = 0;
+  for (let r = 0; r < numRows; r++) {
+    let span = 1, h = 0;
+    const row = grid[r] || [];
+    for (let c = 0; c < numCols; c++) {
+      const cell = row[c];
+      if (cell && (!(grid[r - 1] && grid[r - 1][c] === cell))) { // top edge in col c
+        const rect = cell.getBoundingClientRect();
+        let s = 1;
+        while (grid[r + s] && grid[r + s][c] === cell) s++;
+        span = s;
+        h = rect.height / s;
+        break;
+      }
+    }
+    rowEdges[r + 1] = rowEdges[r] + (h || 0);
+    for (let k = 1; k < span && r + 1 < numRows; k++) {
+      rowEdges[r + 2] = rowEdges[r + 1] + h;
+      r++;
+    }
+  }
+
+  return { colEdges, rowEdges, numRows, numCols };
+}
+
 function positionImages(wrapper, table, anchors, rangeStart) {
   const grid = buildCellGrid(table);
   const wrapperRect = wrapper.getBoundingClientRect();
+  const { colEdges, rowEdges, numRows, numCols } = buildGridEdges(grid, wrapperRect);
 
-  anchors.forEach(a => {
-    const fromR = a.from.row - rangeStart.r;
+  const clamp = (v, max) => v < 0 ? 0 : (v > max ? max : v);
+  const colX = (c, off) => colEdges[clamp(c, numCols)] + (off || 0) / EMU_PER_PX;
+  const rowY = (r, off) => rowEdges[clamp(r, numRows)] + (off || 0) / EMU_PER_PX;
+  // Average cell sizes — used to size anchors whose row/col span lies entirely
+  // in the empty top rows trimSheetRange removed.
+  const avgRowH = numRows ? rowEdges[numRows] / numRows : 18;
+  const avgColW = numCols ? colEdges[numCols] / numCols : 64;
+
+  // Compute each anchor's geometry up front. Anchors whose whole row span sits
+  // in the trimmed-away top rows (to.row <= rangeStart.r) belong ABOVE the
+  // table — header logos. We reserve a band above the table for them so they
+  // don't overlap the first visible row.
+  const placed = anchors.map(a => {
     const fromC = a.from.col - rangeStart.c;
-    if (fromR < 0 || fromC < 0) return;
+    const fromR = a.from.row - rangeStart.r;
+    const toR = a.type === 'two' ? a.to.row - rangeStart.r : null;
+    const toC = a.type === 'two' ? a.to.col - rangeStart.c : null;
+    const aboveTable = a.type === 'two' && toR <= 0; // entire row span trimmed
 
-    const fromCell = grid[fromR] && grid[fromR][fromC];
-    if (!fromCell) return;
-
-    const fromRect = fromCell.getBoundingClientRect();
-    const left = fromRect.left - wrapperRect.left + (a.from.colOff || 0) / EMU_PER_PX;
-    const top  = fromRect.top  - wrapperRect.top  + (a.from.rowOff || 0) / EMU_PER_PX;
-
-    let width, height;
+    // The anchor box as laid out in OUR grid.
+    const boxLeft = colX(fromC, a.from.colOff);
+    const boxTop = rowY(fromR, a.from.rowOff);
+    let boxW, boxH;
     if (a.type === 'two') {
-      const toR = a.to.row - rangeStart.r;
-      const toC = a.to.col - rangeStart.c;
-      const toCell = grid[toR] && grid[toR][toC];
-      if (toCell) {
-        const toRect = toCell.getBoundingClientRect();
-        width  = (toRect.left - wrapperRect.left + (a.to.colOff || 0) / EMU_PER_PX) - left;
-        height = (toRect.top  - wrapperRect.top  + (a.to.rowOff || 0) / EMU_PER_PX) - top;
-      } else {
-        width  = fromRect.width * 3;
-        height = fromRect.height * 3;
-      }
+      boxW = colX(toC, a.to.colOff) - boxLeft;
+      boxH = rowY(toR, a.to.rowOff) - boxTop;
+      if (toC <= 0) boxW = Math.max(boxW, (a.to.col - a.from.col) * avgColW);
+      if (aboveTable) boxH = Math.max(0, (a.to.row - a.from.row) * avgRowH);
     } else {
-      width  = a.ext.cx / EMU_PER_PX;
-      height = a.ext.cy / EMU_PER_PX;
+      boxW = a.ext.cx / EMU_PER_PX;
+      boxH = a.ext.cy / EMU_PER_PX;
     }
-    if (width <= 0 || height <= 0) return;
 
-    const img = document.createElement('img');
-    img.src = a.blobUrl;
-    img.className = 'embedded-img';
-    img.style.left = left + 'px';
-    img.style.top = top + 'px';
-    img.style.width = width + 'px';
-    img.style.height = height + 'px';
-    wrapper.appendChild(img);
+    let left = boxLeft, top = boxTop, width = boxW, height = boxH;
+    if (a.rel) {
+      // group child: fractional sub-box of the anchor box
+      left = boxLeft + a.rel.x * boxW;
+      top = boxTop + a.rel.y * boxH;
+      width = a.rel.w * boxW;
+      height = a.rel.h * boxH;
+    } else if (a.type === 'two' && a.cx > 0 && a.cy > 0) {
+      // Size from the pic's own xfrm: our grid's column widths differ from
+      // Excel's, so stretching from→to distorts (and editAs="oneCell" anchors
+      // must not scale with cells at all). The intrinsic EMU size is what
+      // Excel actually shows.
+      width = a.cx / EMU_PER_PX;
+      height = a.cy / EMU_PER_PX;
+      if (a.rot) {
+        // rotated: the anchor box is the rotated bounding box — keep centers
+        // aligned so the unrotated box + CSS rotation lands where Excel draws
+        left = boxLeft + (boxW - width) / 2;
+        top = boxTop + (boxH - height) / 2;
+      } else if (!aboveTable && boxW > 0 && boxH > 0) {
+        // Our text rows are shorter than Excel's, so the intrinsic size can
+        // spill onto the rows below the anchor. Shrink (never grow) to the
+        // anchor box, keeping proportions.
+        const scale = Math.min(1, boxW / width, boxH / height);
+        width *= scale;
+        height *= scale;
+      }
+    }
+    return { a, left, top, width, height, aboveTable };
+  }).filter(p => p.width > 0 && p.height > 0);
+
+  // Reserve a top band tall enough for the tallest header logo, and push the
+  // table down by that much so logos sit in the header instead of over data.
+  // Use padding-top on the wrapper (not margin-top on the table) so the gap
+  // can't collapse out of the wrapper; absolute images are positioned from the
+  // wrapper's border-box, so top:0 is the very top of the reserved band.
+  const bandH = placed.reduce((m, p) => p.aboveTable ? Math.max(m, p.height) : m, 0);
+  if (bandH > 0) wrapper.style.paddingTop = bandH + 'px';
+
+  placed.forEach(({ a, left, top, width, height, aboveTable }) => {
+    // Header logos: bottom-align inside the reserved band (so a logo anchored
+    // near the table top stays just above the first row). In-table images: top
+    // is the grid row edge, shifted down by the reserved band.
+    const finalTop = aboveTable ? Math.max(0, bandH - height) : bandH + top;
+
+    const el = document.createElement(a.placeholder ? 'div' : 'img');
+    el.className = 'embedded-img';
+    if (a.placeholder) {
+      el.classList.add('embedded-img-missing');
+      el.textContent = a.placeholder; // e.g. "WMF" — format we can't decode
+    } else {
+      el.src = a.blobUrl;
+    }
+    el.style.left = left + 'px';
+    el.style.top = finalTop + 'px';
+    el.style.width = width + 'px';
+    el.style.height = height + 'px';
+    const t = [];
+    if (a.rot) t.push(`rotate(${a.rot}deg)`);
+    if (a.flipH) t.push('scaleX(-1)');
+    if (a.flipV) t.push('scaleY(-1)');
+    if (t.length) el.style.transform = t.join(' ');
+    wrapper.appendChild(el);
   });
 }
 
