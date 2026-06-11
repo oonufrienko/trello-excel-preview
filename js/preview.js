@@ -77,6 +77,13 @@ async function loadPreview() {
       // italic/color come from parseStyles via JSZip — community
       // SheetJS doesn't expose them in cell.s.)
       workbook = XLSX.read(buffer, { type: 'array', sheetStubs: true });
+      // Old BIFF .xls files saved without a CODEPAGE record decode with the
+      // cp1252 default, so Cyrillic text surfaces as dense U+00C0–U+00FF
+      // mojibake ("Ïîñòà÷àëüíèê"). Detect that signature and re-read as
+      // cp1251 (the Windows-Cyrillic codepage such files actually use).
+      if (ext === 'xls' && looksLikeCp1251Mojibake(workbook)) {
+        workbook = XLSX.read(buffer, { type: 'array', sheetStubs: true, codepage: 1251 });
+      }
       if (workbookHasUncomputedFormulas(workbook)) {
         try {
           await loadXlsxCalc();
@@ -800,6 +807,30 @@ function loadXlsxCalc() {
     document.head.appendChild(s);
   });
   return xlsxCalcLoading;
+}
+
+// Cp1251 text decoded as cp1252 lands almost entirely in U+00C0–U+00FF
+// ("Ïîñòà÷àëüíèê"); real Western European text uses that range sparsely.
+// A high density of such characters across the workbook's strings means the
+// file needs a cp1251 re-read.
+function looksLikeCp1251Mojibake(wb) {
+  let high = 0, total = 0;
+  for (const name of wb.SheetNames) {
+    const sheet = wb.Sheets[name];
+    if (!sheet) continue;
+    for (const key of Object.keys(sheet)) {
+      if (key[0] === '!') continue;
+      const v = sheet[key] && sheet[key].v;
+      if (typeof v !== 'string') continue;
+      for (let i = 0; i < v.length; i++) {
+        const c = v.charCodeAt(i);
+        if (c > 0x20) total++;
+        if (c >= 0xC0 && c <= 0xFF) high++;
+      }
+      if (total > 4000) return total > 20 && high / total > 0.4;
+    }
+  }
+  return total > 20 && high / total > 0.4;
 }
 
 function workbookHasUncomputedFormulas(wb) {
