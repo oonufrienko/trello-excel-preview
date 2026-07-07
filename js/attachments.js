@@ -12,6 +12,13 @@ function esc(s) {
     .replace(/>/g, '&gt;');
 }
 
+const DATE_FMT = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' });
+
+function formatDate(iso) {
+  const d = new Date(iso);
+  return isNaN(d) ? '' : DATE_FMT.format(d);
+}
+
 // appKey injected server-side into window.TRELLO_APP_KEY — enables t.getRestApi()
 const t = TrelloPowerUp.iframe({ appKey: window.TRELLO_APP_KEY || '', appName: 'Excel Viewer' });
 
@@ -40,7 +47,19 @@ async function openPreview(attachment) {
     title: attachment.name,
     url: t.signUrl(window.location.origin + '/api/preview-html'),
     fullscreen: true,
-    accentColor: '#217346'
+    accentColor: '#217346',
+    actions: [{
+      icon: window.location.origin + '/images/print-icon.svg',
+      alt: 'Print',
+      position: 'left',
+      // Runs here (in the opener iframe), not in the preview iframe —
+      // relay the click over a same-origin channel.
+      callback: () => {
+        const ch = new BroadcastChannel('excel-viewer-print');
+        ch.postMessage({ type: 'print', url: attachment.url });
+        ch.close();
+      }
+    }]
   });
 }
 
@@ -186,7 +205,10 @@ function renderItem(attachment) {
   div.innerHTML = `
     <div class="attachment-info">
       <img src="/images/excel-icon.svg" class="file-icon" alt="Excel">
-      <span class="file-name" title="${esc(attachment.name)}">${esc(attachment.name)}</span>
+      <div class="file-meta">
+        <span class="file-name" title="${esc(attachment.name)}">${esc(attachment.name)}</span>
+        <span class="file-date">${esc(formatDate(attachment.date))}</span>
+      </div>
     </div>
     <div class="attachment-actions">
       <button class="btn btn-primary btn-preview">Preview</button>

@@ -192,11 +192,26 @@ body.preview-page {
   flex-shrink: 0;
 }
 
+.file-meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
 .file-name {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   color: var(--text);
+}
+
+.file-date {
+  font-size: 11px;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .attachment-actions {
@@ -447,4 +462,36 @@ body.preview-page {
 }
 .welcome-container .btn {
   margin-top: 4px;
+}
+
+/* ── Print (preview modal): only the active sheet's table ── */
+@media print {
+  body.preview-page { background: #fff; }
+
+  .sheet-tabs,
+  .preview-footer { display: none !important; }
+
+  .preview-container {
+    height: auto;
+    overflow: visible;
+  }
+
+  .sheet-content {
+    overflow: visible;
+    padding: 0;
+  }
+
+  /* Unstick the header row so it doesn't overlap content across pages. */
+  .sheet-content tr:first-child th,
+  .sheet-content tr:first-child td {
+    position: static;
+  }
+
+  /* Keep Excel cell fills and overlaid images in the printed output. */
+  .sheet-content th,
+  .sheet-content td,
+  .embedded-img {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
 }
