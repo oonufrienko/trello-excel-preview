@@ -42,10 +42,14 @@ export const test = base.extend({
   context: async ({ context }, use) => {
     const previewHost = process.env.PREVIEW_HOST;
     if (previewHost) {
-      await context.route('https://trello-excel-preview.vercel.app/**', route => {
+      // fetch+fulfill (not continue) so the frame keeps the production
+      // origin: the Power-Up REST token lives in localStorage keyed by
+      // that origin, and signed URLs embed it too.
+      await context.route('https://trello-excel-preview.vercel.app/**', async route => {
         const u = new URL(route.request().url());
         u.host = previewHost;
-        return route.continue({ url: u.toString() });
+        const response = await route.fetch({ url: u.toString() });
+        return route.fulfill({ response });
       });
     }
     await context.addInitScript(() => {
