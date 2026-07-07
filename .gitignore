@@ -22,3 +22,7 @@ bad_excel/
 
 # Marketplace screenshots (uploaded directly to Atlassian, not via git)
 marketing/screenshots/
+.env*
+
+# Generated knowledge graph (rebuild locally via /graphify)
+graphify-out/
