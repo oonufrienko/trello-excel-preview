@@ -10,7 +10,9 @@ on:
   workflow_dispatch: {}
 
 jobs:
-  playwright:
+  # Job name must stay "e2e" — the ruleset-for-main required status
+  # check matches on the job name, not the workflow name.
+  e2e:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
