@@ -156,6 +156,12 @@ async function withCharts() {
       ${ser(0, '2023', CATS, V23)}${ser(1, '2024', CATS, V24)}
       <c:axId val="1"/><c:axId val="2"/></c:lineChart>${axes}`),
     chartSpace('Share 2024', `<c:pieChart><c:varyColors val="1"/>${ser(0, '2024', CATS, V24)}</c:pieChart>`),
+    chartSpace('Plan vs Actual', `<c:barChart><c:barDir val="col"/><c:grouping val="clustered"/>
+      ${ser(0, '2023', CATS, V23)}
+      <c:axId val="1"/><c:axId val="2"/></c:barChart>
+      <c:lineChart><c:grouping val="standard"/>
+      ${ser(1, '2024', CATS, V24)}
+      <c:axId val="1"/><c:axId val="2"/></c:lineChart>${axes}`),
     chartSpace('Scatter (unsupported)', `<c:scatterChart><c:scatterStyle val="lineMarker"/>
       <c:ser><c:idx val="0"/><c:order val="0"/>
         <c:xVal><c:numRef><c:f>Data!B2:B5</c:f><c:numCache>${strCache(V23)}</c:numCache></c:numRef></c:xVal>
