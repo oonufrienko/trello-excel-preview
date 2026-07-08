@@ -46,8 +46,8 @@ async function openPreview(attachment) {
     token: userToken
   });
   // Print and donate buttons live in the preview iframe's own header bar
-  // (preview.html) — Trello's modal chrome gives no control over icon
-  // size or placement.
+  // (api/preview-html.js template) — Trello's modal chrome gives no
+  // control over icon size or placement.
   t.modal({
     title: attachment.name,
     url: t.signUrl(window.location.origin + '/api/preview-html'),
