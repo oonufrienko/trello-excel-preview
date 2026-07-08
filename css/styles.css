@@ -236,9 +236,10 @@ body.preview-page {
   height: 48px;
   /* print sits 16px from the left edge, donate mirrors it on the right */
   padding: 0 16px;
-  /* lighter than Trello's #217346 modal bar above, still ≥3:1 against
-     the white icons */
-  background: #3fa26b;
+  /* light grey to contrast Trello's dark-green modal bar; the border
+     keeps it from merging with the sheet-tabs strip below */
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
   flex-shrink: 0;
 }
 
@@ -256,7 +257,7 @@ body.preview-page {
 }
 
 .header-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--secondary-hover);
 }
 
 .header-btn img {
