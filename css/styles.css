@@ -220,6 +220,44 @@ body.preview-page {
   flex-shrink: 0;
 }
 
+/* ── Preview header (green bar inside the modal iframe) ── */
+.preview-header {
+  display: flex;
+  align-items: center;
+  height: 48px;
+  /* print sits 16px from the left edge, donate mirrors it on the right */
+  padding: 0 16px;
+  background: #217346; /* matches the modal accentColor */
+  flex-shrink: 0;
+}
+
+.header-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.header-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.header-btn img {
+  width: 24px;
+  height: 24px;
+  display: block;
+}
+
+#donate-btn {
+  margin-left: auto;
+}
+
 /* ── Preview modal ── */
 .preview-container {
   display: flex;
@@ -468,6 +506,7 @@ body.preview-page {
 @media print {
   body.preview-page { background: #fff; }
 
+  .preview-header,
   .sheet-tabs,
   .preview-footer { display: none !important; }
 

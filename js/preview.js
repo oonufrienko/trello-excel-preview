@@ -4,7 +4,6 @@ let currentWorkbook = null;
 let currentAnchors = {}; // { [sheetName]: [{ type, from, to?, ext?, blobUrl }] }
 let currentStyles = {};  // { [sheetName]: { [addr]: { font, bgColor, alignment } } }
 let blobUrls = [];
-let currentFileUrl = null;
 
 const MAX_PREVIEW_CELLS = 200000;
 const EMU_PER_PX = 9525;
@@ -16,8 +15,6 @@ async function loadPreview() {
       showError('No file data found. Please try again.');
       return;
     }
-    currentFileUrl = data.url;
-
     const params = new URLSearchParams({ url: data.url });
     if (data.token) params.set('token', data.token);
 
@@ -1034,13 +1031,7 @@ function hideLoading() {
   document.getElementById('loading').hidden = true;
 }
 
-// The print action in the Trello modal header runs in the attachments
-// iframe (the modal opener); it signals us over a same-origin channel.
-const printChannel = new BroadcastChannel('excel-viewer-print');
-printChannel.onmessage = (e) => {
-  if (e.data && e.data.type === 'print' && e.data.url === currentFileUrl) {
-    window.print();
-  }
-};
+// Print button lives in our own header bar inside this iframe.
+document.getElementById('print-btn').addEventListener('click', () => window.print());
 
 t.render(loadPreview);
