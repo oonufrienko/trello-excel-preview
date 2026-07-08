@@ -324,7 +324,11 @@ body.preview-page {
 }
 
 .sheet-content table {
-  border-collapse: collapse;
+  /* separate, not collapse: collapsed borders are painted by the grid,
+     not the cell, so they refuse to stick with the sticky header row —
+     a 1-2px seam of scrolled content showed above/through it */
+  border-collapse: separate;
+  border-spacing: 0;
   font-size: 12px;
   table-layout: fixed;
   width: max-content;
@@ -333,7 +337,8 @@ body.preview-page {
 
 .sheet-content th,
 .sheet-content td {
-  border: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
   padding: 4px 10px;
   text-align: left;
   white-space: normal;
@@ -351,8 +356,16 @@ body.preview-page {
   white-space: nowrap;
 }
 
+/* One-sided borders (right/bottom) avoid doubling in the separate model;
+   the leading edges come from these two rules. */
+.sheet-content th:first-child,
+.sheet-content td:first-child {
+  border-left: 1px solid var(--border);
+}
+
 .sheet-content tr:first-child th,
 .sheet-content tr:first-child td {
+  border-top: 1px solid var(--border);
   background: var(--table-header);
   font-weight: 600;
   position: sticky;
