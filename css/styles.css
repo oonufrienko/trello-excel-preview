@@ -85,6 +85,14 @@ body.preview-page {
   --tab-active-bg: #0052cc;
   --tab-active-text: #ffffff;
   background: #dfe1e6;
+  /* Column layout keeps the footer inside the viewport; without this the
+     100vh container pushes it below the fold and the body grows its own
+     scrollbar — a light stripe down the right edge of the modal. */
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  margin: 0;
+  overflow: hidden;
 }
 
 /* ── Shared states ── */
@@ -265,7 +273,8 @@ body.preview-page {
 .preview-container {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  flex: 1;
+  min-height: 0;
   overflow: hidden;
   background: transparent;
 }
@@ -507,7 +516,12 @@ body.preview-page {
 
 /* ── Print (preview modal): only the active sheet's table ── */
 @media print {
-  body.preview-page { background: #fff; }
+  body.preview-page {
+    background: #fff;
+    display: block;
+    height: auto;
+    overflow: visible;
+  }
 
   .preview-header,
   .sheet-tabs,
