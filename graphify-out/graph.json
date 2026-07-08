@@ -1,53 +1,7 @@
 {
   "directed": false,
   "multigraph": false,
-  "graph": {
-    "hyperedges": [
-      {
-        "id": "marketplace_submission_assets",
-        "label": "Atlassian Marketplace Submission Assets",
-        "nodes": [
-          "release_marketplace_submission",
-          "marketing_listing_marketplace_listing",
-          "privacy_privacy_policy",
-          "terms_terms_of_use",
-          "changelog_changelog"
-        ],
-        "relation": "participate_in",
-        "confidence": "EXTRACTED",
-        "confidence_score": 1.0,
-        "source_file": "RELEASE.md"
-      },
-      {
-        "id": "e2e_ci_pipeline",
-        "label": "Playwright E2E CI Pipeline",
-        "nodes": [
-          "_github_workflows_e2e_playwright_job",
-          "tests_readme_e2e_suite",
-          "tests_readme_storagestate",
-          "tests_readme_safety_guard"
-        ],
-        "relation": "form",
-        "confidence": "EXTRACTED",
-        "confidence_score": 1.0,
-        "source_file": "tests/README.md"
-      },
-      {
-        "id": "known_limitations_disclosure",
-        "label": "Known Limitations Disclosure Across Docs",
-        "nodes": [
-          "readme_known_limitations",
-          "release_known_limitations",
-          "marketing_listing_known_limitations",
-          "todo_charts_not_rendered"
-        ],
-        "relation": "participate_in",
-        "confidence": "INFERRED",
-        "confidence_score": 0.85,
-        "source_file": "README.md"
-      }
-    ]
-  },
+  "graph": {},
   "nodes": [
     {
       "label": "attachments-html.js",
@@ -323,7 +277,7 @@
       "label": "formatDate()",
       "file_type": "code",
       "source_file": "js/attachments.js",
-      "source_location": "L17",
+      "source_location": "L19",
       "_origin": "ast",
       "id": "js_attachments_formatdate",
       "community": 6,
@@ -333,7 +287,7 @@
       "label": "t",
       "file_type": "code",
       "source_file": "js/attachments.js",
-      "source_location": "L23",
+      "source_location": "L25",
       "_origin": "ast",
       "id": "js_attachments_t",
       "community": 6,
@@ -343,7 +297,7 @@
       "label": "ensureToken()",
       "file_type": "code",
       "source_file": "js/attachments.js",
-      "source_location": "L25",
+      "source_location": "L27",
       "_origin": "ast",
       "id": "js_attachments_ensuretoken",
       "community": 6,
@@ -353,7 +307,7 @@
       "label": "openPreview()",
       "file_type": "code",
       "source_file": "js/attachments.js",
-      "source_location": "L38",
+      "source_location": "L40",
       "_origin": "ast",
       "id": "js_attachments_openpreview",
       "community": 6,
@@ -363,7 +317,7 @@
       "label": "downloadAttachment()",
       "file_type": "code",
       "source_file": "js/attachments.js",
-      "source_location": "L66",
+      "source_location": "L59",
       "_origin": "ast",
       "id": "js_attachments_downloadattachment",
       "community": 6,
@@ -373,7 +327,7 @@
       "label": "renameAttachment()",
       "file_type": "code",
       "source_file": "js/attachments.js",
-      "source_location": "L115",
+      "source_location": "L108",
       "_origin": "ast",
       "id": "js_attachments_renameattachment",
       "community": 6,
@@ -383,7 +337,7 @@
       "label": "deleteAttachment()",
       "file_type": "code",
       "source_file": "js/attachments.js",
-      "source_location": "L148",
+      "source_location": "L141",
       "_origin": "ast",
       "id": "js_attachments_deleteattachment",
       "community": 6,
@@ -393,7 +347,7 @@
       "label": "showActionsPopup()",
       "file_type": "code",
       "source_file": "js/attachments.js",
-      "source_location": "L172",
+      "source_location": "L165",
       "_origin": "ast",
       "id": "js_attachments_showactionspopup",
       "community": 6,
@@ -403,7 +357,7 @@
       "label": "renderItem()",
       "file_type": "code",
       "source_file": "js/attachments.js",
-      "source_location": "L202",
+      "source_location": "L195",
       "_origin": "ast",
       "id": "js_attachments_renderitem",
       "community": 6,
@@ -413,7 +367,7 @@
       "label": "renderList()",
       "file_type": "code",
       "source_file": "js/attachments.js",
-      "source_location": "L223",
+      "source_location": "L216",
       "_origin": "ast",
       "id": "js_attachments_renderlist",
       "community": 6,
@@ -523,7 +477,7 @@
       "label": "loadPreview()",
       "file_type": "code",
       "source_file": "js/preview.js",
-      "source_location": "L12",
+      "source_location": "L11",
       "_origin": "ast",
       "id": "js_preview_loadpreview",
       "community": 2,
@@ -533,7 +487,7 @@
       "label": "renderWorkbook()",
       "file_type": "code",
       "source_file": "js/preview.js",
-      "source_location": "L109",
+      "source_location": "L106",
       "_origin": "ast",
       "id": "js_preview_renderworkbook",
       "community": 2,
@@ -543,7 +497,7 @@
       "label": "parseStyles()",
       "file_type": "code",
       "source_file": "js/preview.js",
-      "source_location": "L137",
+      "source_location": "L134",
       "_origin": "ast",
       "id": "js_preview_parsestyles",
       "community": 2,
@@ -553,7 +507,7 @@
       "label": "parseAnchors()",
       "file_type": "code",
       "source_file": "js/preview.js",
-      "source_location": "L336",
+      "source_location": "L333",
       "_origin": "ast",
       "id": "js_preview_parseanchors",
       "community": 2,
@@ -563,7 +517,7 @@
       "label": "buildCellGrid()",
       "file_type": "code",
       "source_file": "js/preview.js",
-      "source_location": "L571",
+      "source_location": "L568",
       "_origin": "ast",
       "id": "js_preview_buildcellgrid",
       "community": 2,
@@ -573,7 +527,7 @@
       "label": "buildGridEdges()",
       "file_type": "code",
       "source_file": "js/preview.js",
-      "source_location": "L598",
+      "source_location": "L595",
       "_origin": "ast",
       "id": "js_preview_buildgridedges",
       "community": 2,
@@ -583,7 +537,7 @@
       "label": "positionImages()",
       "file_type": "code",
       "source_file": "js/preview.js",
-      "source_location": "L654",
+      "source_location": "L651",
       "_origin": "ast",
       "id": "js_preview_positionimages",
       "community": 2,
@@ -593,7 +547,7 @@
       "label": "buildColgroup()",
       "file_type": "code",
       "source_file": "js/preview.js",
-      "source_location": "L762",
+      "source_location": "L759",
       "_origin": "ast",
       "id": "js_preview_buildcolgroup",
       "community": 2,
@@ -603,7 +557,7 @@
       "label": "loadXlsxCalc()",
       "file_type": "code",
       "source_file": "js/preview.js",
-      "source_location": "L798",
+      "source_location": "L795",
       "_origin": "ast",
       "id": "js_preview_loadxlsxcalc",
       "community": 2,
@@ -613,7 +567,7 @@
       "label": "looksLikeCp1251Mojibake()",
       "file_type": "code",
       "source_file": "js/preview.js",
-      "source_location": "L818",
+      "source_location": "L815",
       "_origin": "ast",
       "id": "js_preview_lookslikecp1251mojibake",
       "community": 2,
@@ -623,7 +577,7 @@
       "label": "workbookHasUncomputedFormulas()",
       "file_type": "code",
       "source_file": "js/preview.js",
-      "source_location": "L838",
+      "source_location": "L835",
       "_origin": "ast",
       "id": "js_preview_workbookhasuncomputedformulas",
       "community": 2,
@@ -633,7 +587,7 @@
       "label": "applyFormulaCellFormats()",
       "file_type": "code",
       "source_file": "js/preview.js",
-      "source_location": "L858",
+      "source_location": "L855",
       "_origin": "ast",
       "id": "js_preview_applyformulacellformats",
       "community": 2,
@@ -643,7 +597,7 @@
       "label": "fillFormulaStubs()",
       "file_type": "code",
       "source_file": "js/preview.js",
-      "source_location": "L883",
+      "source_location": "L880",
       "_origin": "ast",
       "id": "js_preview_fillformulastubs",
       "community": 2,
@@ -653,7 +607,7 @@
       "label": "trimSheetRange()",
       "file_type": "code",
       "source_file": "js/preview.js",
-      "source_location": "L904",
+      "source_location": "L901",
       "_origin": "ast",
       "id": "js_preview_trimsheetrange",
       "community": 2,
@@ -663,7 +617,7 @@
       "label": "applyCellStyles()",
       "file_type": "code",
       "source_file": "js/preview.js",
-      "source_location": "L945",
+      "source_location": "L942",
       "_origin": "ast",
       "id": "js_preview_applycellstyles",
       "community": 2,
@@ -673,7 +627,7 @@
       "label": "switchSheet()",
       "file_type": "code",
       "source_file": "js/preview.js",
-      "source_location": "L979",
+      "source_location": "L976",
       "_origin": "ast",
       "id": "js_preview_switchsheet",
       "community": 2,
@@ -683,7 +637,7 @@
       "label": "showError()",
       "file_type": "code",
       "source_file": "js/preview.js",
-      "source_location": "L1026",
+      "source_location": "L1023",
       "_origin": "ast",
       "id": "js_preview_showerror",
       "community": 2,
@@ -693,21 +647,11 @@
       "label": "hideLoading()",
       "file_type": "code",
       "source_file": "js/preview.js",
-      "source_location": "L1033",
+      "source_location": "L1030",
       "_origin": "ast",
       "id": "js_preview_hideloading",
       "community": 2,
       "norm_label": "hideloading()"
-    },
-    {
-      "label": "printChannel",
-      "file_type": "code",
-      "source_file": "js/preview.js",
-      "source_location": "L1039",
-      "_origin": "ast",
-      "id": "js_preview_printchannel",
-      "community": 2,
-      "norm_label": "printchannel"
     },
     {
       "label": "settings.js",
@@ -906,7 +850,7 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "js_xlsx_calc_bundle_v",
-      "community": 11,
+      "community": 14,
       "norm_label": "v()"
     },
     {
@@ -926,7 +870,7 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "js_xlsx_calc_bundle_m",
-      "community": 11,
+      "community": 2,
       "norm_label": "m()"
     },
     {
@@ -1990,6 +1934,16 @@
       "norm_label": "print.spec.mjs"
     },
     {
+      "label": "openPreviewFrame()",
+      "file_type": "code",
+      "source_file": "tests/e2e/print.spec.mjs",
+      "source_location": "L22",
+      "_origin": "ast",
+      "id": "tests_e2e_print_spec_openpreviewframe",
+      "community": 4,
+      "norm_label": "openpreviewframe()"
+    },
+    {
       "label": "rename.spec.mjs",
       "file_type": "code",
       "source_file": "tests/e2e/rename.spec.mjs",
@@ -2356,7 +2310,7 @@
       "source_location": "L88",
       "_origin": "ast",
       "id": "tests_setup_seed_board_listfixtures",
-      "community": 7,
+      "community": 11,
       "norm_label": "listfixtures()"
     },
     {
@@ -2480,17 +2434,724 @@
       "norm_label": "headers"
     },
     {
-      "label": "Simple Excel Viewer (Trello Power-Up)",
-      "file_type": "concept",
+      "label": "CHANGELOG.md",
+      "file_type": "document",
+      "source_file": "CHANGELOG.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "changelog",
+      "community": 38,
+      "norm_label": "changelog.md"
+    },
+    {
+      "label": "Changelog",
+      "file_type": "document",
+      "source_file": "CHANGELOG.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "changelog_changelog",
+      "community": 38,
+      "norm_label": "changelog"
+    },
+    {
+      "label": "[Unreleased]",
+      "file_type": "document",
+      "source_file": "CHANGELOG.md",
+      "source_location": "L7",
+      "_origin": "ast",
+      "id": "changelog_unreleased",
+      "community": 38,
+      "norm_label": "[unreleased]"
+    },
+    {
+      "label": "Added",
+      "file_type": "document",
+      "source_file": "CHANGELOG.md",
+      "source_location": "L9",
+      "_origin": "ast",
+      "id": "changelog_added",
+      "community": 38,
+      "norm_label": "added"
+    },
+    {
+      "label": "Changed",
+      "file_type": "document",
+      "source_file": "CHANGELOG.md",
+      "source_location": "L21",
+      "_origin": "ast",
+      "id": "changelog_changed",
+      "community": 38,
+      "norm_label": "changed"
+    },
+    {
+      "label": "Fixed",
+      "file_type": "document",
+      "source_file": "CHANGELOG.md",
+      "source_location": "L27",
+      "_origin": "ast",
+      "id": "changelog_fixed",
+      "community": 38,
+      "norm_label": "fixed"
+    },
+    {
+      "label": "[1.0.0] \u2014 2026-05-13",
+      "file_type": "document",
+      "source_file": "CHANGELOG.md",
+      "source_location": "L35",
+      "_origin": "ast",
+      "id": "changelog_1_0_0_2026_05_13",
+      "community": 38,
+      "norm_label": "[1.0.0] \u2014 2026-05-13"
+    },
+    {
+      "label": "Added",
+      "file_type": "document",
+      "source_file": "CHANGELOG.md",
+      "source_location": "L41",
+      "_origin": "ast",
+      "id": "changelog_added_41",
+      "community": 38,
+      "norm_label": "added"
+    },
+    {
+      "label": "Fixed",
+      "file_type": "document",
+      "source_file": "CHANGELOG.md",
+      "source_location": "L50",
+      "_origin": "ast",
+      "id": "changelog_fixed_50",
+      "community": 38,
+      "norm_label": "fixed"
+    },
+    {
+      "label": "Security",
+      "file_type": "document",
+      "source_file": "CHANGELOG.md",
+      "source_location": "L54",
+      "_origin": "ast",
+      "id": "changelog_security",
+      "community": 38,
+      "norm_label": "security"
+    },
+    {
+      "label": "CLAUDE.md",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "claude",
+      "community": 40,
+      "norm_label": "claude.md"
+    },
+    {
+      "label": "CLAUDE.md",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "claude_claude_md",
+      "community": 40,
+      "norm_label": "claude.md"
+    },
+    {
+      "label": "1. Think Before Coding",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L7",
+      "_origin": "ast",
+      "id": "claude_1_think_before_coding",
+      "community": 40,
+      "norm_label": "1. think before coding"
+    },
+    {
+      "label": "2. Simplicity First",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L17",
+      "_origin": "ast",
+      "id": "claude_2_simplicity_first",
+      "community": 40,
+      "norm_label": "2. simplicity first"
+    },
+    {
+      "label": "3. Surgical Changes",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L29",
+      "_origin": "ast",
+      "id": "claude_3_surgical_changes",
+      "community": 40,
+      "norm_label": "3. surgical changes"
+    },
+    {
+      "label": "4. Goal-Driven Execution",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L45",
+      "_origin": "ast",
+      "id": "claude_4_goal_driven_execution",
+      "community": 40,
+      "norm_label": "4. goal-driven execution"
+    },
+    {
+      "label": "graphify",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L67",
+      "_origin": "ast",
+      "id": "claude_graphify",
+      "community": 40,
+      "norm_label": "graphify"
+    },
+    {
+      "label": "DEPLOY.md",
+      "file_type": "document",
+      "source_file": "DEPLOY.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "deploy",
+      "community": 41,
+      "norm_label": "deploy.md"
+    },
+    {
+      "label": "Deploy & Rollback",
+      "file_type": "document",
+      "source_file": "DEPLOY.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "deploy_deploy_rollback",
+      "community": 41,
+      "norm_label": "deploy & rollback"
+    },
+    {
+      "label": "Dev (test environment)",
+      "file_type": "document",
+      "source_file": "DEPLOY.md",
+      "source_location": "L6",
+      "_origin": "ast",
+      "id": "deploy_dev_test_environment",
+      "community": 41,
+      "norm_label": "dev (test environment)"
+    },
+    {
+      "label": "Prod",
+      "file_type": "document",
+      "source_file": "DEPLOY.md",
+      "source_location": "L21",
+      "_origin": "ast",
+      "id": "deploy_prod",
+      "community": 41,
+      "norm_label": "prod"
+    },
+    {
+      "label": "Rollback",
+      "file_type": "document",
+      "source_file": "DEPLOY.md",
+      "source_location": "L31",
+      "_origin": "ast",
+      "id": "deploy_rollback",
+      "community": 41,
+      "norm_label": "rollback"
+    },
+    {
+      "label": "README.md",
+      "file_type": "document",
       "source_file": "README.md",
-      "source_location": null,
-      "source_url": "https://trello-excel-preview.vercel.app/",
-      "captured_at": null,
-      "author": "Oleksandr Onufrienko",
-      "contributor": null,
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "readme",
+      "community": 8,
+      "norm_label": "readme.md"
+    },
+    {
+      "label": "Simple Excel Viewer",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L1",
+      "_origin": "ast",
       "id": "readme_simple_excel_viewer",
-      "community": 3,
-      "norm_label": "simple excel viewer (trello power-up)"
+      "community": 8,
+      "norm_label": "simple excel viewer"
+    },
+    {
+      "label": "What it does",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L8",
+      "_origin": "ast",
+      "id": "readme_what_it_does",
+      "community": 8,
+      "norm_label": "what it does"
+    },
+    {
+      "label": "Supported formats",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L19",
+      "_origin": "ast",
+      "id": "readme_supported_formats",
+      "community": 8,
+      "norm_label": "supported formats"
+    },
+    {
+      "label": "Known limitations",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L23",
+      "_origin": "ast",
+      "id": "readme_known_limitations",
+      "community": 8,
+      "norm_label": "known limitations"
+    },
+    {
+      "label": "Tech stack",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L33",
+      "_origin": "ast",
+      "id": "readme_tech_stack",
+      "community": 8,
+      "norm_label": "tech stack"
+    },
+    {
+      "label": "Project layout",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L40",
+      "_origin": "ast",
+      "id": "readme_project_layout",
+      "community": 8,
+      "norm_label": "project layout"
+    },
+    {
+      "label": "Legal",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L51",
+      "_origin": "ast",
+      "id": "readme_legal",
+      "community": 8,
+      "norm_label": "legal"
+    },
+    {
+      "label": "Contact",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L56",
+      "_origin": "ast",
+      "id": "readme_contact",
+      "community": 8,
+      "norm_label": "contact"
+    },
+    {
+      "label": "RELEASE.md",
+      "file_type": "document",
+      "source_file": "RELEASE.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "release",
+      "community": 37,
+      "norm_label": "release.md"
+    },
+    {
+      "label": "Release / Marketplace Submission Checklist",
+      "file_type": "document",
+      "source_file": "RELEASE.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "release_release_marketplace_submission_checklist",
+      "community": 37,
+      "norm_label": "release / marketplace submission checklist"
+    },
+    {
+      "label": "\u2705 Ready in this repo",
+      "file_type": "document",
+      "source_file": "RELEASE.md",
+      "source_location": "L7",
+      "_origin": "ast",
+      "id": "release_ready_in_this_repo",
+      "community": 37,
+      "norm_label": "\u2705 ready in this repo"
+    },
+    {
+      "label": "\ud83d\udfe1 Manual steps that need a browser",
+      "file_type": "document",
+      "source_file": "RELEASE.md",
+      "source_location": "L20",
+      "_origin": "ast",
+      "id": "release_manual_steps_that_need_a_browser",
+      "community": 37,
+      "norm_label": "\ud83d\udfe1 manual steps that need a browser"
+    },
+    {
+      "label": "1. Production screenshots (1280\u00d7720) \u2014 \u2705 DONE",
+      "file_type": "document",
+      "source_file": "RELEASE.md",
+      "source_location": "L24",
+      "_origin": "ast",
+      "id": "release_1_production_screenshots_1280_720_done",
+      "community": 37,
+      "norm_label": "1. production screenshots (1280\u00d7720) \u2014 \u2705 done"
+    },
+    {
+      "label": "2. Trello Power-Up admin (https://trello.com/power-ups/admin)",
+      "file_type": "document",
+      "source_file": "RELEASE.md",
+      "source_location": "L28",
+      "_origin": "ast",
+      "id": "release_2_trello_power_up_admin_https_trello_com_power_ups_admin",
+      "community": 37,
+      "norm_label": "2. trello power-up admin (https://trello.com/power-ups/admin)"
+    },
+    {
+      "label": "3. Atlassian Marketplace listing form",
+      "file_type": "document",
+      "source_file": "RELEASE.md",
+      "source_location": "L39",
+      "_origin": "ast",
+      "id": "release_3_atlassian_marketplace_listing_form",
+      "community": 37,
+      "norm_label": "3. atlassian marketplace listing form"
+    },
+    {
+      "label": "4. CI workflow \u2014 \u2705 DONE",
+      "file_type": "document",
+      "source_file": "RELEASE.md",
+      "source_location": "L49",
+      "_origin": "ast",
+      "id": "release_4_ci_workflow_done",
+      "community": 37,
+      "norm_label": "4. ci workflow \u2014 \u2705 done"
+    },
+    {
+      "label": "5. Post-launch operations",
+      "file_type": "document",
+      "source_file": "RELEASE.md",
+      "source_location": "L60",
+      "_origin": "ast",
+      "id": "release_5_post_launch_operations",
+      "community": 37,
+      "norm_label": "5. post-launch operations"
+    },
+    {
+      "label": "\ud83d\udd35 Known limitations to keep on the public roadmap",
+      "file_type": "document",
+      "source_file": "RELEASE.md",
+      "source_location": "L66",
+      "_origin": "ast",
+      "id": "release_known_limitations_to_keep_on_the_public_roadmap",
+      "community": 37,
+      "norm_label": "\ud83d\udd35 known limitations to keep on the public roadmap"
+    },
+    {
+      "label": "Contact",
+      "file_type": "document",
+      "source_file": "RELEASE.md",
+      "source_location": "L76",
+      "_origin": "ast",
+      "id": "release_contact",
+      "community": 37,
+      "norm_label": "contact"
+    },
+    {
+      "label": "TODO.md",
+      "file_type": "document",
+      "source_file": "TODO.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "todo",
+      "community": 8,
+      "norm_label": "todo.md"
+    },
+    {
+      "label": "TODO \u2014 exploratory follow-ups",
+      "file_type": "document",
+      "source_file": "TODO.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "todo_todo_exploratory_follow_ups",
+      "community": 8,
+      "norm_label": "todo \u2014 exploratory follow-ups"
+    },
+    {
+      "label": "Post-launch operations",
+      "file_type": "document",
+      "source_file": "TODO.md",
+      "source_location": "L5",
+      "_origin": "ast",
+      "id": "todo_post_launch_operations",
+      "community": 8,
+      "norm_label": "post-launch operations"
+    },
+    {
+      "label": "UptimeRobot monitoring on /api/health \u2014 DONE (2026-06-06)",
+      "file_type": "document",
+      "source_file": "TODO.md",
+      "source_location": "L7",
+      "_origin": "ast",
+      "id": "todo_uptimerobot_monitoring_on_api_health_done_2026_06_06",
+      "community": 8,
+      "norm_label": "uptimerobot monitoring on /api/health \u2014 done (2026-06-06)"
+    },
+    {
+      "label": "Cell styles (bold / italic / colors / fills) \u2014 FIXED (2026-06-06)",
+      "file_type": "document",
+      "source_file": "TODO.md",
+      "source_location": "L17",
+      "_origin": "ast",
+      "id": "todo_cell_styles_bold_italic_colors_fills_fixed_2026_06_06",
+      "community": 8,
+      "norm_label": "cell styles (bold / italic / colors / fills) \u2014 fixed (2026-06-06)"
+    },
+    {
+      "label": "Embedded image positioning \u2014 robust geometry + header band \u2014 DONE (2026-06-10)",
+      "file_type": "document",
+      "source_file": "TODO.md",
+      "source_location": "L35",
+      "_origin": "ast",
+      "id": "todo_embedded_image_positioning_robust_geometry_header_band_done_2026_06_10",
+      "community": 8,
+      "norm_label": "embedded image positioning \u2014 robust geometry + header band \u2014 done (2026-06-10)"
+    },
+    {
+      "label": "Other image files still misaligned on preview \u2014 DONE (2026-06-11, \"Images v2\")",
+      "file_type": "document",
+      "source_file": "TODO.md",
+      "source_location": "L48",
+      "_origin": "ast",
+      "id": "todo_other_image_files_still_misaligned_on_preview_done_2026_06_11_images_v2",
+      "community": 8,
+      "norm_label": "other image files still misaligned on preview \u2014 done (2026-06-11, \"images v2\")"
+    },
+    {
+      "label": "Formula calculation \u2014 DONE (2026-05-26)",
+      "file_type": "document",
+      "source_file": "TODO.md",
+      "source_location": "L63",
+      "_origin": "ast",
+      "id": "todo_formula_calculation_done_2026_05_26",
+      "community": 8,
+      "norm_label": "formula calculation \u2014 done (2026-05-26)"
+    },
+    {
+      "label": "listing.md",
+      "file_type": "document",
+      "source_file": "marketing/listing.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "marketing_listing",
+      "community": 36,
+      "norm_label": "listing.md"
+    },
+    {
+      "label": "Marketplace Listing Copy",
+      "file_type": "document",
+      "source_file": "marketing/listing.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "marketing_listing_marketplace_listing_copy",
+      "community": 36,
+      "norm_label": "marketplace listing copy"
+    },
+    {
+      "label": "Public name (\u2264 50 chars)",
+      "file_type": "document",
+      "source_file": "marketing/listing.md",
+      "source_location": "L9",
+      "_origin": "ast",
+      "id": "marketing_listing_public_name_50_chars",
+      "community": 36,
+      "norm_label": "public name (\u2264 50 chars)"
+    },
+    {
+      "label": "Tagline / short description (\u2264 120 chars)",
+      "file_type": "document",
+      "source_file": "marketing/listing.md",
+      "source_location": "L15",
+      "_origin": "ast",
+      "id": "marketing_listing_tagline_short_description_120_chars",
+      "community": 36,
+      "norm_label": "tagline / short description (\u2264 120 chars)"
+    },
+    {
+      "label": "Long description (\u2264 1500 chars)",
+      "file_type": "document",
+      "source_file": "marketing/listing.md",
+      "source_location": "L23",
+      "_origin": "ast",
+      "id": "marketing_listing_long_description_1500_chars",
+      "community": 36,
+      "norm_label": "long description (\u2264 1500 chars)"
+    },
+    {
+      "label": "Category",
+      "file_type": "document",
+      "source_file": "marketing/listing.md",
+      "source_location": "L53",
+      "_origin": "ast",
+      "id": "marketing_listing_category",
+      "community": 36,
+      "norm_label": "category"
+    },
+    {
+      "label": "Support contact",
+      "file_type": "document",
+      "source_file": "marketing/listing.md",
+      "source_location": "L59",
+      "_origin": "ast",
+      "id": "marketing_listing_support_contact",
+      "community": 36,
+      "norm_label": "support contact"
+    },
+    {
+      "label": "Privacy Policy URL",
+      "file_type": "document",
+      "source_file": "marketing/listing.md",
+      "source_location": "L65",
+      "_origin": "ast",
+      "id": "marketing_listing_privacy_policy_url",
+      "community": 36,
+      "norm_label": "privacy policy url"
+    },
+    {
+      "label": "Terms of Use URL",
+      "file_type": "document",
+      "source_file": "marketing/listing.md",
+      "source_location": "L71",
+      "_origin": "ast",
+      "id": "marketing_listing_terms_of_use_url",
+      "community": 36,
+      "norm_label": "terms of use url"
+    },
+    {
+      "label": "Author",
+      "file_type": "document",
+      "source_file": "marketing/listing.md",
+      "source_location": "L77",
+      "_origin": "ast",
+      "id": "marketing_listing_author",
+      "community": 36,
+      "norm_label": "author"
+    },
+    {
+      "label": "Iframe Connector URL",
+      "file_type": "document",
+      "source_file": "marketing/listing.md",
+      "source_location": "L83",
+      "_origin": "ast",
+      "id": "marketing_listing_iframe_connector_url",
+      "community": 36,
+      "norm_label": "iframe connector url"
+    },
+    {
+      "label": "Public Power-Up icon",
+      "file_type": "document",
+      "source_file": "marketing/listing.md",
+      "source_location": "L89",
+      "_origin": "ast",
+      "id": "marketing_listing_public_power_up_icon",
+      "community": 36,
+      "norm_label": "public power-up icon"
+    },
+    {
+      "label": "Screenshots (manual \u2014 needs the developer's browser)",
+      "file_type": "document",
+      "source_file": "marketing/listing.md",
+      "source_location": "L93",
+      "_origin": "ast",
+      "id": "marketing_listing_screenshots_manual_needs_the_developer_s_browser",
+      "community": 36,
+      "norm_label": "screenshots (manual \u2014 needs the developer's browser)"
+    },
+    {
+      "label": "Known limitations to disclose (optional, but honest)",
+      "file_type": "document",
+      "source_file": "marketing/listing.md",
+      "source_location": "L105",
+      "_origin": "ast",
+      "id": "marketing_listing_known_limitations_to_disclose_optional_but_honest",
+      "community": 36,
+      "norm_label": "known limitations to disclose (optional, but honest)"
+    },
+    {
+      "label": "README.md",
+      "file_type": "document",
+      "source_file": "tests/README.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "tests_readme",
+      "community": 39,
+      "norm_label": "readme.md"
+    },
+    {
+      "label": "e2e tests",
+      "file_type": "document",
+      "source_file": "tests/README.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "tests_readme_e2e_tests",
+      "community": 39,
+      "norm_label": "e2e tests"
+    },
+    {
+      "label": "Prerequisites",
+      "file_type": "document",
+      "source_file": "tests/README.md",
+      "source_location": "L6",
+      "_origin": "ast",
+      "id": "tests_readme_prerequisites",
+      "community": 39,
+      "norm_label": "prerequisites"
+    },
+    {
+      "label": "Setup (one-time)",
+      "file_type": "document",
+      "source_file": "tests/README.md",
+      "source_location": "L14",
+      "_origin": "ast",
+      "id": "tests_readme_setup_one_time",
+      "community": 39,
+      "norm_label": "setup (one-time)"
+    },
+    {
+      "label": "Running",
+      "file_type": "document",
+      "source_file": "tests/README.md",
+      "source_location": "L39",
+      "_origin": "ast",
+      "id": "tests_readme_running",
+      "community": 39,
+      "norm_label": "running"
+    },
+    {
+      "label": "Fixtures",
+      "file_type": "document",
+      "source_file": "tests/README.md",
+      "source_location": "L49",
+      "_origin": "ast",
+      "id": "tests_readme_fixtures",
+      "community": 39,
+      "norm_label": "fixtures"
+    },
+    {
+      "label": "Safety guard",
+      "file_type": "document",
+      "source_file": "tests/README.md",
+      "source_location": "L56",
+      "_origin": "ast",
+      "id": "tests_readme_safety_guard",
+      "community": 39,
+      "norm_label": "safety guard"
+    },
+    {
+      "label": "CI",
+      "file_type": "document",
+      "source_file": "tests/README.md",
+      "source_location": "L62",
+      "_origin": "ast",
+      "id": "tests_readme_ci",
+      "community": 39,
+      "norm_label": "ci"
     },
     {
       "label": "SheetJS (spreadsheet parsing/HTML rendering library)",
@@ -2501,9 +3162,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "readme_sheetjs",
       "community": 3,
-      "norm_label": "sheetjs (spreadsheet parsing/html rendering library)"
+      "norm_label": "sheetjs (spreadsheet parsing/html rendering library)",
+      "id": "readme_sheetjs"
     },
     {
       "label": "JSZip (zip extraction for embedded images/drawing anchors)",
@@ -2514,9 +3175,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "readme_jszip",
       "community": 3,
-      "norm_label": "jszip (zip extraction for embedded images/drawing anchors)"
+      "norm_label": "jszip (zip extraction for embedded images/drawing anchors)",
+      "id": "readme_jszip"
     },
     {
       "label": "Preview Proxy (/api/proxy)",
@@ -2528,35 +3189,9 @@
       "author": null,
       "contributor": null,
       "rationale": "CORS-bypassing in-memory fetch on Vercel: file streams through, never written to disk, so free Trello plans (10 MB) and paid plans (up to 25 MB) can both preview without server storage.",
-      "id": "readme_preview_proxy",
       "community": 3,
-      "norm_label": "preview proxy (/api/proxy)"
-    },
-    {
-      "label": "README Known Limitations",
-      "file_type": "document",
-      "source_file": "README.md",
-      "source_location": "## Known limitations",
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "readme_known_limitations",
-      "community": 8,
-      "norm_label": "readme known limitations"
-    },
-    {
-      "label": "Changelog (Keep a Changelog format)",
-      "file_type": "document",
-      "source_file": "CHANGELOG.md",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "changelog_changelog",
-      "community": 3,
-      "norm_label": "changelog (keep a changelog format)"
+      "norm_label": "preview proxy (/api/proxy)",
+      "id": "readme_preview_proxy"
     },
     {
       "label": "Client-side Formula Calculation",
@@ -2568,9 +3203,9 @@
       "author": null,
       "contributor": null,
       "rationale": "xlsx-calc is lazy-loaded only when the workbook has formula cells without cached values; files saved by Excel/LibreOffice (vast majority) skip the load entirely. Unsupported formulas fall back to showing the formula text (fillFormulaStubs kept as safety net).",
-      "id": "changelog_formula_calculation",
-      "community": 8,
-      "norm_label": "client-side formula calculation"
+      "community": 45,
+      "norm_label": "client-side formula calculation",
+      "id": "changelog_formula_calculation"
     },
     {
       "label": "xlsx-calc (MIT formula engine)",
@@ -2581,9 +3216,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "changelog_xlsx_calc",
-      "community": 8,
-      "norm_label": "xlsx-calc (mit formula engine)"
+      "community": 51,
+      "norm_label": "xlsx-calc (mit formula engine)",
+      "id": "changelog_xlsx_calc"
     },
     {
       "label": "Theme-palette Color Resolution",
@@ -2595,9 +3230,9 @@
       "author": null,
       "contributor": null,
       "rationale": "Excel's default color picker writes theme=+tint= refs, not rgb=; fills/font colors are resolved against xl/theme/theme1.xml with the ECMA tint formula. Untinted theme-0/1 (sheet default text/background) deliberately stay unresolved so dark mode keeps control. Indexed legacy colors remain unresolved (no real file hit them yet).",
-      "id": "changelog_theme_palette_colors",
-      "community": 20,
-      "norm_label": "theme-palette color resolution"
+      "community": 49,
+      "norm_label": "theme-palette color resolution",
+      "id": "changelog_theme_palette_colors"
     },
     {
       "label": "cp1251 Encoding Fix for Old .xls",
@@ -2609,9 +3244,9 @@
       "author": null,
       "contributor": null,
       "rationale": "BIFF files saved without a CODEPAGE record decoded as cp1252 and showed mojibake for Cyrillic; a dense U+00C0-U+00FF character signature is detected and the file is re-read as cp1251.",
-      "id": "changelog_cp1251_xls_encoding",
       "community": 20,
-      "norm_label": "cp1251 encoding fix for old .xls"
+      "norm_label": "cp1251 encoding fix for old .xls",
+      "id": "changelog_cp1251_xls_encoding"
     },
     {
       "label": "Embedded Image Positioning (monotonic grid edges)",
@@ -2623,9 +3258,9 @@
       "author": null,
       "contributor": null,
       "rationale": "twoCellAnchor images are sized from monotonic column/row edges of the laid-out grid (merged cells can't produce negative sizes), then refined to the picture's own a:xfrm/a:ext size and shrunk (never grown) to the anchor box so they can't spill onto text rows. Logos anchored in trimmed empty top rows render in a reserved header band.",
-      "id": "changelog_embedded_image_positioning",
-      "community": 8,
-      "norm_label": "embedded image positioning (monotonic grid edges)"
+      "community": 44,
+      "norm_label": "embedded image positioning (monotonic grid edges)",
+      "id": "changelog_embedded_image_positioning"
     },
     {
       "label": "WMF Labelled Placeholder Decision",
@@ -2637,9 +3272,9 @@
       "author": null,
       "contributor": null,
       "rationale": "Browsers can't decode legacy WMF vector clip-art. In-browser WMF-to-canvas conversion (js-wmf) was evaluated on 46 real files and rejected - half blank, half unusable black silhouettes - so WMF blips render as a same-size labelled placeholder instead of silently disappearing.",
-      "id": "changelog_wmf_placeholder",
-      "community": 8,
-      "norm_label": "wmf labelled placeholder decision"
+      "community": 50,
+      "norm_label": "wmf labelled placeholder decision",
+      "id": "changelog_wmf_placeholder"
     },
     {
       "label": "Authorization Capabilities (guideline #9)",
@@ -2651,9 +3286,9 @@
       "author": null,
       "contributor": null,
       "rationale": "authorization-status, show-authorization, show-settings and on-enable capabilities are required by Trello Marketplace guideline #9 for a Power-Up that authorizes the user for Rename/Delete.",
-      "id": "changelog_authorization_capabilities",
-      "community": 3,
-      "norm_label": "authorization capabilities (guideline #9)"
+      "community": 43,
+      "norm_label": "authorization capabilities (guideline #9)",
+      "id": "changelog_authorization_capabilities"
     },
     {
       "label": "Proxy Rate Limiting (30 req/min/IP)",
@@ -2664,9 +3299,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "changelog_rate_limiting",
-      "community": 3,
-      "norm_label": "proxy rate limiting (30 req/min/ip)"
+      "community": 47,
+      "norm_label": "proxy rate limiting (30 req/min/ip)",
+      "id": "changelog_rate_limiting"
     },
     {
       "label": "SSRF Allowlist (Trello + AWS S3, HTTPS only)",
@@ -2677,9 +3312,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "changelog_ssrf_allowlist",
-      "community": 3,
-      "norm_label": "ssrf allowlist (trello + aws s3, https only)"
+      "community": 48,
+      "norm_label": "ssrf allowlist (trello + aws s3, https only)",
+      "id": "changelog_ssrf_allowlist"
     },
     {
       "label": "/api/health Uptime Endpoint",
@@ -2690,9 +3325,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "changelog_health_endpoint",
-      "community": 3,
-      "norm_label": "/api/health uptime endpoint"
+      "community": 46,
+      "norm_label": "/api/health uptime endpoint",
+      "id": "changelog_health_endpoint"
     },
     {
       "label": "Preview Modal (client-side SheetJS parsing)",
@@ -2703,9 +3338,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "changelog_preview_modal",
       "community": 3,
-      "norm_label": "preview modal (client-side sheetjs parsing)"
+      "norm_label": "preview modal (client-side sheetjs parsing)",
+      "id": "changelog_preview_modal"
     },
     {
       "label": "Attachment Section (Preview/Download/Rename/Delete)",
@@ -2716,9 +3351,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "changelog_attachment_section",
       "community": 3,
-      "norm_label": "attachment section (preview/download/rename/delete)"
+      "norm_label": "attachment section (preview/download/rename/delete)",
+      "id": "changelog_attachment_section"
     },
     {
       "label": "Ko-fi Funding (river44)",
@@ -2729,9 +3364,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "_github_funding_ko_fi_river44",
       "community": 3,
-      "norm_label": "ko-fi funding (river44)"
+      "norm_label": "ko-fi funding (river44)",
+      "id": "_github_funding_ko_fi_river44"
     },
     {
       "label": "e2e GitHub Actions Workflow (playwright job)",
@@ -2743,9 +3378,9 @@
       "author": null,
       "contributor": null,
       "rationale": "Runs on PRs to main plus a nightly cron at 03:17 UTC to catch Trello/SheetJS-side breakage without an active PR; the off-peak time keeps Trello rate-limit headroom.",
-      "id": "_github_workflows_e2e_playwright_job",
-      "community": 3,
-      "norm_label": "e2e github actions workflow (playwright job)"
+      "community": 42,
+      "norm_label": "e2e github actions workflow (playwright job)",
+      "id": "_github_workflows_e2e_playwright_job"
     },
     {
       "label": "Playwright E2E Suite",
@@ -2757,23 +3392,9 @@
       "author": null,
       "contributor": null,
       "rationale": "Tests run only against a dedicated private test Trello board; synthetic fixtures are generated (generate-fixtures) and seeded as card attachments (seed-board) before runs.",
-      "id": "tests_readme_e2e_suite",
-      "community": 3,
-      "norm_label": "playwright e2e suite"
-    },
-    {
-      "label": "Test Board Safety Guard (_setup.mjs)",
-      "file_type": "concept",
-      "source_file": "tests/README.md",
-      "source_location": "## Safety guard",
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "rationale": "Validates TRELLO_TEST_BOARD_ID and refuses to run if missing or unexpected length; every test asserts the page URL contains the configured board ID before any destructive action, so the suite can never mutate a real board.",
-      "id": "tests_readme_safety_guard",
-      "community": 3,
-      "norm_label": "test board safety guard (_setup.mjs)"
+      "community": 42,
+      "norm_label": "playwright e2e suite",
+      "id": "tests_readme_e2e_suite"
     },
     {
       "label": "storageState.json Trello Session",
@@ -2785,23 +3406,9 @@
       "author": null,
       "contributor": null,
       "rationale": "Playwright login cookies saved by npm run auth; in CI restored from base64 secret TRELLO_STORAGE_STATE_B64. Trello cookies expire in ~30 days, so the secret must be regenerated periodically. The auth script also stores TRELLO_USER_TOKEN in member-private pluginData so Preview tests don't hang on an authorize() popup.",
-      "id": "tests_readme_storagestate",
-      "community": 3,
-      "norm_label": "storagestate.json trello session"
-    },
-    {
-      "label": "Release / Marketplace Submission Checklist",
-      "file_type": "document",
-      "source_file": "RELEASE.md",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": "Oleksandr Onufrienko",
-      "contributor": null,
-      "rationale": "Handover doc separating repo-ready automated artifacts from manual browser-only publisher steps (Trello Power-Up admin, Atlassian Marketplace form). Status 2026-06-03: submitted, awaiting review; kept as record + future-release runbook.",
-      "id": "release_marketplace_submission",
-      "community": 3,
-      "norm_label": "release / marketplace submission checklist"
+      "community": 42,
+      "norm_label": "storagestate.json trello session",
+      "id": "tests_readme_storagestate"
     },
     {
       "label": "RELEASE.md Known Limitations (public roadmap)",
@@ -2812,22 +3419,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "release_known_limitations",
-      "community": 8,
-      "norm_label": "release.md known limitations (public roadmap)"
-    },
-    {
-      "label": "Marketplace Listing Copy",
-      "file_type": "document",
-      "source_file": "marketing/listing.md",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": "Oleksandr Onufrienko",
-      "contributor": null,
-      "id": "marketing_listing_marketplace_listing",
-      "community": 3,
-      "norm_label": "marketplace listing copy"
+      "community": 54,
+      "norm_label": "release.md known limitations (public roadmap)",
+      "id": "release_known_limitations"
     },
     {
       "label": "Listing Known Limitations to Disclose",
@@ -2838,9 +3432,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "marketing_listing_known_limitations",
-      "community": 8,
-      "norm_label": "listing known limitations to disclose"
+      "community": 53,
+      "norm_label": "listing known limitations to disclose",
+      "id": "marketing_listing_known_limitations"
     },
     {
       "label": "Privacy Policy (EN + UA)",
@@ -2852,9 +3446,9 @@
       "author": "Oleksandr Onufrienko",
       "contributor": null,
       "rationale": "Privacy-by-design position: no analytics/trackers/cookies, no user database; attachment passes through the proxy in memory only; short-lived Trello token lives only in Trello's card-private storage; parsing happens entirely in the browser.",
-      "id": "privacy_privacy_policy",
       "community": 3,
-      "norm_label": "privacy policy (en + ua)"
+      "norm_label": "privacy policy (en + ua)",
+      "id": "privacy_privacy_policy"
     },
     {
       "label": "Trello Power-Up SDK (p.trellocdn.com)",
@@ -2865,9 +3459,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "privacy_trello_power_up_sdk",
       "community": 3,
-      "norm_label": "trello power-up sdk (p.trellocdn.com)"
+      "norm_label": "trello power-up sdk (p.trellocdn.com)",
+      "id": "privacy_trello_power_up_sdk"
     },
     {
       "label": "Terms of Use (EN + UA)",
@@ -2879,9 +3473,9 @@
       "author": "Oleksandr Onufrienko",
       "contributor": null,
       "rationale": "As-is/no-warranty license with $100 liability cap, governed by Ukrainian law; explicitly forbids abusing the proxy service or its rate limits.",
-      "id": "terms_terms_of_use",
       "community": 3,
-      "norm_label": "terms of use (en + ua)"
+      "norm_label": "terms of use (en + ua)",
+      "id": "terms_terms_of_use"
     },
     {
       "label": "On-enable Welcome Modal (welcome.html)",
@@ -2892,9 +3486,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "welcome_welcome_modal",
       "community": 3,
-      "norm_label": "on-enable welcome modal (welcome.html)"
+      "norm_label": "on-enable welcome modal (welcome.html)",
+      "id": "welcome_welcome_modal"
     },
     {
       "label": "Attachments Iframe Page (attachments.html)",
@@ -2905,9 +3499,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "attachments_attachments_page",
       "community": 3,
-      "norm_label": "attachments iframe page (attachments.html)"
+      "norm_label": "attachments iframe page (attachments.html)",
+      "id": "attachments_attachments_page"
     },
     {
       "label": "Preview Iframe Page (preview.html)",
@@ -2918,9 +3512,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "preview_preview_page",
       "community": 3,
-      "norm_label": "preview iframe page (preview.html)"
+      "norm_label": "preview iframe page (preview.html)",
+      "id": "preview_preview_page"
     },
     {
       "label": "TODO Exploratory Follow-ups",
@@ -2932,9 +3526,9 @@
       "author": null,
       "contributor": null,
       "rationale": "Non-blocking experiments; each item becomes its own branch when picked up.",
-      "id": "todo_todo_followups",
-      "community": 8,
-      "norm_label": "todo exploratory follow-ups"
+      "community": 59,
+      "norm_label": "todo exploratory follow-ups",
+      "id": "todo_todo_followups"
     },
     {
       "label": "Cell Styles Fix Root Cause (applyCellStyles selector)",
@@ -2946,9 +3540,9 @@
       "author": null,
       "contributor": null,
       "rationale": "The bug was never OOXML parsing (parseStyles was correct, 204 styled cells proven in Node) but the DOM selector in applyCellStyles: td[data-r] never exists, and sheet_to_html's id option makes cell ids 'excel-table-A1' not 'sjs-A1'. Final fix reads the cell address as the suffix after the last '-' (addresses never contain '-'), prefix-agnostic. Also honors explicit-false boolean font props (<b val=\"0\"/>) emitted by LibreOffice.",
-      "id": "todo_cell_styles_fix",
-      "community": 20,
-      "norm_label": "cell styles fix root cause (applycellstyles selector)"
+      "community": 55,
+      "norm_label": "cell styles fix root cause (applycellstyles selector)",
+      "id": "todo_cell_styles_fix"
     },
     {
       "label": "Image Positioning Fix (buildGridEdges + header band)",
@@ -2960,9 +3554,9 @@
       "author": null,
       "contributor": null,
       "rationale": "positionImages sized twoCellAnchor images from DOM rect differences; with merged cells the 'to' cell can land visually above 'from', producing negative height that a size guard silently dropped (all 7 images of a real price-list). Fix: buildGridEdges() computes monotonic cumulative colEdges/rowEdges like Excel does (never negative); negative from-indices clamp to 0; logos in trimmed empty top rows get a reserved header band via wrapper paddingTop.",
-      "id": "todo_image_positioning_fix",
-      "community": 8,
-      "norm_label": "image positioning fix (buildgridedges + header band)"
+      "community": 57,
+      "norm_label": "image positioning fix (buildgridedges + header band)",
+      "id": "todo_image_positioning_fix"
     },
     {
       "label": "Images v2 (a:xfrm ext sizing, rotation, groups, WMF)",
@@ -2974,9 +3568,9 @@
       "author": null,
       "contributor": null,
       "rationale": "Four root causes fixed in the shared algorithm: (1) size taken from the pic's own a:xfrm/a:ext EMU then shrunk-never-grown to the anchor box because our column widths differ from Excel's and most real anchors are editAs=oneCell; (2) a:xfrm rot (1/60000 deg) + flipH/flipV applied as CSS transforms; (3) grpSp groups render every pic in its own sub-box via chOff/chExt child space; (4) WMF blips get a labelled placeholder after js-wmf conversion was tested on all 46 real WMFs and rejected (23 blank, 23 black silhouettes). Deliberate remaining limits: oneCellAnchor can still overlap neighbours; charts (graphicFrame) not rendered - separate future feature.",
-      "id": "todo_images_v2",
-      "community": 8,
-      "norm_label": "images v2 (a:xfrm ext sizing, rotation, groups, wmf)"
+      "community": 58,
+      "norm_label": "images v2 (a:xfrm ext sizing, rotation, groups, wmf)",
+      "id": "todo_images_v2"
     },
     {
       "label": "UptimeRobot Monitoring on /api/health",
@@ -2988,9 +3582,9 @@
       "author": null,
       "contributor": null,
       "rationale": "Pings /api/health every 5 min and emails on downtime. The monitor watches HTTP 200 (+ optional status:ok keyword), not uptimeSeconds, because Vercel cold-starts reset uptimeSeconds to 0.",
-      "id": "todo_uptimerobot_monitoring",
-      "community": 3,
-      "norm_label": "uptimerobot monitoring on /api/health"
+      "community": 60,
+      "norm_label": "uptimerobot monitoring on /api/health",
+      "id": "todo_uptimerobot_monitoring"
     },
     {
       "label": "Charts (graphicFrame) Not Rendered",
@@ -3002,9 +3596,9 @@
       "author": null,
       "contributor": null,
       "rationale": "User decided chart rendering is a separate future feature - its own branch when picked up.",
-      "id": "todo_charts_not_rendered",
-      "community": 8,
-      "norm_label": "charts (graphicframe) not rendered"
+      "community": 56,
+      "norm_label": "charts (graphicframe) not rendered",
+      "id": "todo_charts_not_rendered"
     },
     {
       "label": "CLAUDE.md Behavioral Guidelines",
@@ -3016,9 +3610,9 @@
       "author": null,
       "contributor": null,
       "rationale": "Bias toward caution over speed: think before coding, simplicity first, surgical changes, goal-driven execution with verifiable success criteria.",
-      "id": "claude_behavioral_guidelines",
       "community": 28,
-      "norm_label": "claude.md behavioral guidelines"
+      "norm_label": "claude.md behavioral guidelines",
+      "id": "claude_behavioral_guidelines"
     },
     {
       "label": "Graphify Knowledge Graph Integration",
@@ -3029,9 +3623,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "claude_graphify_integration",
-      "community": 28,
-      "norm_label": "graphify knowledge graph integration"
+      "community": 52,
+      "norm_label": "graphify knowledge graph integration",
+      "id": "claude_graphify_integration"
     },
     {
       "label": "Excel Preview Icon (SVG)",
@@ -3042,9 +3636,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "images_excel_icon_icon",
       "community": 33,
-      "norm_label": "excel preview icon (svg)"
+      "norm_label": "excel preview icon (svg)",
+      "id": "images_excel_icon_icon"
     },
     {
       "label": "Print Icon (SVG)",
@@ -3055,9 +3649,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "images_print_icon_print_icon",
       "community": 34,
-      "norm_label": "print icon (svg)"
+      "norm_label": "print icon (svg)",
+      "id": "images_print_icon_print_icon"
     },
     {
       "label": "Trello Excel Preview App Icon (1024px)",
@@ -3068,9 +3662,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "marketing_icon_1024_app_icon",
       "community": 16,
-      "norm_label": "trello excel preview app icon (1024px)"
+      "norm_label": "trello excel preview app icon (1024px)",
+      "id": "marketing_icon_1024_app_icon"
     },
     {
       "label": "White X Letterform (Excel Motif)",
@@ -3081,9 +3675,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "marketing_icon_1024_x_glyph",
       "community": 16,
-      "norm_label": "white x letterform (excel motif)"
+      "norm_label": "white x letterform (excel motif)",
+      "id": "marketing_icon_1024_x_glyph"
     },
     {
       "label": "Spreadsheet Grid Motif (2x3 Cells)",
@@ -3094,9 +3688,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "marketing_icon_1024_spreadsheet_grid",
       "community": 16,
-      "norm_label": "spreadsheet grid motif (2x3 cells)"
+      "norm_label": "spreadsheet grid motif (2x3 cells)",
+      "id": "marketing_icon_1024_spreadsheet_grid"
     },
     {
       "label": "Excel-Style Green Branding",
@@ -3107,9 +3701,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "marketing_icon_1024_excel_branding_concept",
       "community": 16,
-      "norm_label": "excel-style green branding"
+      "norm_label": "excel-style green branding",
+      "id": "marketing_icon_1024_excel_branding_concept"
     },
     {
       "label": "Trello Power-Up Marketplace Listing Asset",
@@ -3120,9 +3714,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "marketing_icon_1024_powerup_listing_concept",
       "community": 16,
-      "norm_label": "trello power-up marketplace listing asset"
+      "norm_label": "trello power-up marketplace listing asset",
+      "id": "marketing_icon_1024_powerup_listing_concept"
     },
     {
       "label": "Power-Up Demo GIF Screenshot",
@@ -3133,9 +3727,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "marketing_power_up_gif_screenshot",
       "community": 13,
-      "norm_label": "power-up demo gif screenshot"
+      "norm_label": "power-up demo gif screenshot",
+      "id": "marketing_power_up_gif_screenshot"
     },
     {
       "label": "Trello Card Back Modal (test card, list '\u0412 \u0440\u043e\u0431\u043e\u0442\u0456')",
@@ -3146,9 +3740,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "marketing_power_up_gif_screenshot_trello_card_modal",
       "community": 13,
-      "norm_label": "trello card back modal (test card, list '\u0432 \u0440\u043e\u0431\u043e\u0442\u0456')"
+      "norm_label": "trello card back modal (test card, list '\u0432 \u0440\u043e\u0431\u043e\u0442\u0456')",
+      "id": "marketing_power_up_gif_screenshot_trello_card_modal"
     },
     {
       "label": "Card Toolbar with Attachment Button (Add / Labels / Dates / Checklist / Attachment)",
@@ -3159,9 +3753,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "marketing_power_up_gif_screenshot_attachment_toolbar",
       "community": 13,
-      "norm_label": "card toolbar with attachment button (add / labels / dates / checklist / attachment)"
+      "norm_label": "card toolbar with attachment button (add / labels / dates / checklist / attachment)",
+      "id": "marketing_power_up_gif_screenshot_attachment_toolbar"
     },
     {
       "label": "Floating Tab Pill: Power-ups / Automations / Comments",
@@ -3172,9 +3766,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "marketing_power_up_gif_screenshot_powerups_tab_pill",
       "community": 13,
-      "norm_label": "floating tab pill: power-ups / automations / comments"
+      "norm_label": "floating tab pill: power-ups / automations / comments",
+      "id": "marketing_power_up_gif_screenshot_powerups_tab_pill"
     },
     {
       "label": "Background Board Card with Attachment Badges (Instruments, 19 May)",
@@ -3185,9 +3779,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "marketing_power_up_gif_screenshot_board_card_with_attachments",
       "community": 13,
-      "norm_label": "background board card with attachment badges (instruments, 19 may)"
+      "norm_label": "background board card with attachment badges (instruments, 19 may)",
+      "id": "marketing_power_up_gif_screenshot_board_card_with_attachments"
     },
     {
       "label": "Marketing Demo Asset for Trello Excel Preview Power-Up Listing",
@@ -3198,9 +3792,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "marketing_power_up_gif_screenshot_marketing_demo_asset",
       "community": 13,
-      "norm_label": "marketing demo asset for trello excel preview power-up listing"
+      "norm_label": "marketing demo asset for trello excel preview power-up listing",
+      "id": "marketing_power_up_gif_screenshot_marketing_demo_asset"
     },
     {
       "label": "Ukrainian Locale UI (list '\u0412 \u0440\u043e\u0431\u043e\u0442\u0456', user '\u041e\u043b\u0435\u043a\u0441\u0430\u043d\u0434\u0440 \u041e.')",
@@ -3211,9 +3805,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "marketing_power_up_gif_screenshot_ukrainian_locale",
       "community": 13,
-      "norm_label": "ukrainian locale ui (list '\u0432 \u0440\u043e\u0431\u043e\u0442\u0456', user '\u043e\u043b\u0435\u043a\u0441\u0430\u043d\u0434\u0440 \u043e.')"
+      "norm_label": "ukrainian locale ui (list '\u0432 \u0440\u043e\u0431\u043e\u0442\u0456', user '\u043e\u043b\u0435\u043a\u0441\u0430\u043d\u0434\u0440 \u043e.')",
+      "id": "marketing_power_up_gif_screenshot_ukrainian_locale"
     }
   ],
   "links": [
@@ -3436,7 +4030,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "js/attachments.js",
-      "source_location": "L148",
+      "source_location": "L141",
       "weight": 1.0,
       "source": "js_attachments",
       "target": "js_attachments_deleteattachment",
@@ -3446,7 +4040,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "js/attachments.js",
-      "source_location": "L66",
+      "source_location": "L59",
       "weight": 1.0,
       "source": "js_attachments",
       "target": "js_attachments_downloadattachment",
@@ -3456,7 +4050,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "js/attachments.js",
-      "source_location": "L25",
+      "source_location": "L27",
       "weight": 1.0,
       "source": "js_attachments",
       "target": "js_attachments_ensuretoken",
@@ -3486,7 +4080,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "js/attachments.js",
-      "source_location": "L17",
+      "source_location": "L19",
       "weight": 1.0,
       "source": "js_attachments",
       "target": "js_attachments_formatdate",
@@ -3506,7 +4100,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "js/attachments.js",
-      "source_location": "L38",
+      "source_location": "L40",
       "weight": 1.0,
       "source": "js_attachments",
       "target": "js_attachments_openpreview",
@@ -3516,7 +4110,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "js/attachments.js",
-      "source_location": "L115",
+      "source_location": "L108",
       "weight": 1.0,
       "source": "js_attachments",
       "target": "js_attachments_renameattachment",
@@ -3526,7 +4120,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "js/attachments.js",
-      "source_location": "L202",
+      "source_location": "L195",
       "weight": 1.0,
       "source": "js_attachments",
       "target": "js_attachments_renderitem",
@@ -3536,7 +4130,7 @@
       "relation": "indirect_call",
       "confidence": "INFERRED",
       "source_file": "js/attachments.js",
-      "source_location": "L241",
+      "source_location": "L234",
       "weight": 1.0,
       "context": "argument",
       "source": "js_attachments",
@@ -3547,7 +4141,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "js/attachments.js",
-      "source_location": "L172",
+      "source_location": "L165",
       "weight": 1.0,
       "source": "js_attachments",
       "target": "js_attachments_showactionspopup",
@@ -3557,7 +4151,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "js/attachments.js",
-      "source_location": "L23",
+      "source_location": "L25",
       "weight": 1.0,
       "source": "js_attachments",
       "target": "js_attachments_t",
@@ -3568,7 +4162,7 @@
       "context": "argument",
       "confidence": "INFERRED",
       "source_file": "js/attachments.js",
-      "source_location": "L227",
+      "source_location": "L220",
       "weight": 1.0,
       "source": "js_attachments_renderlist",
       "target": "js_attachments_isexcel",
@@ -3579,7 +4173,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "js/attachments.js",
-      "source_location": "L209",
+      "source_location": "L202",
       "weight": 1.0,
       "source": "js_attachments_renderitem",
       "target": "js_attachments_esc",
@@ -3591,7 +4185,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "js/attachments.js",
-      "source_location": "L19",
+      "source_location": "L21",
       "weight": 1.0,
       "source": "js_attachments_formatdate",
       "target": "js_attachments_date_fmt"
@@ -3601,7 +4195,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "js/attachments.js",
-      "source_location": "L210",
+      "source_location": "L203",
       "weight": 1.0,
       "source": "js_attachments_renderitem",
       "target": "js_attachments_formatdate",
@@ -3612,7 +4206,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "js/attachments.js",
-      "source_location": "L152",
+      "source_location": "L145",
       "weight": 1.0,
       "source": "js_attachments_deleteattachment",
       "target": "js_attachments_ensuretoken",
@@ -3623,7 +4217,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "js/attachments.js",
-      "source_location": "L67",
+      "source_location": "L60",
       "weight": 1.0,
       "source": "js_attachments_downloadattachment",
       "target": "js_attachments_ensuretoken",
@@ -3634,7 +4228,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "js/attachments.js",
-      "source_location": "L39",
+      "source_location": "L41",
       "weight": 1.0,
       "source": "js_attachments_openpreview",
       "target": "js_attachments_ensuretoken",
@@ -3645,7 +4239,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "js/attachments.js",
-      "source_location": "L122",
+      "source_location": "L115",
       "weight": 1.0,
       "source": "js_attachments_renameattachment",
       "target": "js_attachments_ensuretoken",
@@ -3656,7 +4250,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "js/attachments.js",
-      "source_location": "L218",
+      "source_location": "L211",
       "weight": 1.0,
       "source": "js_attachments_renderitem",
       "target": "js_attachments_openpreview",
@@ -3667,7 +4261,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "js/attachments.js",
-      "source_location": "L181",
+      "source_location": "L174",
       "weight": 1.0,
       "source": "js_attachments_showactionspopup",
       "target": "js_attachments_downloadattachment",
@@ -3678,9 +4272,31 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "js/attachments.js",
-      "source_location": "L141",
+      "source_location": "L134",
       "weight": 1.0,
       "source": "js_attachments_renameattachment",
+      "target": "js_attachments_renderlist",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "js/attachments.js",
+      "source_location": "L181",
+      "weight": 1.0,
+      "source": "js_attachments_showactionspopup",
+      "target": "js_attachments_renameattachment",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "js/attachments.js",
+      "source_location": "L158",
+      "weight": 1.0,
+      "source": "js_attachments_deleteattachment",
       "target": "js_attachments_renderlist",
       "confidence_score": 1.0
     },
@@ -3692,28 +4308,6 @@
       "source_location": "L188",
       "weight": 1.0,
       "source": "js_attachments_showactionspopup",
-      "target": "js_attachments_renameattachment",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "js/attachments.js",
-      "source_location": "L165",
-      "weight": 1.0,
-      "source": "js_attachments_deleteattachment",
-      "target": "js_attachments_renderlist",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "js/attachments.js",
-      "source_location": "L195",
-      "weight": 1.0,
-      "source": "js_attachments_showactionspopup",
       "target": "js_attachments_deleteattachment",
       "confidence_score": 1.0
     },
@@ -3722,7 +4316,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "js/attachments.js",
-      "source_location": "L219",
+      "source_location": "L212",
       "weight": 1.0,
       "source": "js_attachments_renderitem",
       "target": "js_attachments_showactionspopup",
@@ -3733,7 +4327,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "js/attachments.js",
-      "source_location": "L232",
+      "source_location": "L225",
       "weight": 1.0,
       "source": "js_attachments_renderlist",
       "target": "js_attachments_renderitem",
@@ -3745,7 +4339,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "js/attachments.js",
-      "source_location": "L232",
+      "source_location": "L225",
       "weight": 1.0,
       "source": "js_attachments_renderlist",
       "target": "js_xlsx_calc_bundle_f"
@@ -3784,7 +4378,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "js/preview.js",
-      "source_location": "L945",
+      "source_location": "L942",
       "weight": 1.0,
       "source": "js_preview",
       "target": "js_preview_applycellstyles",
@@ -3794,7 +4388,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "js/preview.js",
-      "source_location": "L858",
+      "source_location": "L855",
       "weight": 1.0,
       "source": "js_preview",
       "target": "js_preview_applyformulacellformats",
@@ -3814,7 +4408,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "js/preview.js",
-      "source_location": "L571",
+      "source_location": "L568",
       "weight": 1.0,
       "source": "js_preview",
       "target": "js_preview_buildcellgrid",
@@ -3824,7 +4418,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "js/preview.js",
-      "source_location": "L762",
+      "source_location": "L759",
       "weight": 1.0,
       "source": "js_preview",
       "target": "js_preview_buildcolgroup",
@@ -3834,7 +4428,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "js/preview.js",
-      "source_location": "L598",
+      "source_location": "L595",
       "weight": 1.0,
       "source": "js_preview",
       "target": "js_preview_buildgridedges",
@@ -3864,7 +4458,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "js/preview.js",
-      "source_location": "L883",
+      "source_location": "L880",
       "weight": 1.0,
       "source": "js_preview",
       "target": "js_preview_fillformulastubs",
@@ -3874,7 +4468,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "js/preview.js",
-      "source_location": "L1033",
+      "source_location": "L1030",
       "weight": 1.0,
       "source": "js_preview",
       "target": "js_preview_hideloading",
@@ -3884,7 +4478,7 @@
       "relation": "indirect_call",
       "confidence": "INFERRED",
       "source_file": "js/preview.js",
-      "source_location": "L1046",
+      "source_location": "L1037",
       "weight": 1.0,
       "context": "argument",
       "source": "js_preview",
@@ -3895,7 +4489,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "js/preview.js",
-      "source_location": "L798",
+      "source_location": "L795",
       "weight": 1.0,
       "source": "js_preview",
       "target": "js_preview_loadxlsxcalc",
@@ -3905,7 +4499,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "js/preview.js",
-      "source_location": "L818",
+      "source_location": "L815",
       "weight": 1.0,
       "source": "js_preview",
       "target": "js_preview_lookslikecp1251mojibake",
@@ -3915,7 +4509,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "js/preview.js",
-      "source_location": "L336",
+      "source_location": "L333",
       "weight": 1.0,
       "source": "js_preview",
       "target": "js_preview_parseanchors",
@@ -3925,7 +4519,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "js/preview.js",
-      "source_location": "L137",
+      "source_location": "L134",
       "weight": 1.0,
       "source": "js_preview",
       "target": "js_preview_parsestyles",
@@ -3935,7 +4529,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "js/preview.js",
-      "source_location": "L654",
+      "source_location": "L651",
       "weight": 1.0,
       "source": "js_preview",
       "target": "js_preview_positionimages",
@@ -3945,17 +4539,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "js/preview.js",
-      "source_location": "L1039",
-      "weight": 1.0,
-      "source": "js_preview",
-      "target": "js_preview_printchannel",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "js/preview.js",
-      "source_location": "L109",
+      "source_location": "L106",
       "weight": 1.0,
       "source": "js_preview",
       "target": "js_preview_renderworkbook",
@@ -3965,7 +4549,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "js/preview.js",
-      "source_location": "L1026",
+      "source_location": "L1023",
       "weight": 1.0,
       "source": "js_preview",
       "target": "js_preview_showerror",
@@ -3975,7 +4559,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "js/preview.js",
-      "source_location": "L979",
+      "source_location": "L976",
       "weight": 1.0,
       "source": "js_preview",
       "target": "js_preview_switchsheet",
@@ -3995,7 +4579,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "js/preview.js",
-      "source_location": "L904",
+      "source_location": "L901",
       "weight": 1.0,
       "source": "js_preview",
       "target": "js_preview_trimsheetrange",
@@ -4005,7 +4589,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "js/preview.js",
-      "source_location": "L838",
+      "source_location": "L835",
       "weight": 1.0,
       "source": "js_preview",
       "target": "js_preview_workbookhasuncomputedformulas",
@@ -4016,7 +4600,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "js/preview.js",
-      "source_location": "L98",
+      "source_location": "L95",
       "weight": 1.0,
       "source": "js_preview_loadpreview",
       "target": "js_preview_applyformulacellformats",
@@ -4027,7 +4611,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "js/preview.js",
-      "source_location": "L97",
+      "source_location": "L94",
       "weight": 1.0,
       "source": "js_preview_loadpreview",
       "target": "js_preview_fillformulastubs",
@@ -4038,7 +4622,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "js/preview.js",
-      "source_location": "L91",
+      "source_location": "L88",
       "weight": 1.0,
       "source": "js_preview_loadpreview",
       "target": "js_preview_loadxlsxcalc",
@@ -4049,7 +4633,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "js/preview.js",
-      "source_location": "L86",
+      "source_location": "L83",
       "weight": 1.0,
       "source": "js_preview_loadpreview",
       "target": "js_preview_lookslikecp1251mojibake",
@@ -4060,7 +4644,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "js/preview.js",
-      "source_location": "L61",
+      "source_location": "L58",
       "weight": 1.0,
       "source": "js_preview_loadpreview",
       "target": "js_preview_parseanchors",
@@ -4071,7 +4655,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "js/preview.js",
-      "source_location": "L62",
+      "source_location": "L59",
       "weight": 1.0,
       "source": "js_preview_loadpreview",
       "target": "js_preview_parsestyles",
@@ -4082,7 +4666,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "js/preview.js",
-      "source_location": "L102",
+      "source_location": "L99",
       "weight": 1.0,
       "source": "js_preview_loadpreview",
       "target": "js_preview_renderworkbook",
@@ -4093,7 +4677,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "js/preview.js",
-      "source_location": "L16",
+      "source_location": "L15",
       "weight": 1.0,
       "source": "js_preview_loadpreview",
       "target": "js_preview_showerror",
@@ -4104,7 +4688,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "js/preview.js",
-      "source_location": "L89",
+      "source_location": "L86",
       "weight": 1.0,
       "source": "js_preview_loadpreview",
       "target": "js_preview_workbookhasuncomputedformulas",
@@ -4116,7 +4700,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "js/preview.js",
-      "source_location": "L52",
+      "source_location": "L49",
       "weight": 1.0,
       "source": "js_preview_loadpreview",
       "target": "js_xlsx_calc_bundle_u"
@@ -4127,7 +4711,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "js/preview.js",
-      "source_location": "L75",
+      "source_location": "L72",
       "weight": 1.0,
       "source": "js_preview_loadpreview",
       "target": "package_devdependencies_xlsx"
@@ -4137,7 +4721,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "js/preview.js",
-      "source_location": "L110",
+      "source_location": "L107",
       "weight": 1.0,
       "source": "js_preview_renderworkbook",
       "target": "js_preview_hideloading",
@@ -4148,7 +4732,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "js/preview.js",
-      "source_location": "L122",
+      "source_location": "L119",
       "weight": 1.0,
       "source": "js_preview_renderworkbook",
       "target": "js_preview_switchsheet",
@@ -4160,7 +4744,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "js/preview.js",
-      "source_location": "L163",
+      "source_location": "L160",
       "weight": 1.0,
       "source": "js_preview_parsestyles",
       "target": "js_xlsx_calc_bundle_b"
@@ -4171,7 +4755,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "js/preview.js",
-      "source_location": "L189",
+      "source_location": "L186",
       "weight": 1.0,
       "source": "js_preview_parsestyles",
       "target": "js_xlsx_calc_bundle_h"
@@ -4181,7 +4765,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "js/preview.js",
-      "source_location": "L655",
+      "source_location": "L652",
       "weight": 1.0,
       "source": "js_preview_positionimages",
       "target": "js_preview_buildcellgrid",
@@ -4193,7 +4777,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "js/preview.js",
-      "source_location": "L600",
+      "source_location": "L597",
       "weight": 1.0,
       "source": "js_preview_buildgridedges",
       "target": "js_xlsx_calc_bundle_m"
@@ -4203,7 +4787,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "js/preview.js",
-      "source_location": "L657",
+      "source_location": "L654",
       "weight": 1.0,
       "source": "js_preview_positionimages",
       "target": "js_preview_buildgridedges",
@@ -4215,7 +4799,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "js/preview.js",
-      "source_location": "L720",
+      "source_location": "L717",
       "weight": 1.0,
       "source": "js_preview_positionimages",
       "target": "js_xlsx_calc_bundle_a"
@@ -4226,7 +4810,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "js/preview.js",
-      "source_location": "L660",
+      "source_location": "L657",
       "weight": 1.0,
       "source": "js_preview_positionimages",
       "target": "js_xlsx_calc_bundle_c"
@@ -4237,7 +4821,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "js/preview.js",
-      "source_location": "L728",
+      "source_location": "L725",
       "weight": 1.0,
       "source": "js_preview_positionimages",
       "target": "js_xlsx_calc_bundle_m"
@@ -4247,7 +4831,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "js/preview.js",
-      "source_location": "L1016",
+      "source_location": "L1013",
       "weight": 1.0,
       "source": "js_preview_switchsheet",
       "target": "js_preview_positionimages",
@@ -4258,7 +4842,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "js/preview.js",
-      "source_location": "L998",
+      "source_location": "L995",
       "weight": 1.0,
       "source": "js_preview_switchsheet",
       "target": "js_preview_buildcolgroup",
@@ -4270,7 +4854,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "js/preview.js",
-      "source_location": "L809",
+      "source_location": "L806",
       "weight": 1.0,
       "source": "js_preview_loadxlsxcalc",
       "target": "js_xlsx_calc_bundle_s"
@@ -4280,7 +4864,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "js/preview.js",
-      "source_location": "L984",
+      "source_location": "L981",
       "weight": 1.0,
       "source": "js_preview_switchsheet",
       "target": "js_preview_trimsheetrange",
@@ -4291,7 +4875,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "js/preview.js",
-      "source_location": "L1006",
+      "source_location": "L1003",
       "weight": 1.0,
       "source": "js_preview_switchsheet",
       "target": "js_preview_applycellstyles",
@@ -4302,7 +4886,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "js/preview.js",
-      "source_location": "L1027",
+      "source_location": "L1024",
       "weight": 1.0,
       "source": "js_preview_showerror",
       "target": "js_preview_hideloading",
@@ -6212,6 +6796,16 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "tests/e2e/print.spec.mjs",
+      "source_location": "L22",
+      "weight": 1.0,
+      "source": "tests_e2e_print_spec",
+      "target": "tests_e2e_print_spec_openpreviewframe",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "tests/generate-fixtures.mjs",
       "source_location": "L34",
       "weight": 1.0,
@@ -6917,74 +7511,654 @@
       "confidence_score": 1.0
     },
     {
-      "relation": "conceptually_related_to",
+      "relation": "contains",
       "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "marketing/listing.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "marketing_listing_marketplace_listing",
-      "target": "readme_simple_excel_viewer"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "README.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "readme_simple_excel_viewer",
-      "target": "privacy_privacy_policy"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "README.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "readme_simple_excel_viewer",
-      "target": "readme_jszip"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "README.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "readme_simple_excel_viewer",
-      "target": "readme_preview_proxy"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "README.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "readme_simple_excel_viewer",
-      "target": "readme_sheetjs"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "README.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "readme_simple_excel_viewer",
-      "target": "terms_terms_of_use"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
       "source_file": "CHANGELOG.md",
-      "source_location": null,
+      "source_location": "L1",
       "weight": 1.0,
-      "source": "changelog_preview_modal",
-      "target": "readme_sheetjs"
+      "source": "changelog",
+      "target": "changelog_changelog",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CHANGELOG.md",
+      "source_location": "L35",
+      "weight": 1.0,
+      "source": "changelog_changelog",
+      "target": "changelog_1_0_0_2026_05_13",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CHANGELOG.md",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "changelog_changelog",
+      "target": "changelog_unreleased",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CHANGELOG.md",
+      "source_location": "L9",
+      "weight": 1.0,
+      "source": "changelog_unreleased",
+      "target": "changelog_added",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CHANGELOG.md",
+      "source_location": "L21",
+      "weight": 1.0,
+      "source": "changelog_unreleased",
+      "target": "changelog_changed",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CHANGELOG.md",
+      "source_location": "L27",
+      "weight": 1.0,
+      "source": "changelog_unreleased",
+      "target": "changelog_fixed",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CHANGELOG.md",
+      "source_location": "L41",
+      "weight": 1.0,
+      "source": "changelog_1_0_0_2026_05_13",
+      "target": "changelog_added_41",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CHANGELOG.md",
+      "source_location": "L50",
+      "weight": 1.0,
+      "source": "changelog_1_0_0_2026_05_13",
+      "target": "changelog_fixed_50",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CHANGELOG.md",
+      "source_location": "L54",
+      "weight": 1.0,
+      "source": "changelog_1_0_0_2026_05_13",
+      "target": "changelog_security",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "claude",
+      "target": "claude_claude_md",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "claude_claude_md",
+      "target": "claude_1_think_before_coding",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L17",
+      "weight": 1.0,
+      "source": "claude_claude_md",
+      "target": "claude_2_simplicity_first",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L29",
+      "weight": 1.0,
+      "source": "claude_claude_md",
+      "target": "claude_3_surgical_changes",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L45",
+      "weight": 1.0,
+      "source": "claude_claude_md",
+      "target": "claude_4_goal_driven_execution",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L67",
+      "weight": 1.0,
+      "source": "claude_claude_md",
+      "target": "claude_graphify",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "DEPLOY.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "deploy",
+      "target": "deploy_deploy_rollback",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "DEPLOY.md",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "deploy_deploy_rollback",
+      "target": "deploy_dev_test_environment",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "DEPLOY.md",
+      "source_location": "L21",
+      "weight": 1.0,
+      "source": "deploy_deploy_rollback",
+      "target": "deploy_prod",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "DEPLOY.md",
+      "source_location": "L31",
+      "weight": 1.0,
+      "source": "deploy_deploy_rollback",
+      "target": "deploy_rollback",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "readme",
+      "target": "readme_simple_excel_viewer",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L31",
+      "weight": 1.0,
+      "source": "readme",
+      "target": "todo",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L56",
+      "weight": 1.0,
+      "source": "readme_simple_excel_viewer",
+      "target": "readme_contact",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L23",
+      "weight": 1.0,
+      "source": "readme_simple_excel_viewer",
+      "target": "readme_known_limitations",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L51",
+      "weight": 1.0,
+      "source": "readme_simple_excel_viewer",
+      "target": "readme_legal",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L40",
+      "weight": 1.0,
+      "source": "readme_simple_excel_viewer",
+      "target": "readme_project_layout",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L19",
+      "weight": 1.0,
+      "source": "readme_simple_excel_viewer",
+      "target": "readme_supported_formats",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L33",
+      "weight": 1.0,
+      "source": "readme_simple_excel_viewer",
+      "target": "readme_tech_stack",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "readme_simple_excel_viewer",
+      "target": "readme_what_it_does",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "RELEASE.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "release",
+      "target": "release_release_marketplace_submission_checklist",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "RELEASE.md",
+      "source_location": "L76",
+      "weight": 1.0,
+      "source": "release_release_marketplace_submission_checklist",
+      "target": "release_contact",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "RELEASE.md",
+      "source_location": "L66",
+      "weight": 1.0,
+      "source": "release_release_marketplace_submission_checklist",
+      "target": "release_known_limitations_to_keep_on_the_public_roadmap",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "RELEASE.md",
+      "source_location": "L20",
+      "weight": 1.0,
+      "source": "release_release_marketplace_submission_checklist",
+      "target": "release_manual_steps_that_need_a_browser",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "RELEASE.md",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "release_release_marketplace_submission_checklist",
+      "target": "release_ready_in_this_repo",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "RELEASE.md",
+      "source_location": "L24",
+      "weight": 1.0,
+      "source": "release_manual_steps_that_need_a_browser",
+      "target": "release_1_production_screenshots_1280_720_done",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "RELEASE.md",
+      "source_location": "L28",
+      "weight": 1.0,
+      "source": "release_manual_steps_that_need_a_browser",
+      "target": "release_2_trello_power_up_admin_https_trello_com_power_ups_admin",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "RELEASE.md",
+      "source_location": "L39",
+      "weight": 1.0,
+      "source": "release_manual_steps_that_need_a_browser",
+      "target": "release_3_atlassian_marketplace_listing_form",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "RELEASE.md",
+      "source_location": "L49",
+      "weight": 1.0,
+      "source": "release_manual_steps_that_need_a_browser",
+      "target": "release_4_ci_workflow_done",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "RELEASE.md",
+      "source_location": "L60",
+      "weight": 1.0,
+      "source": "release_manual_steps_that_need_a_browser",
+      "target": "release_5_post_launch_operations",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "TODO.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "todo",
+      "target": "todo_todo_exploratory_follow_ups",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "TODO.md",
+      "source_location": "L17",
+      "weight": 1.0,
+      "source": "todo_todo_exploratory_follow_ups",
+      "target": "todo_cell_styles_bold_italic_colors_fills_fixed_2026_06_06",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "TODO.md",
+      "source_location": "L35",
+      "weight": 1.0,
+      "source": "todo_todo_exploratory_follow_ups",
+      "target": "todo_embedded_image_positioning_robust_geometry_header_band_done_2026_06_10",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "TODO.md",
+      "source_location": "L63",
+      "weight": 1.0,
+      "source": "todo_todo_exploratory_follow_ups",
+      "target": "todo_formula_calculation_done_2026_05_26",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "TODO.md",
+      "source_location": "L48",
+      "weight": 1.0,
+      "source": "todo_todo_exploratory_follow_ups",
+      "target": "todo_other_image_files_still_misaligned_on_preview_done_2026_06_11_images_v2",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "TODO.md",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "todo_todo_exploratory_follow_ups",
+      "target": "todo_post_launch_operations",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "TODO.md",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "todo_post_launch_operations",
+      "target": "todo_uptimerobot_monitoring_on_api_health_done_2026_06_06",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "marketing/listing.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "marketing_listing",
+      "target": "marketing_listing_marketplace_listing_copy",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "marketing/listing.md",
+      "source_location": "L77",
+      "weight": 1.0,
+      "source": "marketing_listing_marketplace_listing_copy",
+      "target": "marketing_listing_author",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "marketing/listing.md",
+      "source_location": "L53",
+      "weight": 1.0,
+      "source": "marketing_listing_marketplace_listing_copy",
+      "target": "marketing_listing_category",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "marketing/listing.md",
+      "source_location": "L83",
+      "weight": 1.0,
+      "source": "marketing_listing_marketplace_listing_copy",
+      "target": "marketing_listing_iframe_connector_url",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "marketing/listing.md",
+      "source_location": "L105",
+      "weight": 1.0,
+      "source": "marketing_listing_marketplace_listing_copy",
+      "target": "marketing_listing_known_limitations_to_disclose_optional_but_honest",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "marketing/listing.md",
+      "source_location": "L23",
+      "weight": 1.0,
+      "source": "marketing_listing_marketplace_listing_copy",
+      "target": "marketing_listing_long_description_1500_chars",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "marketing/listing.md",
+      "source_location": "L65",
+      "weight": 1.0,
+      "source": "marketing_listing_marketplace_listing_copy",
+      "target": "marketing_listing_privacy_policy_url",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "marketing/listing.md",
+      "source_location": "L9",
+      "weight": 1.0,
+      "source": "marketing_listing_marketplace_listing_copy",
+      "target": "marketing_listing_public_name_50_chars",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "marketing/listing.md",
+      "source_location": "L89",
+      "weight": 1.0,
+      "source": "marketing_listing_marketplace_listing_copy",
+      "target": "marketing_listing_public_power_up_icon",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "marketing/listing.md",
+      "source_location": "L93",
+      "weight": 1.0,
+      "source": "marketing_listing_marketplace_listing_copy",
+      "target": "marketing_listing_screenshots_manual_needs_the_developer_s_browser",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "marketing/listing.md",
+      "source_location": "L59",
+      "weight": 1.0,
+      "source": "marketing_listing_marketplace_listing_copy",
+      "target": "marketing_listing_support_contact",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "marketing/listing.md",
+      "source_location": "L15",
+      "weight": 1.0,
+      "source": "marketing_listing_marketplace_listing_copy",
+      "target": "marketing_listing_tagline_short_description_120_chars",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "marketing/listing.md",
+      "source_location": "L71",
+      "weight": 1.0,
+      "source": "marketing_listing_marketplace_listing_copy",
+      "target": "marketing_listing_terms_of_use_url",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/README.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "tests_readme",
+      "target": "tests_readme_e2e_tests",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/README.md",
+      "source_location": "L62",
+      "weight": 1.0,
+      "source": "tests_readme_e2e_tests",
+      "target": "tests_readme_ci",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/README.md",
+      "source_location": "L49",
+      "weight": 1.0,
+      "source": "tests_readme_e2e_tests",
+      "target": "tests_readme_fixtures",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/README.md",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "tests_readme_e2e_tests",
+      "target": "tests_readme_prerequisites",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/README.md",
+      "source_location": "L39",
+      "weight": 1.0,
+      "source": "tests_readme_e2e_tests",
+      "target": "tests_readme_running",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/README.md",
+      "source_location": "L56",
+      "weight": 1.0,
+      "source": "tests_readme_e2e_tests",
+      "target": "tests_readme_safety_guard",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/README.md",
+      "source_location": "L14",
+      "weight": 1.0,
+      "source": "tests_readme_e2e_tests",
+      "target": "tests_readme_setup_one_time",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -7027,26 +8201,6 @@
       "target": "readme_jszip"
     },
     {
-      "relation": "conceptually_related_to",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "CHANGELOG.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "changelog_rate_limiting",
-      "target": "readme_preview_proxy"
-    },
-    {
-      "relation": "conceptually_related_to",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "CHANGELOG.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "changelog_ssrf_allowlist",
-      "target": "readme_preview_proxy"
-    },
-    {
       "relation": "references",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
@@ -7055,196 +8209,6 @@
       "weight": 1.0,
       "source": "privacy_privacy_policy",
       "target": "readme_preview_proxy"
-    },
-    {
-      "relation": "semantically_similar_to",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "source_file": "README.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "readme_known_limitations",
-      "target": "marketing_listing_known_limitations"
-    },
-    {
-      "relation": "references",
-      "confidence": "INFERRED",
-      "confidence_score": 0.95,
-      "source_file": "README.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "readme_known_limitations",
-      "target": "todo_charts_not_rendered"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "README.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "readme_known_limitations",
-      "target": "todo_todo_followups"
-    },
-    {
-      "relation": "semantically_similar_to",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "source_file": "RELEASE.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "release_known_limitations",
-      "target": "readme_known_limitations"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "CHANGELOG.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "changelog_changelog",
-      "target": "_github_funding_ko_fi_river44"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "CHANGELOG.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "changelog_changelog",
-      "target": "_github_workflows_e2e_playwright_job"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "CHANGELOG.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "changelog_changelog",
-      "target": "terms_terms_of_use"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "CHANGELOG.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "changelog_changelog",
-      "target": "welcome_welcome_modal"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "RELEASE.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "release_marketplace_submission",
-      "target": "changelog_changelog"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "CHANGELOG.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "changelog_formula_calculation",
-      "target": "changelog_xlsx_calc"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "TODO.md",
-      "source_location": "## Formula calculation \u2014 DONE",
-      "weight": 1.0,
-      "source": "todo_todo_followups",
-      "target": "changelog_formula_calculation"
-    },
-    {
-      "relation": "conceptually_related_to",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "TODO.md",
-      "source_location": "Theme colors \u2014 RESOLVED (2026-06-11)",
-      "weight": 1.0,
-      "source": "todo_cell_styles_fix",
-      "target": "changelog_theme_palette_colors"
-    },
-    {
-      "relation": "conceptually_related_to",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "TODO.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "todo_cell_styles_fix",
-      "target": "changelog_cp1251_xls_encoding"
-    },
-    {
-      "relation": "conceptually_related_to",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "TODO.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "todo_image_positioning_fix",
-      "target": "changelog_embedded_image_positioning"
-    },
-    {
-      "relation": "conceptually_related_to",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "TODO.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "todo_images_v2",
-      "target": "changelog_wmf_placeholder"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "RELEASE.md",
-      "source_location": "### 2. Trello Power-Up admin",
-      "weight": 1.0,
-      "source": "release_marketplace_submission",
-      "target": "changelog_authorization_capabilities"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "RELEASE.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "release_marketplace_submission",
-      "target": "changelog_rate_limiting"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "RELEASE.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "release_marketplace_submission",
-      "target": "changelog_health_endpoint"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "TODO.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "todo_uptimerobot_monitoring",
-      "target": "changelog_health_endpoint"
     },
     {
       "relation": "implements",
@@ -7300,96 +8264,6 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
-      "source_file": "RELEASE.md",
-      "source_location": "### 4. CI workflow",
-      "weight": 1.0,
-      "source": "release_marketplace_submission",
-      "target": "_github_workflows_e2e_playwright_job"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "tests/README.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "tests_readme_e2e_suite",
-      "target": "tests_readme_safety_guard"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "tests/README.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "tests_readme_e2e_suite",
-      "target": "tests_readme_storagestate"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "RELEASE.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "release_marketplace_submission",
-      "target": "marketing_listing_marketplace_listing"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "RELEASE.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "release_marketplace_submission",
-      "target": "privacy_privacy_policy"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "RELEASE.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "release_marketplace_submission",
-      "target": "terms_terms_of_use"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "RELEASE.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "release_known_limitations",
-      "target": "todo_todo_followups"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "marketing/listing.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "marketing_listing_marketplace_listing",
-      "target": "privacy_privacy_policy"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "marketing/listing.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "marketing_listing_marketplace_listing",
-      "target": "terms_terms_of_use"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
       "source_file": "privacy.html",
       "source_location": null,
       "weight": 1.0,
@@ -7445,36 +8319,6 @@
       "weight": 1.0,
       "source": "welcome_welcome_modal",
       "target": "privacy_trello_power_up_sdk"
-    },
-    {
-      "relation": "conceptually_related_to",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "TODO.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "todo_images_v2",
-      "target": "todo_image_positioning_fix"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "TODO.md",
-      "source_location": "Known remaining limits",
-      "weight": 1.0,
-      "source": "todo_images_v2",
-      "target": "todo_charts_not_rendered"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "CLAUDE.md",
-      "source_location": "## graphify",
-      "weight": 1.0,
-      "source": "claude_behavioral_guidelines",
-      "target": "claude_graphify_integration"
     },
     {
       "relation": "conceptually_related_to",
@@ -7627,50 +8471,6 @@
       "target": "marketing_power_up_gif_screenshot_marketing_demo_asset"
     }
   ],
-  "hyperedges": [
-    {
-      "id": "marketplace_submission_assets",
-      "label": "Atlassian Marketplace Submission Assets",
-      "nodes": [
-        "release_marketplace_submission",
-        "marketing_listing_marketplace_listing",
-        "privacy_privacy_policy",
-        "terms_terms_of_use",
-        "changelog_changelog"
-      ],
-      "relation": "participate_in",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "RELEASE.md"
-    },
-    {
-      "id": "e2e_ci_pipeline",
-      "label": "Playwright E2E CI Pipeline",
-      "nodes": [
-        "_github_workflows_e2e_playwright_job",
-        "tests_readme_e2e_suite",
-        "tests_readme_storagestate",
-        "tests_readme_safety_guard"
-      ],
-      "relation": "form",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "tests/README.md"
-    },
-    {
-      "id": "known_limitations_disclosure",
-      "label": "Known Limitations Disclosure Across Docs",
-      "nodes": [
-        "readme_known_limitations",
-        "release_known_limitations",
-        "marketing_listing_known_limitations",
-        "todo_charts_not_rendered"
-      ],
-      "relation": "participate_in",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "source_file": "README.md"
-    }
-  ],
-  "built_at_commit": "680276b5a289c40dbf44a96c9b2afa34c4d5fbea"
+  "hyperedges": [],
+  "built_at_commit": "06ed7b78c754015c96a8a661190d4d7f2fd89a62"
 }
