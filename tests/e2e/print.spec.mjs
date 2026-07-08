@@ -15,8 +15,8 @@ test('Attachment list shows labelled upload date under the file name', async ({ 
   await row.waitFor({ state: 'visible' });
 
   // Seeded attachments always carry an upload timestamp → label + digits.
-  // The label is locale-driven (browser locale): "Added:" or "Додано:".
-  await expect(row.locator('.file-date')).toHaveText(/^(Added:|Додано:) .*\d/);
+  // The label is locale-driven (browser locale): "Added" or "Додано".
+  await expect(row.locator('.file-date')).toHaveText(/^(Added|Додано) .*\d/);
 });
 
 async function openPreviewFrame(page, info) {

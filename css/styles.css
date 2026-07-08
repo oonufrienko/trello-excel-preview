@@ -187,8 +187,8 @@ body.preview-page {
 }
 
 .file-icon {
-  width: 20px;
-  height: 20px;
+  width: 28px;
+  height: 28px;
   flex-shrink: 0;
 }
 
@@ -200,6 +200,7 @@ body.preview-page {
 }
 
 .file-name {
+  font-size: 15px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -207,7 +208,7 @@ body.preview-page {
 }
 
 .file-date {
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-muted);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -227,7 +228,9 @@ body.preview-page {
   height: 48px;
   /* print sits 16px from the left edge, donate mirrors it on the right */
   padding: 0 16px;
-  background: #217346; /* matches the modal accentColor */
+  /* lighter than Trello's #217346 modal bar above, still ≥3:1 against
+     the white icons */
+  background: #3fa26b;
   flex-shrink: 0;
 }
 

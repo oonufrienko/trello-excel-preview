@@ -14,7 +14,7 @@ function esc(s) {
 
 const DATE_FMT = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' });
 // Same locale source as DATE_FMT (the browser), so label and date agree.
-const ADDED_LABEL = (navigator.language || '').toLowerCase().startsWith('uk') ? 'Додано:' : 'Added:';
+const ADDED_LABEL = (navigator.language || '').toLowerCase().startsWith('uk') ? 'Додано' : 'Added';
 
 function formatDate(iso) {
   const d = new Date(iso);
