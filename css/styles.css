@@ -317,7 +317,10 @@ body.preview-page {
 .sheet-content {
   flex: 1;
   overflow: auto;
-  padding: 12px;
+  /* No top padding: the sticky header row must land flush at the top of
+     the scrollport — rows were showing through a padded strip above it.
+     The wrapper's margin-top provides the initial gap instead. */
+  padding: 0 12px 12px;
 }
 
 .sheet-content table {
@@ -373,7 +376,10 @@ body.preview-page {
   display: block;
   width: fit-content;
   max-width: 100%;
-  margin: 0 auto;
+  /* Top gap lives here (not on .sheet-content padding) so it scrolls
+     away with the content instead of leaving a strip above the sticky
+     header row. */
+  margin: 12px auto 0;
 }
 .embedded-img {
   position: absolute;
