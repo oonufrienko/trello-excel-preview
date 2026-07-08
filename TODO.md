@@ -58,7 +58,7 @@ Regression coverage: hand-built `images-v2.xlsx` fixture (rotated 45° pic, 2-pi
 
 **Known remaining limits (deliberate):**
 - `oneCellAnchor` images have no "to" box, so when our rows/columns are narrower than Excel's they can still partially cover a neighbouring cell (8 residual single-cell hits on «Прайс Спец Хомут»). Fully solvable only by replicating Excel's exact column widths — relates to the stretched-rendering follow-up.
-- **Charts (`graphicFrame`)** are not rendered at all (sales_chart.xlsx / sales_dashboard.xlsx show no chart) — user decided it's a separate future feature, own branch when picked up.
+- **Charts (`graphicFrame`)** — DONE for bar/column, line and pie (2026-07-08, branch `feat/chart-rendering`): SVG drawn from cached series data (`numCache`/`strCache`), no range evaluation; unsupported types (scatter, area, combo, % stacked) show a labelled placeholder. Fixture `with-charts.xlsx` + `tests/e2e/charts.spec.mjs`. Remaining: real-world validation on sales_chart.xlsx / sales_dashboard.xlsx, more types on demand.
 
 ## Formula calculation — DONE (2026-05-26)
 

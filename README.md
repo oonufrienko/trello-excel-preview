@@ -23,7 +23,7 @@ Marketplace: submitted, awaiting review.
 ## Known limitations
 
 - **Embedded image placement is approximate.** Images render at their true size from the file (rotation, mirroring and picture groups supported), anchored to the right cell — but because browser column widths differ from Excel's, an image may sit a few pixels off or be scaled down to fit its anchor range. **WMF clip-art** (legacy vector format browsers can't decode) shows as a labelled placeholder of the correct size.
-- **Charts and graphs are not rendered** — only cell data. Files with embedded charts have not been tested; chart objects will not appear in the preview.
+- **Charts render for the common types.** Bar/column, line and pie charts are drawn from the series data cached in the file (no recalculation). Other types (scatter, area, combo, 3-D, % stacked) show a labelled placeholder at the chart's position and size.
 - **Cell styling** (bold, italic, font colors, background fills) renders for direct `rgb=` and theme-palette colors. Legacy **indexed colors** (old 64-color palette) are not resolved — cells using them show uncolored.
 - **Old `.xls`** (BIFF binary) format renders without embedded images.
 - **Preview is capped at 25 MB** (file-size proxy guard). Larger files must be downloaded.

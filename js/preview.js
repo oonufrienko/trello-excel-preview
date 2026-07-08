@@ -526,6 +526,28 @@ async function parseAnchors(zip) {
       return null;
     });
 
+    // Charts: an anchor's xdr:graphicFrame carries <c:chart r:id> pointing
+    // at chartN.xml. Supported types become a { chart } entry rendered as
+    // SVG; anything else gets a labelled placeholder (same UX as WMF).
+    const buildChartEntries = (aEl, base) => findDirects(aEl, 'graphicFrame').map(async (frameEl) => {
+      const chartRef = findDeep(frameEl, 'chart');
+      if (!chartRef) return null;
+      const rId = getRId(chartRef);
+      if (!rId || !drawingRels[rId]) return null;
+      const chartDoc = await readXml(resolvePath(drawingPath, drawingRels[rId]));
+      if (!chartDoc) return null;
+      // graphicFrame keeps its xfrm directly (not under spPr like pics)
+      const xfrm = findDirect(frameEl, 'xfrm');
+      const ext = xfrm ? findDirect(xfrm, 'ext') : null;
+      const entry = { ...base, rot: 0, flipH: false, flipV: false,
+                      cx: attrInt(ext, 'cx'), cy: attrInt(ext, 'cy') };
+      const model = parseChartXml(chartDoc);
+      if (model && !model.unsupported) return { ...entry, chart: model };
+      return { ...entry, placeholder: model ? `CHART · ${model.unsupported}` : 'CHART' };
+    });
+
+    const buildAll = (aEl, base) => [...buildEntries(aEl, base), ...buildChartEntries(aEl, base)];
+
     // Build both anchor sets in parallel. Each blob extraction is a
     // JSZip decompression — serial awaits were the bottleneck for
     // workbooks with many images.
@@ -533,7 +555,7 @@ async function parseAnchors(zip) {
       const fromEl = findDirect(aEl, 'from');
       const toEl = findDirect(aEl, 'to');
       if (!fromEl || !toEl) return [];
-      return buildEntries(aEl, {
+      return buildAll(aEl, {
         type: 'two',
         from: { col: intOf(fromEl, 'col'), row: intOf(fromEl, 'row'),
                 colOff: intOf(fromEl, 'colOff'), rowOff: intOf(fromEl, 'rowOff') },
@@ -546,7 +568,7 @@ async function parseAnchors(zip) {
       const fromEl = findDirect(aEl, 'from');
       const extEl = findDirect(aEl, 'ext');
       if (!fromEl || !extEl) return [];
-      return buildEntries(aEl, {
+      return buildAll(aEl, {
         type: 'one',
         from: { col: intOf(fromEl, 'col'), row: intOf(fromEl, 'row'),
                 colOff: intOf(fromEl, 'colOff'), rowOff: intOf(fromEl, 'rowOff') },
@@ -561,6 +583,341 @@ async function parseAnchors(zip) {
   }
 
   return result;
+}
+
+// ── Chart XML → plain model ───────────────────────────────────────────────
+// chartN.xml embeds the cached series data Excel last computed
+// (c:numCache / c:strCache), so charts can be drawn without evaluating
+// any cell ranges. Returns a model for supported types, or
+// { unsupported: <localName> } so the caller can show a labelled
+// placeholder instead of nothing.
+const CHART_TYPES = { barChart: 'bar', lineChart: 'line', pieChart: 'pie', doughnutChart: 'pie' };
+
+function parseChartXml(doc) {
+  const first = (parent, name) =>
+    parent && parent.getElementsByTagNameNS('*', name)[0];
+  const direct = (parent, name) => {
+    if (!parent) return null;
+    for (const child of parent.children) {
+      if (child.localName === name) return child;
+    }
+    return null;
+  };
+  const directs = (parent, name) => {
+    const out = [];
+    if (parent) {
+      for (const child of parent.children) {
+        if (child.localName === name) out.push(child);
+      }
+    }
+    return out;
+  };
+  // Cached points live under (str|num)Ref/(str|num)Cache or (str|num)Lit;
+  // pt elements carry an idx attribute, so fill by index.
+  const readPts = (holder) => {
+    if (!holder) return null;
+    const cache = first(holder, 'numCache') || first(holder, 'strCache') ||
+                  first(holder, 'numLit') || first(holder, 'strLit') || holder;
+    const pts = Array.from(cache.getElementsByTagNameNS('*', 'pt'));
+    if (!pts.length) return null;
+    const out = [];
+    pts.forEach(pt => {
+      const idx = parseInt(pt.getAttribute('idx'), 10) || 0;
+      const v = first(pt, 'v');
+      out[idx] = v ? v.textContent : '';
+    });
+    return out;
+  };
+
+  const plotArea = first(doc, 'plotArea');
+  if (!plotArea) return null;
+
+  // A plotArea may hold several chart elements (combo: barChart +
+  // lineChart on one axis). Collect all supported plots; each series
+  // remembers which mark to draw (renderAs).
+  const plots = [];
+  let unsupported = null;
+  for (const child of plotArea.children) {
+    if (CHART_TYPES[child.localName]) plots.push({ el: child, type: CHART_TYPES[child.localName] });
+    else if (/Chart$/.test(child.localName)) unsupported = child.localName.replace(/Chart$/, '');
+  }
+  if (!plots.length) return unsupported ? { unsupported } : null;
+
+  // Pie can't be combined with axes — render it alone when present.
+  const pie = plots.find(p => p.type === 'pie');
+  const axisPlots = pie ? [pie] : plots;
+
+  let stacked = false, horizontal = false;
+  const series = [];
+  // Combo plots on a different axis pair (bars in $, line in %) must not
+  // share the value scale — series from a plot whose axIds differ from the
+  // first plot's get secondary: true and their own scale + right-side axis.
+  let primaryAxes = null;
+  for (const plot of axisPlots) {
+    const groupingEl = direct(plot.el, 'grouping');
+    const grouping = groupingEl ? groupingEl.getAttribute('val') : 'clustered';
+    if (grouping === 'percentStacked') return { unsupported: '% stacked' };
+    if (plot.type === 'bar') {
+      if (grouping === 'stacked') stacked = true;
+      const barDirEl = direct(plot.el, 'barDir');
+      if (barDirEl && barDirEl.getAttribute('val') === 'bar') horizontal = true;
+    }
+    const axKey = directs(plot.el, 'axId').map(a => a.getAttribute('val')).sort().join(',');
+    if (primaryAxes === null) primaryAxes = axKey;
+    const secondary = axKey !== primaryAxes;
+    for (const ser of directs(plot.el, 'ser')) {
+      const txPts = readPts(direct(ser, 'tx'));
+      const vals = (readPts(direct(ser, 'val')) || []).map(v => parseFloat(v) || 0);
+      if (!vals.length) continue;
+      series.push({
+        name: (txPts && txPts.find(v => v)) || `Series ${series.length + 1}`,
+        cats: readPts(direct(ser, 'cat')),
+        vals,
+        renderAs: plot.type,
+        secondary
+      });
+    }
+  }
+  if (!series.length) return { unsupported: axisPlots[0].type };
+  // Horizontal bars can't host line overlays — drop lines rather than lie.
+  if (horizontal) {
+    for (let i = series.length - 1; i >= 0; i--) {
+      if (series[i].renderAs === 'line') series.splice(i, 1);
+    }
+  }
+
+  const nCats = Math.max(...series.map(s => s.vals.length));
+  const cats = series.find(s => s.cats)?.cats ||
+               Array.from({ length: nCats }, (_, i) => String(i + 1));
+
+  const titleEl = direct(first(doc, 'chart'), 'title');
+  const title = titleEl
+    ? Array.from(titleEl.getElementsByTagNameNS('*', 't')).map(t => t.textContent).join('') || null
+    : null;
+
+  return {
+    type: pie ? 'pie' : 'axis',
+    stacked,
+    horizontal,
+    title,
+    cats: cats.map(c => c == null ? '' : String(c)),
+    series
+  };
+}
+
+// ── Chart model → SVG ─────────────────────────────────────────────────────
+// Hand-rolled renderer for the three common types; ~Excel default palette.
+const CHART_PALETTE = ['#4472c4', '#ed7d31', '#a5a5a5', '#ffc000', '#5b9bd5', '#70ad47', '#264478', '#9e480e'];
+
+function renderChartSvg(model, w, h) {
+  const NS = 'http://www.w3.org/2000/svg';
+  const mk = (name, attrs, parent) => {
+    const el = document.createElementNS(NS, name);
+    for (const k in attrs) el.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(el);
+    return el;
+  };
+  const text = (x, y, str, attrs, parent) => {
+    const t = mk('text', { x, y, 'font-size': 9, fill: '#595959', 'font-family': 'sans-serif', ...attrs }, parent);
+    t.textContent = str;
+    return t;
+  };
+  const trunc = (s, n) => s.length > n ? s.slice(0, n - 1) + '…' : s;
+  const fmtNum = (v) =>
+    Math.abs(v) >= 1e6 ? (v / 1e6).toFixed(1).replace(/\.0$/, '') + 'M'
+    : Math.abs(v) >= 1e3 ? (v / 1e3).toFixed(1).replace(/\.0$/, '') + 'k'
+    : String(Math.round(v * 100) / 100);
+  // Round up to a 1/2/2.5/5×10^n bound so the top gridline is a clean number.
+  const nice = (v) => {
+    if (v <= 0) return 1;
+    const p = Math.pow(10, Math.floor(Math.log10(v)));
+    const n = v / p;
+    return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 2.5 ? 2.5 : n <= 5 ? 5 : 10) * p;
+  };
+
+  const svg = mk('svg', { viewBox: `0 0 ${w} ${h}`, width: w, height: h });
+  mk('rect', { x: 0, y: 0, width: w, height: h, fill: '#ffffff' }, svg);
+
+  const { series, cats } = model;
+  const small = w < 90 || h < 60; // too tiny for labels — draw marks only
+  const pad = 4;
+  const titleH = model.title && !small ? 14 : 0;
+  const showLegend = !small && (model.type === 'pie' ? cats.length <= 8 : series.length > 1);
+  const legendH = showLegend ? 14 : 0;
+
+  if (titleH) text(w / 2, pad + 9, trunc(model.title, Math.floor(w / 6)),
+    { 'text-anchor': 'middle', 'font-size': 10, 'font-weight': 'bold', fill: '#404040' }, svg);
+
+  // ── Pie ──
+  if (model.type === 'pie') {
+    const vals = series[0].vals.map(v => Math.max(0, v));
+    const total = vals.reduce((a, b) => a + b, 0) || 1;
+    const cx = w / 2, cy = titleH + (h - titleH - legendH) / 2;
+    const r = Math.max(8, Math.min(w, h - titleH - legendH) / 2 - pad * 2);
+    let angle = -Math.PI / 2;
+    vals.forEach((v, i) => {
+      if (v <= 0) return;
+      const sweep = v / total * 2 * Math.PI;
+      const color = CHART_PALETTE[i % CHART_PALETTE.length];
+      if (sweep >= 2 * Math.PI - 1e-6) {
+        mk('circle', { cx, cy, r, fill: color, stroke: '#fff', 'stroke-width': 1 }, svg);
+      } else {
+        const x1 = cx + r * Math.cos(angle), y1 = cy + r * Math.sin(angle);
+        const x2 = cx + r * Math.cos(angle + sweep), y2 = cy + r * Math.sin(angle + sweep);
+        mk('path', {
+          d: `M${cx},${cy} L${x1},${y1} A${r},${r} 0 ${sweep > Math.PI ? 1 : 0} 1 ${x2},${y2} Z`,
+          fill: color, stroke: '#fff', 'stroke-width': 1
+        }, svg);
+      }
+      angle += sweep;
+    });
+    if (showLegend) drawLegend(cats.map((c, i) => [trunc(c, 12), CHART_PALETTE[i % CHART_PALETTE.length]]));
+    return svg;
+  }
+
+  // ── Value scales for bar/line ──
+  // Primary series share one axis; series flagged secondary (combo plots
+  // with their own axId pair, e.g. % over $) get an independent scale
+  // drawn on the right.
+  const barSeries = series.filter(s => s.renderAs !== 'line');
+  const lineSeries = series.filter(s => s.renderAs === 'line');
+  const primary = series.filter(s => !s.secondary);
+  const secondarySeries = series.filter(s => s.secondary);
+  let dataMax = 0, dataMin = 0;
+  if (model.stacked) {
+    for (let i = 0; i < cats.length; i++) {
+      let pos = 0, neg = 0;
+      barSeries.forEach(s => { if (s.secondary) return; const v = s.vals[i] || 0; if (v >= 0) pos += v; else neg += v; });
+      dataMax = Math.max(dataMax, pos); dataMin = Math.min(dataMin, neg);
+    }
+    lineSeries.forEach(s => { if (s.secondary) return; s.vals.forEach(v => { dataMax = Math.max(dataMax, v); dataMin = Math.min(dataMin, v); }); });
+  } else {
+    primary.forEach(s => s.vals.forEach(v => { dataMax = Math.max(dataMax, v); dataMin = Math.min(dataMin, v); }));
+  }
+  const yMax = dataMax > 0 ? nice(dataMax) : 0;
+  const yMin = dataMin < 0 ? -nice(-dataMin) : 0;
+  const span = (yMax - yMin) || 1;
+
+  let y2Max = 0, y2Min = 0, span2 = 1;
+  if (secondarySeries.length) {
+    let mx = 0, mn = 0;
+    secondarySeries.forEach(s => s.vals.forEach(v => { mx = Math.max(mx, v); mn = Math.min(mn, v); }));
+    y2Max = mx > 0 ? nice(mx) : 0;
+    y2Min = mn < 0 ? -nice(-mn) : 0;
+    span2 = (y2Max - y2Min) || 1;
+  }
+
+  const horiz = !!model.horizontal;
+  const axisW = small ? 0 : (horiz ? Math.min(64, w * 0.25) : 32);
+  const axis2W = !small && secondarySeries.length && !horiz ? 30 : 0;
+  const xLabH = small ? 0 : 12;
+  const plot = {
+    x: pad + axisW,
+    y: pad + titleH,
+    w: w - pad * 2 - axisW - axis2W,
+    h: h - pad * 2 - titleH - legendH - xLabH
+  };
+  if (plot.w < 10 || plot.h < 10) return svg;
+
+  // value → pixel along the value axis (primary / secondary)
+  const vPx = (v) => horiz
+    ? plot.x + (v - yMin) / span * plot.w
+    : plot.y + plot.h - (v - yMin) / span * plot.h;
+  const v2Px = (v) => plot.y + plot.h - (v - y2Min) / span2 * plot.h;
+
+  // Gridlines + value labels (4 divisions). Secondary-axis labels sit on
+  // the right, on the same gridlines (both scales use 4 divisions).
+  for (let i = 0; i <= 4; i++) {
+    const v = yMin + span * i / 4;
+    const p = vPx(v);
+    if (horiz) {
+      mk('line', { x1: p, y1: plot.y, x2: p, y2: plot.y + plot.h, stroke: '#e5e5e5', 'stroke-width': 1 }, svg);
+      if (!small) text(p, plot.y + plot.h + 10, fmtNum(v), { 'text-anchor': 'middle' }, svg);
+    } else {
+      mk('line', { x1: plot.x, y1: p, x2: plot.x + plot.w, y2: p, stroke: '#e5e5e5', 'stroke-width': 1 }, svg);
+      if (!small) text(plot.x - 4, p + 3, fmtNum(v), { 'text-anchor': 'end' }, svg);
+      if (axis2W) text(plot.x + plot.w + 4, p + 3, fmtNum(y2Min + span2 * i / 4), { 'text-anchor': 'start', fill: '#8a8a8a' }, svg);
+    }
+  }
+
+  const slot = (horiz ? plot.h : plot.w) / cats.length;
+
+  // Category labels — thin out so they never overlap.
+  if (!small) {
+    const step = horiz ? Math.ceil(cats.length / Math.floor(plot.h / 14)) || 1
+                       : Math.ceil(cats.length / Math.max(1, Math.floor(plot.w / 44)));
+    cats.forEach((c, i) => {
+      if (i % step) return;
+      const center = (horiz ? plot.y : plot.x) + slot * (i + 0.5);
+      if (horiz) text(plot.x - 4, center + 3, trunc(c, Math.floor(axisW / 5)), { 'text-anchor': 'end' }, svg);
+      else text(center, plot.y + plot.h + 10, trunc(c, Math.ceil(slot / 6)), { 'text-anchor': 'middle' }, svg);
+    });
+  }
+
+  // Bars first, lines on top (combo overlays share the same value axis).
+  // Series colors index the FULL series list so legend colors line up.
+  if (barSeries.length) {
+    const group = slot * 0.72;
+    const barW = model.stacked ? group : group / barSeries.length;
+    const zero = vPx(0);
+    const stackPos = new Array(cats.length).fill(0);
+    const stackNeg = new Array(cats.length).fill(0);
+    barSeries.forEach((s, si) => {
+      const color = CHART_PALETTE[series.indexOf(s) % CHART_PALETTE.length];
+      for (let i = 0; i < cats.length; i++) {
+        const v = s.vals[i] || 0;
+        if (!v && model.stacked) continue;
+        let from = 0, to = v;
+        if (model.stacked) {
+          const base = v >= 0 ? stackPos[i] : stackNeg[i];
+          from = base; to = base + v;
+          if (v >= 0) stackPos[i] = to; else stackNeg[i] = to;
+        }
+        const p1 = vPx(from), p2 = vPx(to);
+        const cross = (horiz ? plot.y : plot.x) + i * slot + (slot - group) / 2 +
+                      (model.stacked ? 0 : si * barW);
+        const attrs = horiz
+          ? { x: Math.min(p1, p2), y: cross, width: Math.abs(p2 - p1), height: barW }
+          : { x: cross, y: Math.min(p1, p2), width: barW, height: Math.abs(p2 - p1) };
+        if ((horiz ? attrs.width : attrs.height) < 0.5 && v) {
+          if (horiz) attrs.width = 0.5; else { attrs.y -= 0.5; attrs.height = 0.5; }
+        }
+        mk('rect', { ...attrs, fill: color }, svg);
+      }
+    });
+    // Zero axis on top of the bars so negatives read clearly.
+    if (horiz) mk('line', { x1: zero, y1: plot.y, x2: zero, y2: plot.y + plot.h, stroke: '#9b9b9b', 'stroke-width': 1 }, svg);
+    else mk('line', { x1: plot.x, y1: zero, x2: plot.x + plot.w, y2: zero, stroke: '#9b9b9b', 'stroke-width': 1 }, svg);
+  }
+  lineSeries.forEach((s) => {
+    const color = CHART_PALETTE[series.indexOf(s) % CHART_PALETTE.length];
+    const toPx = s.secondary ? v2Px : vPx;
+    const pts = [];
+    for (let i = 0; i < cats.length; i++) {
+      if (s.vals[i] == null) continue;
+      pts.push([plot.x + slot * (i + 0.5), toPx(s.vals[i])]);
+    }
+    mk('polyline', {
+      points: pts.map(p => p.join(',')).join(' '),
+      fill: 'none', stroke: color, 'stroke-width': 2, 'stroke-linejoin': 'round'
+    }, svg);
+    if (slot > 8) pts.forEach(([x, y]) => mk('circle', { cx: x, cy: y, r: 2, fill: color }, svg));
+  });
+
+  if (showLegend) drawLegend(series.map((s, i) => [trunc(s.name, 14), CHART_PALETTE[i % CHART_PALETTE.length]]));
+  return svg;
+
+  function drawLegend(items) {
+    const itemW = Math.min(90, (w - pad * 2) / items.length);
+    const totalW = itemW * items.length;
+    let x = Math.max(pad, (w - totalW) / 2);
+    const y = h - pad - 3;
+    items.forEach(([label, color]) => {
+      mk('rect', { x, y: y - 7, width: 7, height: 7, fill: color }, svg);
+      text(x + 10, y, trunc(label, Math.floor(itemW / 5)), {}, svg);
+      x += itemW;
+    });
+  }
 }
 
 // Build a logical (row, col) → <td> grid that accounts for colspan/rowspan,
@@ -653,13 +1010,23 @@ function positionImages(wrapper, table, anchors, rangeStart) {
   const wrapperRect = wrapper.getBoundingClientRect();
   const { colEdges, rowEdges, numRows, numCols } = buildGridEdges(grid, wrapperRect);
 
-  const clamp = (v, max) => v < 0 ? 0 : (v > max ? max : v);
-  const colX = (c, off) => colEdges[clamp(c, numCols)] + (off || 0) / EMU_PER_PX;
-  const rowY = (r, off) => rowEdges[clamp(r, numRows)] + (off || 0) / EMU_PER_PX;
   // Average cell sizes — used to size anchors whose row/col span lies entirely
-  // in the empty top rows trimSheetRange removed.
+  // in the empty top rows trimSheetRange removed, and to extrapolate edges
+  // beyond the trimmed grid (see below).
   const avgRowH = numRows ? rowEdges[numRows] / numRows : 18;
   const avgColW = numCols ? colEdges[numCols] / numCols : 64;
+
+  const clamp = (v, max) => v < 0 ? 0 : (v > max ? max : v);
+  // Anchors often live in empty columns/rows to the right of / below the
+  // data (dashboards park charts there), which trimSheetRange cut away.
+  // Clamping both ends of such an anchor to the last grid edge collapses
+  // its box to ~zero — extrapolate with average cell sizes instead.
+  const colX = (c, off) => (c > numCols
+    ? colEdges[numCols] + (c - numCols) * avgColW
+    : colEdges[clamp(c, numCols)]) + (off || 0) / EMU_PER_PX;
+  const rowY = (r, off) => (r > numRows
+    ? rowEdges[numRows] + (r - numRows) * avgRowH
+    : rowEdges[clamp(r, numRows)]) + (off || 0) / EMU_PER_PX;
 
   // Compute each anchor's geometry up front. Anchors whose whole row span sits
   // in the trimmed-away top rows (to.row <= rangeStart.r) belong ABOVE the
@@ -731,9 +1098,12 @@ function positionImages(wrapper, table, anchors, rangeStart) {
     // is the grid row edge, shifted down by the reserved band.
     const finalTop = aboveTable ? Math.max(0, bandH - height) : bandH + top;
 
-    const el = document.createElement(a.placeholder ? 'div' : 'img');
+    const el = document.createElement(a.blobUrl ? 'img' : 'div');
     el.className = 'embedded-img';
-    if (a.placeholder) {
+    if (a.chart) {
+      el.classList.add('embedded-chart');
+      el.appendChild(renderChartSvg(a.chart, Math.round(width), Math.round(height)));
+    } else if (a.placeholder) {
       el.classList.add('embedded-img-missing');
       el.textContent = a.placeholder; // e.g. "WMF" — format we can't decode
     } else {
