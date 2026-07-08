@@ -66,7 +66,7 @@ These cannot be done from CI/CLI — they require the developer to log into the 
 ## 🔵 Known limitations to keep on the public roadmap
 
 - Embedded image positions may not match the original Excel layout exactly (drift, more visible on non-first sheets or on files with custom column widths/row heights).
-- Charts and graphs are not rendered — only cell data. Files with embedded charts have not been tested.
+- Charts: bar/column, line and pie render from cached series data; other types (scatter, area, combo, …) show a labelled placeholder.
 - Cell styling (bold, italic, font colors, background fills) is not rendered.
 - Old `.xls` (BIFF binary) format renders without embedded images.
 - Preview is capped at 25 MB (file-size proxy guard).
