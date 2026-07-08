@@ -632,28 +632,59 @@ function parseChartXml(doc) {
   const plotArea = first(doc, 'plotArea');
   if (!plotArea) return null;
 
-  let chartEl = null, type = null, unsupported = null;
+  // A plotArea may hold several chart elements (combo: barChart +
+  // lineChart on one axis). Collect all supported plots; each series
+  // remembers which mark to draw (renderAs).
+  const plots = [];
+  let unsupported = null;
   for (const child of plotArea.children) {
-    if (CHART_TYPES[child.localName]) { chartEl = child; type = CHART_TYPES[child.localName]; break; }
-    if (/Chart$/.test(child.localName)) unsupported = child.localName.replace(/Chart$/, '');
+    if (CHART_TYPES[child.localName]) plots.push({ el: child, type: CHART_TYPES[child.localName] });
+    else if (/Chart$/.test(child.localName)) unsupported = child.localName.replace(/Chart$/, '');
   }
-  if (!chartEl) return unsupported ? { unsupported } : null;
+  if (!plots.length) return unsupported ? { unsupported } : null;
 
-  const groupingEl = direct(chartEl, 'grouping');
-  const grouping = groupingEl ? groupingEl.getAttribute('val') : 'clustered';
-  if (grouping === 'percentStacked') return { unsupported: '% stacked' };
+  // Pie can't be combined with axes — render it alone when present.
+  const pie = plots.find(p => p.type === 'pie');
+  const axisPlots = pie ? [pie] : plots;
 
-  const series = directs(chartEl, 'ser').map((ser, i) => {
-    const txPts = readPts(direct(ser, 'tx'));
-    const vals = (readPts(direct(ser, 'val')) || []).map(v => parseFloat(v) || 0);
-    const cats = readPts(direct(ser, 'cat'));
-    return {
-      name: (txPts && txPts.find(v => v)) || `Series ${i + 1}`,
-      cats,
-      vals
-    };
-  }).filter(s => s.vals.length);
-  if (!series.length) return { unsupported: type };
+  let stacked = false, horizontal = false;
+  const series = [];
+  // Combo plots on a different axis pair (bars in $, line in %) must not
+  // share the value scale — series from a plot whose axIds differ from the
+  // first plot's get secondary: true and their own scale + right-side axis.
+  let primaryAxes = null;
+  for (const plot of axisPlots) {
+    const groupingEl = direct(plot.el, 'grouping');
+    const grouping = groupingEl ? groupingEl.getAttribute('val') : 'clustered';
+    if (grouping === 'percentStacked') return { unsupported: '% stacked' };
+    if (plot.type === 'bar') {
+      if (grouping === 'stacked') stacked = true;
+      const barDirEl = direct(plot.el, 'barDir');
+      if (barDirEl && barDirEl.getAttribute('val') === 'bar') horizontal = true;
+    }
+    const axKey = directs(plot.el, 'axId').map(a => a.getAttribute('val')).sort().join(',');
+    if (primaryAxes === null) primaryAxes = axKey;
+    const secondary = axKey !== primaryAxes;
+    for (const ser of directs(plot.el, 'ser')) {
+      const txPts = readPts(direct(ser, 'tx'));
+      const vals = (readPts(direct(ser, 'val')) || []).map(v => parseFloat(v) || 0);
+      if (!vals.length) continue;
+      series.push({
+        name: (txPts && txPts.find(v => v)) || `Series ${series.length + 1}`,
+        cats: readPts(direct(ser, 'cat')),
+        vals,
+        renderAs: plot.type,
+        secondary
+      });
+    }
+  }
+  if (!series.length) return { unsupported: axisPlots[0].type };
+  // Horizontal bars can't host line overlays — drop lines rather than lie.
+  if (horizontal) {
+    for (let i = series.length - 1; i >= 0; i--) {
+      if (series[i].renderAs === 'line') series.splice(i, 1);
+    }
+  }
 
   const nCats = Math.max(...series.map(s => s.vals.length));
   const cats = series.find(s => s.cats)?.cats ||
@@ -664,11 +695,10 @@ function parseChartXml(doc) {
     ? Array.from(titleEl.getElementsByTagNameNS('*', 't')).map(t => t.textContent).join('') || null
     : null;
 
-  const barDirEl = direct(chartEl, 'barDir');
   return {
-    type,
-    stacked: grouping === 'stacked',
-    horizontal: type === 'bar' && barDirEl && barDirEl.getAttribute('val') === 'bar',
+    type: pie ? 'pie' : 'axis',
+    stacked,
+    horizontal,
     title,
     cats: cats.map(c => c == null ? '' : String(c)),
     series
@@ -745,38 +775,58 @@ function renderChartSvg(model, w, h) {
     return svg;
   }
 
-  // ── Shared scale for bar/line ──
+  // ── Value scales for bar/line ──
+  // Primary series share one axis; series flagged secondary (combo plots
+  // with their own axId pair, e.g. % over $) get an independent scale
+  // drawn on the right.
+  const barSeries = series.filter(s => s.renderAs !== 'line');
+  const lineSeries = series.filter(s => s.renderAs === 'line');
+  const primary = series.filter(s => !s.secondary);
+  const secondarySeries = series.filter(s => s.secondary);
   let dataMax = 0, dataMin = 0;
   if (model.stacked) {
     for (let i = 0; i < cats.length; i++) {
       let pos = 0, neg = 0;
-      series.forEach(s => { const v = s.vals[i] || 0; if (v >= 0) pos += v; else neg += v; });
+      barSeries.forEach(s => { if (s.secondary) return; const v = s.vals[i] || 0; if (v >= 0) pos += v; else neg += v; });
       dataMax = Math.max(dataMax, pos); dataMin = Math.min(dataMin, neg);
     }
+    lineSeries.forEach(s => { if (s.secondary) return; s.vals.forEach(v => { dataMax = Math.max(dataMax, v); dataMin = Math.min(dataMin, v); }); });
   } else {
-    series.forEach(s => s.vals.forEach(v => { dataMax = Math.max(dataMax, v); dataMin = Math.min(dataMin, v); }));
+    primary.forEach(s => s.vals.forEach(v => { dataMax = Math.max(dataMax, v); dataMin = Math.min(dataMin, v); }));
   }
   const yMax = dataMax > 0 ? nice(dataMax) : 0;
   const yMin = dataMin < 0 ? -nice(-dataMin) : 0;
   const span = (yMax - yMin) || 1;
 
+  let y2Max = 0, y2Min = 0, span2 = 1;
+  if (secondarySeries.length) {
+    let mx = 0, mn = 0;
+    secondarySeries.forEach(s => s.vals.forEach(v => { mx = Math.max(mx, v); mn = Math.min(mn, v); }));
+    y2Max = mx > 0 ? nice(mx) : 0;
+    y2Min = mn < 0 ? -nice(-mn) : 0;
+    span2 = (y2Max - y2Min) || 1;
+  }
+
   const horiz = !!model.horizontal;
   const axisW = small ? 0 : (horiz ? Math.min(64, w * 0.25) : 32);
+  const axis2W = !small && secondarySeries.length && !horiz ? 30 : 0;
   const xLabH = small ? 0 : 12;
   const plot = {
     x: pad + axisW,
     y: pad + titleH,
-    w: w - pad * 2 - axisW,
+    w: w - pad * 2 - axisW - axis2W,
     h: h - pad * 2 - titleH - legendH - xLabH
   };
   if (plot.w < 10 || plot.h < 10) return svg;
 
-  // value → pixel along the value axis
+  // value → pixel along the value axis (primary / secondary)
   const vPx = (v) => horiz
     ? plot.x + (v - yMin) / span * plot.w
     : plot.y + plot.h - (v - yMin) / span * plot.h;
+  const v2Px = (v) => plot.y + plot.h - (v - y2Min) / span2 * plot.h;
 
-  // Gridlines + value labels (4 divisions).
+  // Gridlines + value labels (4 divisions). Secondary-axis labels sit on
+  // the right, on the same gridlines (both scales use 4 divisions).
   for (let i = 0; i <= 4; i++) {
     const v = yMin + span * i / 4;
     const p = vPx(v);
@@ -786,6 +836,7 @@ function renderChartSvg(model, w, h) {
     } else {
       mk('line', { x1: plot.x, y1: p, x2: plot.x + plot.w, y2: p, stroke: '#e5e5e5', 'stroke-width': 1 }, svg);
       if (!small) text(plot.x - 4, p + 3, fmtNum(v), { 'text-anchor': 'end' }, svg);
+      if (axis2W) text(plot.x + plot.w + 4, p + 3, fmtNum(y2Min + span2 * i / 4), { 'text-anchor': 'start', fill: '#8a8a8a' }, svg);
     }
   }
 
@@ -803,14 +854,16 @@ function renderChartSvg(model, w, h) {
     });
   }
 
-  if (model.type === 'bar') {
+  // Bars first, lines on top (combo overlays share the same value axis).
+  // Series colors index the FULL series list so legend colors line up.
+  if (barSeries.length) {
     const group = slot * 0.72;
-    const barW = model.stacked ? group : group / series.length;
+    const barW = model.stacked ? group : group / barSeries.length;
     const zero = vPx(0);
     const stackPos = new Array(cats.length).fill(0);
     const stackNeg = new Array(cats.length).fill(0);
-    series.forEach((s, si) => {
-      const color = CHART_PALETTE[si % CHART_PALETTE.length];
+    barSeries.forEach((s, si) => {
+      const color = CHART_PALETTE[series.indexOf(s) % CHART_PALETTE.length];
       for (let i = 0; i < cats.length; i++) {
         const v = s.vals[i] || 0;
         if (!v && model.stacked) continue;
@@ -835,21 +888,21 @@ function renderChartSvg(model, w, h) {
     // Zero axis on top of the bars so negatives read clearly.
     if (horiz) mk('line', { x1: zero, y1: plot.y, x2: zero, y2: plot.y + plot.h, stroke: '#9b9b9b', 'stroke-width': 1 }, svg);
     else mk('line', { x1: plot.x, y1: zero, x2: plot.x + plot.w, y2: zero, stroke: '#9b9b9b', 'stroke-width': 1 }, svg);
-  } else { // line
-    series.forEach((s, si) => {
-      const color = CHART_PALETTE[si % CHART_PALETTE.length];
-      const pts = [];
-      for (let i = 0; i < cats.length; i++) {
-        if (s.vals[i] == null) continue;
-        pts.push([plot.x + slot * (i + 0.5), vPx(s.vals[i])]);
-      }
-      mk('polyline', {
-        points: pts.map(p => p.join(',')).join(' '),
-        fill: 'none', stroke: color, 'stroke-width': 2, 'stroke-linejoin': 'round'
-      }, svg);
-      if (slot > 8) pts.forEach(([x, y]) => mk('circle', { cx: x, cy: y, r: 2, fill: color }, svg));
-    });
   }
+  lineSeries.forEach((s) => {
+    const color = CHART_PALETTE[series.indexOf(s) % CHART_PALETTE.length];
+    const toPx = s.secondary ? v2Px : vPx;
+    const pts = [];
+    for (let i = 0; i < cats.length; i++) {
+      if (s.vals[i] == null) continue;
+      pts.push([plot.x + slot * (i + 0.5), toPx(s.vals[i])]);
+    }
+    mk('polyline', {
+      points: pts.map(p => p.join(',')).join(' '),
+      fill: 'none', stroke: color, 'stroke-width': 2, 'stroke-linejoin': 'round'
+    }, svg);
+    if (slot > 8) pts.forEach(([x, y]) => mk('circle', { cx: x, cy: y, r: 2, fill: color }, svg));
+  });
 
   if (showLegend) drawLegend(series.map((s, i) => [trunc(s.name, 14), CHART_PALETTE[i % CHART_PALETTE.length]]));
   return svg;
@@ -957,13 +1010,23 @@ function positionImages(wrapper, table, anchors, rangeStart) {
   const wrapperRect = wrapper.getBoundingClientRect();
   const { colEdges, rowEdges, numRows, numCols } = buildGridEdges(grid, wrapperRect);
 
-  const clamp = (v, max) => v < 0 ? 0 : (v > max ? max : v);
-  const colX = (c, off) => colEdges[clamp(c, numCols)] + (off || 0) / EMU_PER_PX;
-  const rowY = (r, off) => rowEdges[clamp(r, numRows)] + (off || 0) / EMU_PER_PX;
   // Average cell sizes — used to size anchors whose row/col span lies entirely
-  // in the empty top rows trimSheetRange removed.
+  // in the empty top rows trimSheetRange removed, and to extrapolate edges
+  // beyond the trimmed grid (see below).
   const avgRowH = numRows ? rowEdges[numRows] / numRows : 18;
   const avgColW = numCols ? colEdges[numCols] / numCols : 64;
+
+  const clamp = (v, max) => v < 0 ? 0 : (v > max ? max : v);
+  // Anchors often live in empty columns/rows to the right of / below the
+  // data (dashboards park charts there), which trimSheetRange cut away.
+  // Clamping both ends of such an anchor to the last grid edge collapses
+  // its box to ~zero — extrapolate with average cell sizes instead.
+  const colX = (c, off) => (c > numCols
+    ? colEdges[numCols] + (c - numCols) * avgColW
+    : colEdges[clamp(c, numCols)]) + (off || 0) / EMU_PER_PX;
+  const rowY = (r, off) => (r > numRows
+    ? rowEdges[numRows] + (r - numRows) * avgRowH
+    : rowEdges[clamp(r, numRows)]) + (off || 0) / EMU_PER_PX;
 
   // Compute each anchor's geometry up front. Anchors whose whole row span sits
   // in the trimmed-away top rows (to.row <= rangeStart.r) belong ABOVE the
