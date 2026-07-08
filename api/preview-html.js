@@ -31,6 +31,15 @@ export default function handler(req, res) {
 </head>
 <body class="preview-page">
   <div id="app" class="preview-container">
+    <div id="preview-header" class="preview-header">
+      <button id="print-btn" class="header-btn" type="button" title="Print" aria-label="Print">
+        <img src="/images/print-icon.svg" alt="Print">
+      </button>
+      <a id="donate-btn" class="header-btn" href="${KOFI_URL}" target="_blank"
+         rel="noopener noreferrer" title="Support the project ❤️" aria-label="Support the project ❤️">
+        <img src="/images/donate-icon.svg" alt="Support the project ❤️">
+      </a>
+    </div>
     <div id="loading" class="loading">Loading file…</div>
     <div id="error" class="error-state" hidden></div>
     <div id="sheet-tabs" class="sheet-tabs" hidden></div>
