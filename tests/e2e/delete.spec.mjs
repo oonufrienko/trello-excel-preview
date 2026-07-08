@@ -39,6 +39,9 @@ test('Delete: no "500" alert when Trello returns 500-but-deleted', async ({ page
   const bad = dialogs.find(d => d.type === 'alert' && /500|failed to delete/i.test(d.message));
   expect(bad, `Got unwanted alert: ${bad?.message}`).toBeUndefined();
 
-  // And the row should be gone after Trello's state syncs.
-  await expect(row).toBeHidden({ timeout: 8000 });
+  // And the row should be gone after Trello's state syncs. Generous
+  // timeout: the sync sometimes lands after 8s, and a late sync fails
+  // the run unrecoverably — the fixture is consumed, so the retry can
+  // never find the row again (only seed-board restores it).
+  await expect(row).toBeHidden({ timeout: 20_000 });
 });
