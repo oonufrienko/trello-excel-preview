@@ -85,6 +85,14 @@ body.preview-page {
   --tab-active-bg: #0052cc;
   --tab-active-text: #ffffff;
   background: #dfe1e6;
+  /* Column layout keeps the footer inside the viewport; without this the
+     100vh container pushes it below the fold and the body grows its own
+     scrollbar — a light stripe down the right edge of the modal. */
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  margin: 0;
+  overflow: hidden;
 }
 
 /* ── Shared states ── */
@@ -187,16 +195,32 @@ body.preview-page {
 }
 
 .file-icon {
-  width: 20px;
-  height: 20px;
+  width: 28px;
+  height: 28px;
   flex-shrink: 0;
 }
 
+.file-meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
 .file-name {
+  font-size: 15px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   color: var(--text);
+}
+
+.file-date {
+  font-size: 13px;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .attachment-actions {
@@ -205,11 +229,53 @@ body.preview-page {
   flex-shrink: 0;
 }
 
+/* ── Preview header (green bar inside the modal iframe) ── */
+.preview-header {
+  display: flex;
+  align-items: center;
+  height: 48px;
+  /* print sits 16px from the left edge, donate mirrors it on the right */
+  padding: 0 16px;
+  /* light grey to contrast Trello's dark-green modal bar; the border
+     keeps it from merging with the sheet-tabs strip below */
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.header-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.header-btn:hover {
+  background: var(--secondary-hover);
+}
+
+.header-btn img {
+  width: 24px;
+  height: 24px;
+  display: block;
+}
+
+#donate-btn {
+  margin-left: auto;
+}
+
 /* ── Preview modal ── */
 .preview-container {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  flex: 1;
+  min-height: 0;
   overflow: hidden;
   background: transparent;
 }
@@ -251,11 +317,18 @@ body.preview-page {
 .sheet-content {
   flex: 1;
   overflow: auto;
-  padding: 12px;
+  /* No top padding: the sticky header row must land flush at the top of
+     the scrollport — rows were showing through a padded strip above it.
+     The wrapper's margin-top provides the initial gap instead. */
+  padding: 0 12px 12px;
 }
 
 .sheet-content table {
-  border-collapse: collapse;
+  /* separate, not collapse: collapsed borders are painted by the grid,
+     not the cell, so they refuse to stick with the sticky header row —
+     a 1-2px seam of scrolled content showed above/through it */
+  border-collapse: separate;
+  border-spacing: 0;
   font-size: 12px;
   table-layout: fixed;
   width: max-content;
@@ -264,7 +337,8 @@ body.preview-page {
 
 .sheet-content th,
 .sheet-content td {
-  border: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
   padding: 4px 10px;
   text-align: left;
   white-space: normal;
@@ -282,8 +356,16 @@ body.preview-page {
   white-space: nowrap;
 }
 
+/* One-sided borders (right/bottom) avoid doubling in the separate model;
+   the leading edges come from these two rules. */
+.sheet-content th:first-child,
+.sheet-content td:first-child {
+  border-left: 1px solid var(--border);
+}
+
 .sheet-content tr:first-child th,
 .sheet-content tr:first-child td {
+  border-top: 1px solid var(--border);
   background: var(--table-header);
   font-weight: 600;
   position: sticky;
@@ -307,7 +389,10 @@ body.preview-page {
   display: block;
   width: fit-content;
   max-width: 100%;
-  margin: 0 auto;
+  /* Top gap lives here (not on .sheet-content padding) so it scrolls
+     away with the content instead of leaving a strip above the sticky
+     header row. */
+  margin: 12px auto 0;
 }
 .embedded-img {
   position: absolute;
@@ -447,4 +532,42 @@ body.preview-page {
 }
 .welcome-container .btn {
   margin-top: 4px;
+}
+
+/* ── Print (preview modal): only the active sheet's table ── */
+@media print {
+  body.preview-page {
+    background: #fff;
+    display: block;
+    height: auto;
+    overflow: visible;
+  }
+
+  .preview-header,
+  .sheet-tabs,
+  .preview-footer { display: none !important; }
+
+  .preview-container {
+    height: auto;
+    overflow: visible;
+  }
+
+  .sheet-content {
+    overflow: visible;
+    padding: 0;
+  }
+
+  /* Unstick the header row so it doesn't overlap content across pages. */
+  .sheet-content tr:first-child th,
+  .sheet-content tr:first-child td {
+    position: static;
+  }
+
+  /* Keep Excel cell fills and overlaid images in the printed output. */
+  .sheet-content th,
+  .sheet-content td,
+  .embedded-img {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
 }

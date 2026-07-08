@@ -15,7 +15,6 @@ async function loadPreview() {
       showError('No file data found. Please try again.');
       return;
     }
-
     const params = new URLSearchParams({ url: data.url });
     if (data.token) params.set('token', data.token);
 
@@ -1031,5 +1030,8 @@ function showError(msg) {
 function hideLoading() {
   document.getElementById('loading').hidden = true;
 }
+
+// Print button lives in our own header bar inside this iframe.
+document.getElementById('print-btn').addEventListener('click', () => window.print());
 
 t.render(loadPreview);

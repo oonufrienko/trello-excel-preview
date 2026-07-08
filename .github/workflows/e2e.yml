@@ -10,7 +10,9 @@ on:
   workflow_dispatch: {}
 
 jobs:
-  playwright:
+  # Job name must stay "e2e" — the ruleset-for-main required status
+  # check matches on the job name, not the workflow name.
+  e2e:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -37,8 +39,9 @@ jobs:
 
       - name: Restore storageState.json
         run: |
-          mkdir -p ./
-          echo "$TRELLO_STORAGE_STATE_B64" | base64 -d > ./storageState.json
+          # tr strips CR/LF/spaces a Windows clipboard or editor may have
+          # added to the secret; base64 -d chokes on them otherwise.
+          printf '%s' "$TRELLO_STORAGE_STATE_B64" | tr -d '[:space:]' | base64 -d > ./storageState.json
           test -s ./storageState.json
         env:
           TRELLO_STORAGE_STATE_B64: ${{ secrets.TRELLO_STORAGE_STATE_B64 }}

@@ -5,6 +5,7 @@ dotenv.config({ path: '.env' });
 
 export default defineConfig({
   testDir: './tests/e2e',
+  globalSetup: './tests/setup/check-session.mjs',
   fullyParallel: false, // Trello rate limits — run serially
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,

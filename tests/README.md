@@ -29,6 +29,12 @@ npx playwright install chromium
    ```bash
    npm run auth
    ```
+   After login the script also authorizes the Power-Up REST API
+   automatically (stores `TRELLO_USER_TOKEN` in member-private pluginData —
+   server-side, one time per member). It needs seeded fixtures, so if this
+   is a fresh setup run `npm run generate-fixtures && npm run seed-board`
+   first, then `npm run auth`. Without this step every test that clicks
+   Preview hangs on an `authorize()` popup.
 
 ## Running
 

@@ -12,6 +12,15 @@ function esc(s) {
     .replace(/>/g, '&gt;');
 }
 
+const DATE_FMT = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' });
+// Same locale source as DATE_FMT (the browser), so label and date agree.
+const ADDED_LABEL = (navigator.language || '').toLowerCase().startsWith('uk') ? 'Додано' : 'Added';
+
+function formatDate(iso) {
+  const d = new Date(iso);
+  return isNaN(d) ? '' : `${ADDED_LABEL} ${DATE_FMT.format(d)}`;
+}
+
 // appKey injected server-side into window.TRELLO_APP_KEY — enables t.getRestApi()
 const t = TrelloPowerUp.iframe({ appKey: window.TRELLO_APP_KEY || '', appName: 'Excel Viewer' });
 
@@ -36,6 +45,9 @@ async function openPreview(attachment) {
     name: attachment.name,
     token: userToken
   });
+  // Print and donate buttons live in the preview iframe's own header bar
+  // (api/preview-html.js template) — Trello's modal chrome gives no
+  // control over icon size or placement.
   t.modal({
     title: attachment.name,
     url: t.signUrl(window.location.origin + '/api/preview-html'),
@@ -186,7 +198,10 @@ function renderItem(attachment) {
   div.innerHTML = `
     <div class="attachment-info">
       <img src="/images/excel-icon.svg" class="file-icon" alt="Excel">
-      <span class="file-name" title="${esc(attachment.name)}">${esc(attachment.name)}</span>
+      <div class="file-meta">
+        <span class="file-name" title="${esc(attachment.name)}">${esc(attachment.name)}</span>
+        <span class="file-date">${esc(formatDate(attachment.date))}</span>
+      </div>
     </div>
     <div class="attachment-actions">
       <button class="btn btn-primary btn-preview">Preview</button>
