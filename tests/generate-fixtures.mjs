@@ -2,6 +2,7 @@
 // Generate synthetic xlsx fixtures into tests/fixtures/generated/.
 // Run: npm run generate-fixtures
 import ExcelJS from 'exceljs';
+import JSZip from 'jszip';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -101,6 +102,123 @@ async function multiSheetWithImages() {
     });
   }
   await wb.xlsx.writeFile(join(OUT_DIR, 'with-images-multi.xlsx'));
+}
+
+// Four charts (bar, line, pie + scatter) anchored over one sheet. ExcelJS
+// cannot write charts, so the workbook is post-processed as a zip: drawing
+// XML, chart parts, rels and content-type overrides are injected by hand.
+// Every chart embeds cached series data (numCache/strCache) — exactly what
+// the previewer's parseChartXml consumes.
+async function withCharts() {
+  const wb = new ExcelJS.Workbook();
+  const ws = wb.addWorksheet('Data');
+  ws.columns = [
+    { header: 'Region', key: 'r', width: 14 },
+    { header: '2023',   key: 'x', width: 10 },
+    { header: '2024',   key: 'y', width: 10 }
+  ];
+  const rows = [['Київ', 120, 150], ['Львів', 80, 95], ['Одеса', 60, 88], ['Харків', 45, 40]];
+  rows.forEach(([r, x, y]) => ws.addRow({ r, x, y }));
+  const buffer = await wb.xlsx.writeBuffer();
+
+  const zip = await JSZip.loadAsync(buffer);
+
+  const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const strCache = (vals) =>
+    `<c:ptCount val="${vals.length}"/>` +
+    vals.map((v, i) => `<c:pt idx="${i}"><c:v>${esc(v)}</c:v></c:pt>`).join('');
+  const ser = (idx, name, cats, vals) => `<c:ser><c:idx val="${idx}"/><c:order val="${idx}"/>
+    <c:tx><c:strRef><c:f>Data!X${idx}</c:f><c:strCache>${strCache([name])}</c:strCache></c:strRef></c:tx>
+    <c:cat><c:strRef><c:f>Data!A2:A5</c:f><c:strCache>${strCache(cats)}</c:strCache></c:strRef></c:cat>
+    <c:val><c:numRef><c:f>Data!B2:B5</c:f><c:numCache>${strCache(vals)}</c:numCache></c:numRef></c:val>
+  </c:ser>`;
+  const axes = `<c:catAx><c:axId val="1"/><c:scaling><c:orientation val="minMax"/></c:scaling><c:delete val="0"/><c:axPos val="b"/><c:crossAx val="2"/></c:catAx>
+    <c:valAx><c:axId val="2"/><c:scaling><c:orientation val="minMax"/></c:scaling><c:delete val="0"/><c:axPos val="l"/><c:crossAx val="1"/></c:valAx>`;
+  const chartSpace = (title, plot) => `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<c:chartSpace xmlns:c="http://schemas.openxmlformats.org/drawingml/2006/chart" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+  <c:chart>
+    <c:title><c:tx><c:rich><a:bodyPr/><a:p><a:r><a:t>${esc(title)}</a:t></a:r></a:p></c:rich></c:tx><c:overlay val="0"/></c:title>
+    <c:autoTitleDeleted val="0"/>
+    <c:plotArea><c:layout/>${plot}</c:plotArea>
+    <c:plotVisOnly val="1"/>
+  </c:chart>
+</c:chartSpace>`;
+
+  const CATS = rows.map(r => r[0]);
+  const V23 = rows.map(r => r[1]);
+  const V24 = rows.map(r => r[2]);
+
+  const charts = [
+    chartSpace('Sales by Region', `<c:barChart><c:barDir val="col"/><c:grouping val="clustered"/>
+      ${ser(0, '2023', CATS, V23)}${ser(1, '2024', CATS, V24)}
+      <c:axId val="1"/><c:axId val="2"/></c:barChart>${axes}`),
+    chartSpace('Trend', `<c:lineChart><c:grouping val="standard"/>
+      ${ser(0, '2023', CATS, V23)}${ser(1, '2024', CATS, V24)}
+      <c:axId val="1"/><c:axId val="2"/></c:lineChart>${axes}`),
+    chartSpace('Share 2024', `<c:pieChart><c:varyColors val="1"/>${ser(0, '2024', CATS, V24)}</c:pieChart>`),
+    chartSpace('Scatter (unsupported)', `<c:scatterChart><c:scatterStyle val="lineMarker"/>
+      <c:ser><c:idx val="0"/><c:order val="0"/>
+        <c:xVal><c:numRef><c:f>Data!B2:B5</c:f><c:numCache>${strCache(V23)}</c:numCache></c:numRef></c:xVal>
+        <c:yVal><c:numRef><c:f>Data!C2:C5</c:f><c:numCache>${strCache(V24)}</c:numCache></c:numRef></c:yVal>
+      </c:ser><c:axId val="1"/><c:axId val="2"/></c:scatterChart>
+      <c:valAx><c:axId val="1"/><c:scaling><c:orientation val="minMax"/></c:scaling><c:delete val="0"/><c:axPos val="b"/><c:crossAx val="2"/></c:valAx>
+      <c:valAx><c:axId val="2"/><c:scaling><c:orientation val="minMax"/></c:scaling><c:delete val="0"/><c:axPos val="l"/><c:crossAx val="1"/></c:valAx>`)
+  ];
+  charts.forEach((xml, i) => zip.file(`xl/charts/chart${i + 1}.xml`, xml));
+
+  // Drawing: 2×2 grid of twoCellAnchor graphicFrames below the data rows.
+  const anchor = (i, rId) => {
+    const col = (i % 2) * 7, row = 6 + Math.floor(i / 2) * 16;
+    return `<xdr:twoCellAnchor>
+    <xdr:from><xdr:col>${col}</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>${row}</xdr:row><xdr:rowOff>0</xdr:rowOff></xdr:from>
+    <xdr:to><xdr:col>${col + 6}</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>${row + 14}</xdr:row><xdr:rowOff>0</xdr:rowOff></xdr:to>
+    <xdr:graphicFrame macro="">
+      <xdr:nvGraphicFramePr><xdr:cNvPr id="${i + 2}" name="Chart ${i + 1}"/><xdr:cNvGraphicFramePr/></xdr:nvGraphicFramePr>
+      <xdr:xfrm><a:off x="0" y="0"/><a:ext cx="4267200" cy="2438400"/></xdr:xfrm>
+      <a:graphic><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/chart">
+        <c:chart xmlns:c="http://schemas.openxmlformats.org/drawingml/2006/chart" r:id="${rId}"/>
+      </a:graphicData></a:graphic>
+    </xdr:graphicFrame>
+    <xdr:clientData/>
+  </xdr:twoCellAnchor>`;
+  };
+  zip.file('xl/drawings/drawing1.xml',
+    `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<xdr:wsDr xmlns:xdr="http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+${charts.map((_, i) => anchor(i, `rId${i + 1}`)).join('\n')}
+</xdr:wsDr>`);
+  zip.file('xl/drawings/_rels/drawing1.xml.rels',
+    `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+${charts.map((_, i) => `<Relationship Id="rId${i + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/chart" Target="../charts/chart${i + 1}.xml"/>`).join('\n')}
+</Relationships>`);
+
+  // Wire the drawing into the sheet: <drawing> element + sheet-level rel.
+  const sheetPath = 'xl/worksheets/sheet1.xml';
+  const sheetXml = await zip.file(sheetPath).async('string');
+  zip.file(sheetPath, sheetXml.replace('</worksheet>', '<drawing r:id="rId100"/></worksheet>'));
+  const sheetRelsPath = 'xl/worksheets/_rels/sheet1.xml.rels';
+  const relEntry = '<Relationship Id="rId100" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/drawing" Target="../drawings/drawing1.xml"/>';
+  const existingRels = zip.file(sheetRelsPath);
+  if (existingRels) {
+    const xml = await existingRels.async('string');
+    zip.file(sheetRelsPath, xml.replace('</Relationships>', `${relEntry}</Relationships>`));
+  } else {
+    zip.file(sheetRelsPath,
+      `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${relEntry}</Relationships>`);
+  }
+
+  // Content types for the new parts.
+  const ctPath = '[Content_Types].xml';
+  const ct = await zip.file(ctPath).async('string');
+  const overrides =
+    '<Override PartName="/xl/drawings/drawing1.xml" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/>' +
+    charts.map((_, i) => `<Override PartName="/xl/charts/chart${i + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.drawingml.chart+xml"/>`).join('');
+  zip.file(ctPath, ct.replace('</Types>', `${overrides}</Types>`));
+
+  const out = await zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE' });
+  await writeFile(join(OUT_DIR, 'with-charts.xlsx'), out);
 }
 
 // A twoCellAnchor image (tl + br) over a region with merged cells, plus
@@ -223,6 +341,7 @@ async function main() {
   await simple2col();           console.log('  simple-2col.xlsx');
   await multiSheet();           console.log('  multi-sheet.xlsx');
   await multiSheetWithImages(); console.log('  with-images-multi.xlsx');
+  await withCharts();           console.log('  with-charts.xlsx');
   await twoCellAnchorImage();   console.log('  two-cell-anchor.xlsx');
   await formulasNoCache();      console.log('  formulas-no-cache.xlsx');
   await themeColorsFixture();   console.log('  theme-colors.xlsx');
