@@ -131,7 +131,7 @@ async function renameAttachment(attachment) {
       throw new Error(`HTTP ${res.status}${text ? ': ' + text.substring(0, 100) : ''}`);
     }
 
-    await renderList();
+    await renderList({ [attachment.id]: { name: trimmed } });
   } catch (err) {
     console.error('Rename failed:', err);
     alert(`Failed to rename: ${err.message}`);
@@ -213,11 +213,17 @@ function renderItem(attachment) {
   return div;
 }
 
-async function renderList() {
+// `overrides` optimistically patches attachment fields (keyed by id) onto the
+// SDK's card model. After a REST write (rename), `t.card('attachments')` lags
+// until Trello re-syncs, so we render the value we just persisted instead of
+// the stale one. The next natural render reconciles once the model catches up.
+async function renderList(overrides = {}) {
   const app = document.getElementById('app');
   try {
     const card = await t.card('attachments');
-    const files = (card.attachments || []).filter(isExcel);
+    const files = (card.attachments || [])
+      .map(a => (overrides[a.id] ? { ...a, ...overrides[a.id] } : a))
+      .filter(isExcel);
     app.innerHTML = '';
     if (!files.length) {
       app.innerHTML = '<div class="empty-state">No Excel files attached.</div>';
@@ -231,4 +237,4 @@ async function renderList() {
   t.sizeTo('#app').catch(() => {});
 }
 
-t.render(renderList);
+t.render(() => renderList());
