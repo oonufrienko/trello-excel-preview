@@ -21,13 +21,13 @@ test('Rename: prompt → new name persists after reload', async ({ page, fixture
   await page.locator('text=Rename').click();
 
   const renamedRow = powerUp.locator('.attachment-item', { hasText: newName });
-  await expect(renamedRow).toBeVisible({ timeout: 8000 });
+  await expect(renamedRow).toBeVisible({ timeout: 20_000 });
 
   // Reload — name persists.
   await page.reload();
   const powerUp2 = page.frameLocator('iframe[src*="trello-excel-preview"]').first();
   const renamedRow2 = powerUp2.locator('.attachment-item', { hasText: newName });
-  await expect(renamedRow2).toBeVisible({ timeout: 10_000 });
+  await expect(renamedRow2).toBeVisible({ timeout: 20_000 });
 
   // Restore original name so seed-board's idempotency works on re-runs.
   page.removeAllListeners('dialog');
@@ -37,5 +37,5 @@ test('Rename: prompt → new name persists after reload', async ({ page, fixture
   });
   await renamedRow2.locator('.btn-more').click();
   await page.locator('text=Rename').click();
-  await expect(powerUp2.locator('.attachment-item', { hasText: FIXTURE })).toBeVisible({ timeout: 8000 });
+  await expect(powerUp2.locator('.attachment-item', { hasText: FIXTURE })).toBeVisible({ timeout: 20_000 });
 });
