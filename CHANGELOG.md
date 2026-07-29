@@ -16,7 +16,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - **On-enable welcome modal** (`welcome.html`) shown the first time the Power-Up is enabled on a board.
 - **Terms of Use** page (`terms.html`, EN + UA) linked from the Privacy Policy.
 - **Ko-fi support links** in the preview footer and welcome modal, plus `.github/FUNDING.yml`.
-- `/api/health` endpoint for uptime monitoring (returns `{ status, version, uptimeSeconds, timestamp }`).
+- `/api/health` endpoint for uptime monitoring (returns `{ status, version, commit, env, uptimeSeconds, timestamp }`). `commit` and `env` make it possible to tell what production is actually serving: compare with `git rev-parse --short origin/main`.
 - Rate limiting on `/api/proxy` (30 requests/min per IP, returns `429` with `Retry-After`).
 - Playwright e2e test infrastructure with safety guard against running on non-test boards.
 - GitHub Actions workflow that runs e2e tests on pull requests to `main` and nightly at 03:17 UTC.
