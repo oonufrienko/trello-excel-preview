@@ -21,9 +21,11 @@ Vercel Dashboard → project → Settings → Domains.
 **CI moves this alias too.** When an e2e run on a pull request goes green it
 points `trello-excel-preview-dev.vercel.app` at that PR's build, so you can look
 at the change in Trello without deploying anything by hand. The alias stays
-there after the PR is merged — and since the nightly e2e run tests the dev
-alias, leave it on a branch and the nightly reports on that branch instead of on
-main. Put main back with **Actions → reset-dev → Run workflow**.
+there only until the PR is finished: closing or merging it triggers `reset-dev`,
+which builds main and aliases it back. That matters because the nightly e2e run
+tests the dev alias — left on a branch, the nightly would report on that branch
+instead of on main. To put main back sooner (you are done looking, but the PR
+stays open), run it by hand: **Actions → reset-dev → Run workflow**.
 
 ## Prod
 

@@ -5,9 +5,18 @@ name: reset-dev
 # The e2e job points dev at whichever PR was pushed last, so after eyeballing a
 # PR in Trello the alias is left on branch code. The nightly e2e run tests the
 # dev alias, so leaving it there makes the nightly report on a branch instead of
-# on what users have. Run this workflow (Actions -> reset-dev -> Run workflow)
-# to build main and alias it back.
+# on what users have.
+#
+# push to main is the workhorse trigger: it catches every merge and, unlike a
+# pull_request trigger, runs the definition from main — so it fires even for
+# branches that predate this file. pull_request/closed covers the other exit,
+# a PR abandoned without merging, which no push would ever catch. Running twice
+# for one merge is harmless: the second run just aliases main again.
 on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [closed]
   workflow_dispatch: {}
 
 # Shares the lock with e2e: switching what dev serves mid-suite would pull the
