@@ -1,16 +1,16 @@
 # Graph Report - trello-excel-preview  (2026-07-29)
 
 ## Corpus Check
-- 42 files · ~49,874 words
+- 43 files · ~50,261 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 353 nodes · 444 edges · 53 communities (33 shown, 20 thin omitted)
-- Extraction: 92% EXTRACTED · 8% INFERRED · 0% AMBIGUOUS · INFERRED: 36 edges (avg confidence: 0.69)
+- 358 nodes · 453 edges · 54 communities (34 shown, 20 thin omitted)
+- Extraction: 92% EXTRACTED · 8% INFERRED · 0% AMBIGUOUS · INFERRED: 37 edges (avg confidence: 0.7)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `30e7a299`
+- Built from commit: `83b0d7a4`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -29,6 +29,7 @@
 - [[_COMMUNITY_Bundle Helper Functions|Bundle Helper Functions]]
 - [[_COMMUNITY_Marketing Demo GIF|Marketing Demo GIF]]
 - [[_COMMUNITY_Board Cleanup Script|Board Cleanup Script]]
+- [[_COMMUNITY_rename.spec.mjs|rename.spec.mjs]]
 - [[_COMMUNITY_App Icon Branding|App Icon Branding]]
 - [[_COMMUNITY_Bundle Utility Group|Bundle Utility Group]]
 - [[_COMMUNITY_Vercel Config|Vercel Config]]
@@ -59,14 +60,15 @@
 - [[_COMMUNITY_WMF Labelled Placeholder Decision|WMF Labelled Placeholder Decision]]
 - [[_COMMUNITY_xlsx-calc (MIT formula engine)|xlsx-calc (MIT formula engine)]]
 - [[_COMMUNITY_Graphify Knowledge Graph Integration|Graphify Knowledge Graph Integration]]
+- [[_COMMUNITY_clean-orphans.mjs|clean-orphans.mjs]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `Marketplace Listing Copy` - 13 edges
-2. `loadPreview()` - 12 edges
-3. `test` - 12 edges
-4. `main()` - 10 edges
-5. `u()` - 9 edges
-6. `scripts` - 9 edges
+1. `test` - 13 edges
+2. `Marketplace Listing Copy` - 13 edges
+3. `loadPreview()` - 12 edges
+4. `scripts` - 10 edges
+5. `main()` - 10 edges
+6. `u()` - 9 edges
 7. `main()` - 9 edges
 8. `s()` - 8 edges
 9. `Simple Excel Viewer` - 8 edges
@@ -76,33 +78,33 @@
 - `loadPreview()` --references--> `xlsx`  [EXTRACTED]
   js/preview.js → package.json
 - `trello()` --indirect_call--> `v()`  [INFERRED]
+  tests/setup/clean-orphans.mjs → js/xlsx-calc.bundle.js
+- `trello()` --indirect_call--> `v()`  [INFERRED]
   tests/setup/seed-board.mjs → js/xlsx-calc.bundle.js
 - `trello()` --indirect_call--> `v()`  [INFERRED]
   tests/setup/unseed-real.mjs → js/xlsx-calc.bundle.js
 - `listFixtures()` --indirect_call--> `f()`  [INFERRED]
   tests/setup/seed-board.mjs → js/xlsx-calc.bundle.js
-- `Preview Iframe Page (preview.html)` --implements--> `Preview Modal (client-side SheetJS parsing)`  [INFERRED]
-  preview.html → CHANGELOG.md
 
 ## Import Cycles
 - None detected.
 
-## Communities (53 total, 20 thin omitted)
+## Communities (54 total, 20 thin omitted)
 
 ### Community 1 - "Package Manifest & Dependencies"
 Cohesion: 0.07
-Nodes (28): author, bugs, email, contributors, description, devDependencies, dotenv, esbuild (+20 more)
+Nodes (29): author, bugs, email, contributors, description, devDependencies, dotenv, esbuild (+21 more)
 
 ### Community 2 - "Preview Rendering"
-Cohesion: 0.15
-Nodes (23): applyCellStyles(), applyFormulaCellFormats(), blobUrls, buildCellGrid(), buildColgroup(), buildGridEdges(), currentAnchors, currentStyles (+15 more)
+Cohesion: 0.14
+Nodes (24): applyCellStyles(), applyFormulaCellFormats(), blobUrls, buildCellGrid(), buildColgroup(), buildGridEdges(), currentAnchors, currentStyles (+16 more)
 
 ### Community 3 - "Product Docs & API Pages"
 Cohesion: 0.25
 Nodes (9): Ko-fi Funding (river44), Attachments Iframe Page (attachments.html), Attachment Section (Preview/Download/Rename/Delete), Preview Modal (client-side SheetJS parsing), Preview Iframe Page (preview.html), Privacy Policy (EN + UA), Trello Power-Up SDK (p.trellocdn.com), Terms of Use (EN + UA) (+1 more)
 
 ### Community 4 - "E2E Test Specs"
-Cohesion: 0.17
+Cohesion: 0.16
 Nodes (5): ALLOWED, CASES, __dirname, IDS_FILE, test
 
 ### Community 5 - "Test Fixture Generation"
@@ -110,7 +112,7 @@ Cohesion: 0.21
 Nodes (16): chunk(), crc32(), crcTable, csvFile(), __dirname, flatColorPng(), formulasNoCache(), large5mb() (+8 more)
 
 ### Community 6 - "Attachments UI"
-Cohesion: 0.30
+Cohesion: 0.29
 Nodes (14): DATE_FMT, deleteAttachment(), downloadAttachment(), ensureToken(), esc(), EXCEL_EXTS, formatDate(), isExcel() (+6 more)
 
 ### Community 7 - "Trello Board Seeding"
@@ -130,12 +132,12 @@ Cohesion: 0.33
 Nodes (8): actionsEl, onAuthorize(), onDisconnect(), refresh(), renderConnected(), renderDisconnected(), statusEl, t
 
 ### Community 11 - "Bundle Minified Helpers"
-Cohesion: 0.33
-Nodes (10): Dr(), _e(), f(), h(), i(), l(), m(), u() (+2 more)
+Cohesion: 0.39
+Nodes (9): Dr(), _e(), f(), i(), l(), m(), u(), v() (+1 more)
 
 ### Community 12 - "Bundle Helper Functions"
-Cohesion: 0.23
-Nodes (12): a(), calcNames(), constructor(), getRef(), Je(), o(), qe(), s() (+4 more)
+Cohesion: 0.43
+Nodes (7): a(), Je(), o(), qe(), s(), t(), w()
 
 ### Community 13 - "Marketing Demo GIF"
 Cohesion: 0.43
@@ -144,6 +146,10 @@ Nodes (7): Power-Up Demo GIF Screenshot, Card Toolbar with Attachment Button (Ad
 ### Community 14 - "Board Cleanup Script"
 Cohesion: 0.38
 Nodes (6): __dirname, IDS_FILE, main(), REPO_ROOT, requireEnv(), trello()
+
+### Community 15 - "rename.spec.mjs"
+Cohesion: 0.40
+Nodes (5): calcNames(), constructor(), getRef(), setVar(), setVarOfExpression()
 
 ### Community 16 - "App Icon Branding"
 Cohesion: 0.60
@@ -185,12 +191,16 @@ Nodes (4): Deploy & Rollback, Dev (test environment), Prod, Rollback
 Cohesion: 0.67
 Nodes (3): e2e GitHub Actions Workflow (playwright job), Playwright E2E Suite, storageState.json Trello Session
 
+### Community 53 - "clean-orphans.mjs"
+Cohesion: 0.83
+Nodes (3): main(), requireEnv(), trello()
+
 ## Ambiguous Edges - Review These
 - `Background Board Card with Attachment Badges (Instruments, 19 May)` → `Marketing Demo Asset for Trello Excel Preview Power-Up Listing`  [AMBIGUOUS]
   marketing/power-up-gif-screenshot.gif · relation: conceptually_related_to
 
 ## Knowledge Gaps
-- **121 isolated node(s):** `t`, `STARTED_AT`, `rateBuckets`, `RFC-5987`, `t` (+116 more)
+- **123 isolated node(s):** `STARTED_AT`, `rateBuckets`, `RFC-5987`, `EXCEL_EXTS`, `t` (+118 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **20 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
@@ -200,14 +210,14 @@ _Questions this graph is uniquely positioned to answer:_
 - **What is the exact relationship between `Background Board Card with Attachment Badges (Instruments, 19 May)` and `Marketing Demo Asset for Trello Excel Preview Power-Up Listing`?**
   _Edge tagged AMBIGUOUS (relation: conceptually_related_to) - confidence is low._
 - **Why does `loadPreview()` connect `Preview Rendering` to `Package Manifest & Dependencies`, `Bundle Minified Helpers`?**
-  _High betweenness centrality (0.070) - this node is a cross-community bridge._
+  _High betweenness centrality (0.084) - this node is a cross-community bridge._
 - **Why does `u()` connect `Bundle Minified Helpers` to `Formula Engine Bundle`, `Preview Rendering`, `Bundle Helper Functions`?**
-  _High betweenness centrality (0.057) - this node is a cross-community bridge._
+  _High betweenness centrality (0.073) - this node is a cross-community bridge._
 - **Are the 2 inferred relationships involving `loadPreview()` (e.g. with `preview.js` and `u()`) actually correct?**
   _`loadPreview()` has 2 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 3 inferred relationships involving `u()` (e.g. with `loadPreview()` and `m()`) actually correct?**
-  _`u()` has 3 INFERRED edges - model-reasoned connections that need verification._
-- **What connects `t`, `STARTED_AT`, `rateBuckets` to the rest of the system?**
-  _126 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **What connects `STARTED_AT`, `rateBuckets`, `RFC-5987` to the rest of the system?**
+  _128 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Formula Engine Bundle` be split into smaller, more focused modules?**
   _Cohesion score 0.04878048780487805 - nodes in this community are weakly interconnected._
+- **Should `Package Manifest & Dependencies` be split into smaller, more focused modules?**
+  _Cohesion score 0.06666666666666667 - nodes in this community are weakly interconnected._

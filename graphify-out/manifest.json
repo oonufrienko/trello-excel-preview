@@ -35,8 +35,8 @@
     "semantic_hash": "e822e1e1bc42606785de7398cce37833"
   },
   "js/attachments.js": {
-    "mtime": 1785302754.2577553,
-    "ast_hash": "f39ee8d7d6eed15df8d590112fdb18dd",
+    "mtime": 1785305771.5019727,
+    "ast_hash": "5f6d92dcaf24fce34798ed90cf74b885",
     "semantic_hash": ""
   },
   "js/auth.js": {
@@ -65,8 +65,8 @@
     "semantic_hash": "335cb5bf834d95b127939177434fee69"
   },
   "package.json": {
-    "mtime": 1785158346.0670369,
-    "ast_hash": "13783fb7fae8ec09bfbf36091a4a1a80",
+    "mtime": 1785305790.214629,
+    "ast_hash": "71a773e0c6adfdcf2cfb89e2c6ca4761",
     "semantic_hash": ""
   },
   "playwright.config.mjs": {
@@ -130,8 +130,8 @@
     "semantic_hash": ""
   },
   "tests/e2e/rename.spec.mjs": {
-    "mtime": 1785304700.6734679,
-    "ast_hash": "83ed91bc705acc62b9b87f8bb686c687",
+    "mtime": 1785306114.9562163,
+    "ast_hash": "2f0409d8b8d93511b7c58c7a167afee1",
     "semantic_hash": ""
   },
   "tests/e2e/xls-encoding.spec.mjs": {
@@ -257,6 +257,11 @@
   "images/donate-icon.svg": {
     "mtime": 1783503687.914262,
     "ast_hash": "fa291a741332bad80a9343d02bded6b1",
+    "semantic_hash": ""
+  },
+  "tests/setup/clean-orphans.mjs": {
+    "mtime": 1785305783.9812455,
+    "ast_hash": "5212d5ec8dcbe651c15a4a04285c33ea",
     "semantic_hash": ""
   }
 }
