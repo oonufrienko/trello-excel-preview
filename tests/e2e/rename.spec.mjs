@@ -3,6 +3,21 @@ import { test, expect } from './_setup.mjs';
 
 const FIXTURE = 'data.csv';
 
+// Restore the original name over REST, not through the UI. The rename itself
+// is what this spec tests; the restore is only cleanup, and doing it in the
+// browser made a slow Trello sync leave the board dirty. seed-board matches
+// attachments by name in CI, so a leftover renamed-*.csv makes it upload a
+// duplicate data.csv on the next run.
+test.afterEach(async ({ fixtureIds }) => {
+  const info = fixtureIds[FIXTURE];
+  const url = new URL(`https://api.trello.com/1/cards/${info.cardId}/attachments/${info.attachmentId}`);
+  url.searchParams.set('key', process.env.TRELLO_API_KEY);
+  url.searchParams.set('token', process.env.TRELLO_USER_TOKEN);
+  url.searchParams.set('name', FIXTURE);
+  const res = await fetch(url.toString(), { method: 'PUT' });
+  if (!res.ok) throw new Error(`Restoring ${FIXTURE} failed: ${res.status} ${await res.text()}`);
+});
+
 test('Rename: prompt → new name persists after reload', async ({ page, fixtureIds }) => {
   const info = fixtureIds[FIXTURE];
   expect(info).toBeTruthy();
@@ -20,22 +35,16 @@ test('Rename: prompt → new name persists after reload', async ({ page, fixture
   await row.locator('.btn-more').click();
   await page.locator('text=Rename').click();
 
+  // Normally instant: renameAttachment patches the row right after the PUT.
+  // The generous timeout only covers the fallback re-render from
+  // t.card('attachments') — Trello's client-side model — whose sync can lag
+  // the write by tens of seconds. Same lag delete.spec allows 20s for.
   const renamedRow = powerUp.locator('.attachment-item', { hasText: newName });
-  await expect(renamedRow).toBeVisible({ timeout: 8000 });
+  await expect(renamedRow).toBeVisible({ timeout: 20_000 });
 
   // Reload — name persists.
   await page.reload();
   const powerUp2 = page.frameLocator('iframe[src*="trello-excel-preview"]').first();
   const renamedRow2 = powerUp2.locator('.attachment-item', { hasText: newName });
-  await expect(renamedRow2).toBeVisible({ timeout: 10_000 });
-
-  // Restore original name so seed-board's idempotency works on re-runs.
-  page.removeAllListeners('dialog');
-  page.on('dialog', async d => {
-    if (d.type() === 'prompt') await d.accept(FIXTURE);
-    else await d.dismiss();
-  });
-  await renamedRow2.locator('.btn-more').click();
-  await page.locator('text=Rename').click();
-  await expect(powerUp2.locator('.attachment-item', { hasText: FIXTURE })).toBeVisible({ timeout: 8000 });
+  await expect(renamedRow2).toBeVisible({ timeout: 20_000 });
 });

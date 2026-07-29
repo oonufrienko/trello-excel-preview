@@ -131,7 +131,17 @@ async function renameAttachment(attachment) {
       throw new Error(`HTTP ${res.status}${text ? ': ' + text.substring(0, 100) : ''}`);
     }
 
-    await renderList();
+    // Trello's client-side card model lags the REST write by tens of
+    // seconds, so re-rendering from t.card() here would paint the OLD name
+    // back. Patch the row we just renamed; t.render() reconciles later.
+    attachment.name = trimmed;
+    const nameEl = document.querySelector(`.attachment-item[data-attachment-id="${attachment.id}"] .file-name`);
+    if (nameEl) {
+      nameEl.textContent = trimmed;
+      nameEl.title = trimmed;
+    } else {
+      await renderList();
+    }
   } catch (err) {
     console.error('Rename failed:', err);
     alert(`Failed to rename: ${err.message}`);
@@ -195,6 +205,7 @@ function showActionsPopup(attachment, mouseEvent) {
 function renderItem(attachment) {
   const div = document.createElement('div');
   div.className = 'attachment-item';
+  div.dataset.attachmentId = attachment.id;
   div.innerHTML = `
     <div class="attachment-info">
       <img src="/images/excel-icon.svg" class="file-icon" alt="Excel">
