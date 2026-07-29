@@ -10,6 +10,7 @@ const FIXTURE = 'data.csv';
 // duplicate data.csv on the next run.
 test.afterEach(async ({ fixtureIds }) => {
   const info = fixtureIds[FIXTURE];
+  if (!info) return; // nothing seeded — let the test's own assertion report it
   const url = new URL(`https://api.trello.com/1/cards/${info.cardId}/attachments/${info.attachmentId}`);
   url.searchParams.set('key', process.env.TRELLO_API_KEY);
   url.searchParams.set('token', process.env.TRELLO_USER_TOKEN);
@@ -35,10 +36,9 @@ test('Rename: prompt → new name persists after reload', async ({ page, fixture
   await row.locator('.btn-more').click();
   await page.locator('text=Rename').click();
 
-  // Normally instant: renameAttachment patches the row right after the PUT.
-  // The generous timeout only covers the fallback re-render from
-  // t.card('attachments') — Trello's client-side model — whose sync can lag
-  // the write by tens of seconds. Same lag delete.spec allows 20s for.
+  // Normally instant: renameAttachment re-renders with the name it just
+  // persisted. The generous timeout is headroom for the render round-trip
+  // through the Power-Up iframe, in the spirit of delete.spec's 20s.
   const renamedRow = powerUp.locator('.attachment-item', { hasText: newName });
   await expect(renamedRow).toBeVisible({ timeout: 20_000 });
 
