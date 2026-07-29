@@ -56,8 +56,11 @@ jobs:
 
       - name: Point dev alias at main
         run: |
-          npx --yes vercel@58.1.0 alias set "${{ steps.build.outputs.url }}" \
+          npx --yes vercel@58.1.0 alias set "$DEPLOYMENT_URL" \
             trello-excel-preview-dev.vercel.app \
             --scope oonufrienkos-projects --token "$VERCEL_TOKEN"
         env:
+          # Through env, not ${{ }} inline — GitHub substitutes expressions
+          # before bash parses the script.
+          DEPLOYMENT_URL: ${{ steps.build.outputs.url }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}

@@ -1,7 +1,12 @@
 # Deploy & Rollback
 
-No Vercel git integration: **nothing deploys automatically** on push or merge.
-All deploys go through the Vercel CLI (`npx vercel`, already authorized).
+No Vercel git integration: **nothing reaches the production domain
+automatically** — merging a PR ships nothing to users. All production deploys go
+through the Vercel CLI (`npx vercel`, already authorized).
+
+CI does build on its own, but only for the test environment: a PR run stages
+that PR's build, and `reset-dev` builds main after a merge. Both only ever move
+the dev alias.
 
 ## Dev (test environment)
 

@@ -98,9 +98,12 @@ jobs:
       # the dev alias actually serves, not a fresh build.
       - name: Run Playwright
         run: |
-          host="${{ steps.preview.outputs.url }}"
-          PREVIEW_HOST="${host#https://}" npx playwright test
+          PREVIEW_HOST="${DEPLOYMENT_URL#https://}" npx playwright test
         env:
+          # Through env, not ${{ }} inline: GitHub substitutes expressions into
+          # the script before bash parses it, so a stray quote or newline in the
+          # value would rewrite the command rather than be passed to it.
+          DEPLOYMENT_URL: ${{ steps.preview.outputs.url }}
           TRELLO_API_KEY: ${{ secrets.TRELLO_API_KEY }}
           TRELLO_USER_TOKEN: ${{ secrets.TRELLO_USER_TOKEN }}
           TRELLO_TEST_BOARD_ID: ${{ secrets.TRELLO_TEST_BOARD_ID }}
@@ -112,10 +115,11 @@ jobs:
       - name: Point dev alias at this build
         if: github.event_name == 'pull_request'
         run: |
-          npx --yes vercel@58.1.0 alias set "${{ steps.preview.outputs.url }}" \
+          npx --yes vercel@58.1.0 alias set "$DEPLOYMENT_URL" \
             trello-excel-preview-dev.vercel.app \
             --scope oonufrienkos-projects --token "$VERCEL_TOKEN"
         env:
+          DEPLOYMENT_URL: ${{ steps.preview.outputs.url }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
 
       - name: Upload Playwright report
