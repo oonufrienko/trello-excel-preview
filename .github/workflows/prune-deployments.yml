@@ -1,0 +1,33 @@
+name: prune-deployments
+
+# Vercel keeps deployments forever by default, and every PR push stages one, so
+# the project's deployment list grows without bound. Vercel's own retention
+# policy is configured in months and would also govern real production
+# deployments, so we prune on our own schedule instead.
+#
+# 04:37 UTC — after the nightly e2e run at 03:17, so a staged build is never
+# pulled out from under a suite. (It could not be anyway: nothing younger than
+# PRUNE_DAYS is touched.)
+on:
+  schedule:
+    - cron: '37 4 * * *'
+  workflow_dispatch: {}
+
+jobs:
+  prune:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      VERCEL_ORG_ID: team_i8VbzTWKRuzPhOtsS49yRAgi
+      VERCEL_PROJECT_ID: prj_Ie3XBspzfh7eMheHHxTu6fx3frhV
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Prune old deployments
+        run: node scripts/prune-deployments.mjs --yes
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}

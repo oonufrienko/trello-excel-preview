@@ -63,6 +63,12 @@ npx vercel rollback <previous-prod-url>
 
 Or: Dashboard → Deployments → pick the deployment → ⋯ → Instant Rollback.
 
+Instant rollback only reaches deployments that still exist. The
+`prune-deployments` workflow deletes anything older than 5 days (keeping the
+5 newest and everything that has an alias), so for an older release use the code
+rollback below. Vercel keeps deleted deployments restorable for 30 days under
+Settings → Security → Recently Deleted.
+
 **Code rollback (when main must be reverted too):**
 
 ```bash
