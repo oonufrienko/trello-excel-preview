@@ -14,7 +14,7 @@
   "12": "Bundle Helper Functions",
   "13": "Marketing Demo GIF",
   "14": "Board Cleanup Script",
-  "15": "Formula Variable Resolution",
+  "15": "rename.spec.mjs",
   "16": "App Icon Branding",
   "17": "Bundle Utility Group",
   "18": "Vercel Config",
@@ -51,13 +51,5 @@
   "49": "Theme-palette Color Resolution",
   "50": "WMF Labelled Placeholder Decision",
   "51": "xlsx-calc (MIT formula engine)",
-  "52": "Graphify Knowledge Graph Integration",
-  "53": "Listing Known Limitations to Disclose",
-  "54": "RELEASE.md Known Limitations (public roadmap)",
-  "55": "Cell Styles Fix Root Cause (applyCellStyles selector)",
-  "56": "Charts (graphicFrame) Not Rendered",
-  "57": "Image Positioning Fix (buildGridEdges + header band)",
-  "58": "Images v2 (a:xfrm ext sizing, rotation, groups, WMF)",
-  "59": "TODO Exploratory Follow-ups",
-  "60": "UptimeRobot Monitoring on /api/health"
+  "52": "Graphify Knowledge Graph Integration"
 }
