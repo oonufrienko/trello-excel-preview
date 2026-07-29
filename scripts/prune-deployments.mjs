@@ -33,16 +33,31 @@ function vercel(args) {
   });
 }
 
+// `vercel alias ls` prints "<deployment url> <alias> <age>" rows and has no
+// --json, so parse the first column. Belt and braces: removal also passes
+// --safe, which is what actually guarantees an aliased deployment survives.
+function aliasedUrls() {
+  const urls = new Set();
+  for (const line of vercel(['alias', 'ls']).split('\n')) {
+    const m = line.trim().match(/^(\S+\.vercel\.app)\s+\S+\.vercel\.app/);
+    if (m) urls.add(m[1]);
+  }
+  return urls;
+}
+
 const { deployments } = JSON.parse(vercel(['ls', PROJECT, '--json', '--limit', '100']));
 deployments.sort((a, b) => b.createdAt - a.createdAt);
 
+const aliased = aliasedUrls();
 const cutoff = Date.now() - MAX_AGE_DAYS * 86_400_000;
 const stale = deployments
   .slice(KEEP_NEWEST)
-  .filter(d => d.createdAt < cutoff);
+  .filter(d => d.createdAt < cutoff)
+  .filter(d => !aliased.has(d.url));
 
 const age = d => ((Date.now() - d.createdAt) / 86_400_000).toFixed(1);
 console.log(`${deployments.length} deployments; keeping the newest ${KEEP_NEWEST} and anything under ${MAX_AGE_DAYS} days old.`);
+console.log(`Protected by an alias (never candidates): ${[...aliased].join(', ') || 'none'}`);
 
 if (!stale.length) {
   console.log('Nothing to prune.');
