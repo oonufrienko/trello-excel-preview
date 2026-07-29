@@ -7,6 +7,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ## [Unreleased]
 
 ### Added
+- **Deploy on green**: merging to `main` builds it once, runs the full e2e suite against that exact build, and promotes it to production only if the suite passes (`.github/workflows/deploy.yml`). A red suite ships nothing — production keeps serving what it served before.
+- **Pull requests are tested against their own build**: an e2e run stages the PR's build and points the suite at it via `PREVIEW_HOST`. Previously the suite exercised whatever the dev alias happened to serve, so a green check said nothing about the change under review.
+- **The dev alias follows the PR**: a green PR run points `trello-excel-preview-dev.vercel.app` at that build, so the change can be opened on the Trello test board without deploying by hand. `reset-dev` puts `main` back when a PR is closed without merging, or on demand.
+- `npm run clean-orphans` — sweeps `renamed-*.csv` attachments left on the test board by interrupted rename runs.
 - **Formula calculation**: cells with formulas but no cached value are now computed client-side via [xlsx-calc](https://github.com/fabiooshiro/xlsx-calc) (MIT), lazy-loaded only when such cells exist. Computed numbers get `#,##0.00` formatting; unsupported formulas fall back to showing the formula text.
 - **Authorization capabilities** (Marketplace guideline #9): `authorization-status`, `show-authorization` (opens an Authorize popup), and `show-settings` (Connect/Disconnect panel at `/api/settings-html`).
 - **On-enable welcome modal** (`welcome.html`) shown the first time the Power-Up is enabled on a board.
@@ -19,12 +23,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Marketplace assets (privacy policy, listing copy, 1024×1024 icon, demo gif).
 
 ### Changed
+- e2e runs now serialize on a `trello-test-board` concurrency group (`queue: max`). Every run seeds and mutates the same Trello board, and a run cancelled mid-suite left it dirty.
 - Product name: **Simple Excel Preview → Simple Excel Viewer** across all user-facing artifacts.
 - Attribution wording: **"Claude (Anthropic)" → "AI"** in privacy, terms, listing, README, and the preview footer.
 - Root connector frame served via `api/index-html.js` (replacing static `index.html`) so the Trello app key is injected server-side, enabling `t.getRestApi()`.
 - CHANGELOG migrated from per-branch notes to Keep a Changelog format.
 
 ### Fixed
+- **Renaming an attachment showed the old name** until the card was reloaded. `renderList()` rebuilt the list from `t.card('attachments')` — the Power-Up SDK's cached card model — which lags a REST write by tens of seconds; the rename now renders the value it just persisted. Trello's behaviour changed around 2026-07-25, which also turned the nightly e2e run red for three nights.
+- `rename.spec` restored the fixture's name through the UI, so a slow sync left `renamed-<timestamp>.csv` on the test board — and `seed-board`, which matches attachments by name in CI, then uploaded a duplicate `data.csv` every night. Cleanup now goes through the REST API in `afterEach`.
+- The `PREVIEW_HOST` rewrite in the e2e setup matched only the production host, while the Power-Up on the test board is registered against the dev alias — so it never fired.
 - **Theme-palette colors now render.** Excel's default color picker writes `theme=` + `tint=` refs (not `rgb=`); fills and font colors are now resolved against `xl/theme/theme1.xml` with the ECMA tint formula. Untinted theme-0/1 (sheet default text/background) stay unresolved so dark mode keeps control. (Indexed legacy colors remain unresolved.)
 - **Cyrillic in old `.xls` files.** BIFF files saved without a CODEPAGE record decoded as cp1252 and showed mojibake; the dense U+00C0–U+00FF signature is now detected and the file is re-read as cp1251.
 - **Embedded images no longer vanish or stretch over text.** `twoCellAnchor` images are sized from the laid-out grid via monotonic column/row edges (merged cells can't produce negative sizes), then refined to the picture's own size from `a:xfrm/a:ext` and shrunk (never grown) to the anchor box so they can't spill onto text rows. Logos anchored in trimmed empty top rows render in a reserved header band above the table.
