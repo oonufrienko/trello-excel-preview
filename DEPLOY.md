@@ -18,6 +18,13 @@ otherwise tests hit stale code. Then: `npx playwright test`.
 Aliases: `npx vercel alias ls` to inspect, `alias set` to switch, or
 Vercel Dashboard → project → Settings → Domains.
 
+**CI moves this alias too.** When an e2e run on a pull request goes green it
+points `trello-excel-preview-dev.vercel.app` at that PR's build, so you can look
+at the change in Trello without deploying anything by hand. The alias stays
+there after the PR is merged — and since the nightly e2e run tests the dev
+alias, leave it on a branch and the nightly reports on that branch instead of on
+main. Put main back with **Actions → reset-dev → Run workflow**.
+
 ## Prod
 
 ```bash

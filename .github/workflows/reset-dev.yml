@@ -1,0 +1,54 @@
+name: reset-dev
+
+# Put main back on the dev alias.
+#
+# The e2e job points dev at whichever PR was pushed last, so after eyeballing a
+# PR in Trello the alias is left on branch code. The nightly e2e run tests the
+# dev alias, so leaving it there makes the nightly report on a branch instead of
+# on what users have. Run this workflow (Actions -> reset-dev -> Run workflow)
+# to build main and alias it back.
+on:
+  workflow_dispatch: {}
+
+# Shares the lock with e2e: switching what dev serves mid-suite would pull the
+# ground out from under a running test.
+concurrency:
+  group: trello-test-board
+  cancel-in-progress: false
+  queue: max
+
+jobs:
+  reset-dev:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      VERCEL_ORG_ID: team_i8VbzTWKRuzPhOtsS49yRAgi
+      VERCEL_PROJECT_ID: prj_Ie3XBspzfh7eMheHHxTu6fx3frhV
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # --prod --skip-domain, same as the e2e job: a plain preview deploy gets
+      # Vercel's vercel.live toolbar injected, our CSP blocks it, and the
+      # nightly run would then fail on preview.spec's no-CSP-violations check.
+      - name: Build main
+        id: build
+        run: |
+          url=$(npx --yes vercel@58.1.0 deploy --prod --skip-domain --yes --token "$VERCEL_TOKEN")
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          echo "Built: $url"
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+
+      - name: Point dev alias at main
+        run: |
+          npx --yes vercel@58.1.0 alias set "${{ steps.build.outputs.url }}" \
+            trello-excel-preview-dev.vercel.app \
+            --scope oonufrienkos-projects --token "$VERCEL_TOKEN"
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
