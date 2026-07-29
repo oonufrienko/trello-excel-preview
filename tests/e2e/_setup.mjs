@@ -31,9 +31,9 @@ export const test = base.extend({
     await use(ids);
   },
 
-  // If PREVIEW_HOST is set, transparently rewrite all requests to
-  // trello-excel-preview.vercel.app -> that host. Lets the suite validate
-  // a preview deploy without touching the Trello Power-Up admin config.
+  // If PREVIEW_HOST is set, transparently rewrite all requests to our
+  // deployed hosts -> that host. Lets the suite validate a preview deploy
+  // without touching the Trello Power-Up admin config.
   //
   // Also installs a securitypolicyviolation listener in every frame, so
   // CSP blocks emit a clearly-tagged console.error caught by the
@@ -45,7 +45,9 @@ export const test = base.extend({
       // fetch+fulfill (not continue) so the frame keeps the production
       // origin: the Power-Up REST token lives in localStorage keyed by
       // that origin, and signed URLs embed it too.
-      await context.route('https://trello-excel-preview.vercel.app/**', async route => {
+      // Both hosts: the Power-Up on the test board is registered against the
+      // dev alias, while a staged production build serves the bare host.
+      await context.route(/^https:\/\/trello-excel-preview(-dev)?\.vercel\.app\//, async route => {
         const u = new URL(route.request().url());
         u.host = previewHost;
         const response = await route.fetch({ url: u.toString() });

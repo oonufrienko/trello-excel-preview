@@ -9,12 +9,25 @@ on:
     - cron: '17 3 * * *'
   workflow_dispatch: {}
 
+# Every run seeds and mutates the same Trello test board, so runs must not
+# overlap. cancel-in-progress stays false on purpose: a run killed mid-suite
+# leaves the board dirty (that is how the orphan renamed-*.csv attachments
+# accumulated), so we queue instead of cancelling.
+concurrency:
+  group: trello-test-board
+  cancel-in-progress: false
+
 jobs:
   # Job name must stay "e2e" — the ruleset-for-main required status
   # check matches on the job name, not the workflow name.
   e2e:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      # Project identifiers (not secrets) — let the Vercel CLI work without a
+      # local .vercel/ directory.
+      VERCEL_ORG_ID: team_i8VbzTWKRuzPhOtsS49yRAgi
+      VERCEL_PROJECT_ID: prj_Ie3XBspzfh7eMheHHxTu6fx3frhV
     steps:
       - uses: actions/checkout@v4
 
@@ -56,8 +69,32 @@ jobs:
           TRELLO_USER_TOKEN: ${{ secrets.TRELLO_USER_TOKEN }}
           TRELLO_TEST_BOARD_ID: ${{ secrets.TRELLO_TEST_BOARD_ID }}
 
+      # On a PR, test the PR's own code: deploy it and point the suite at that
+      # build via PREVIEW_HOST. Without this the suite would exercise whatever
+      # the dev alias happens to serve, so a green check would say nothing
+      # about the change under review.
+      #
+      # --prod --skip-domain, not a plain preview deploy: Vercel injects its
+      # toolbar script (vercel.live) into preview-environment deployments, our
+      # CSP blocks it, and preview.spec's "no CSP violations" assertion then
+      # fails on every run. --skip-domain keeps the production domain pointing
+      # at whatever it serves now, so this stages a build without shipping it.
+      - name: Stage build for this PR
+        id: preview
+        if: github.event_name == 'pull_request'
+        run: |
+          url=$(npx vercel@58.1.0 deploy --prod --skip-domain --yes --token "$VERCEL_TOKEN")
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          echo "Staged: $url"
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+
+      # The nightly run deliberately leaves PREVIEW_HOST empty: it checks what
+      # the dev alias actually serves, not a fresh build.
       - name: Run Playwright
-        run: npx playwright test
+        run: |
+          host="${{ steps.preview.outputs.url }}"
+          PREVIEW_HOST="${host#https://}" npx playwright test
         env:
           TRELLO_API_KEY: ${{ secrets.TRELLO_API_KEY }}
           TRELLO_USER_TOKEN: ${{ secrets.TRELLO_USER_TOKEN }}
