@@ -367,7 +367,7 @@
       "label": "renderList()",
       "file_type": "code",
       "source_file": "js/attachments.js",
-      "source_location": "L216",
+      "source_location": "L220",
       "_origin": "ast",
       "id": "js_attachments_renderlist",
       "community": 6,
@@ -850,7 +850,7 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "js_xlsx_calc_bundle_v",
-      "community": 14,
+      "community": 11,
       "norm_label": "v()"
     },
     {
@@ -870,7 +870,7 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "js_xlsx_calc_bundle_m",
-      "community": 2,
+      "community": 11,
       "norm_label": "m()"
     },
     {
@@ -1614,10 +1614,20 @@
       "norm_label": "auth"
     },
     {
-      "label": "bundle-vendor",
+      "label": "clean-orphans",
       "file_type": "code",
       "source_file": "package.json",
       "source_location": "L20",
+      "_origin": "ast",
+      "id": "package_scripts_clean_orphans",
+      "community": 1,
+      "norm_label": "clean-orphans"
+    },
+    {
+      "label": "bundle-vendor",
+      "file_type": "code",
+      "source_file": "package.json",
+      "source_location": "L21",
       "_origin": "ast",
       "id": "package_scripts_bundle_vendor",
       "community": 1,
@@ -1627,7 +1637,7 @@
       "label": "generate-fixtures",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L21",
+      "source_location": "L22",
       "_origin": "ast",
       "id": "package_scripts_generate_fixtures",
       "community": 1,
@@ -1637,7 +1647,7 @@
       "label": "seed-board",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L22",
+      "source_location": "L23",
       "_origin": "ast",
       "id": "package_scripts_seed_board",
       "community": 1,
@@ -1647,7 +1657,7 @@
       "label": "unseed-real",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L23",
+      "source_location": "L24",
       "_origin": "ast",
       "id": "package_scripts_unseed_real",
       "community": 1,
@@ -1657,7 +1667,7 @@
       "label": "test:e2e",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L24",
+      "source_location": "L25",
       "_origin": "ast",
       "id": "package_scripts_test_e2e",
       "community": 1,
@@ -1667,7 +1677,7 @@
       "label": "test:e2e:headed",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L25",
+      "source_location": "L26",
       "_origin": "ast",
       "id": "package_scripts_test_e2e_headed",
       "community": 1,
@@ -1677,7 +1687,7 @@
       "label": "test:e2e:ui",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L26",
+      "source_location": "L27",
       "_origin": "ast",
       "id": "package_scripts_test_e2e_ui",
       "community": 1,
@@ -1687,7 +1697,7 @@
       "label": "devDependencies",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L28",
+      "source_location": "L29",
       "_origin": "ast",
       "id": "package_devdependencies",
       "community": 1,
@@ -1697,7 +1707,7 @@
       "label": "@playwright/test",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L29",
+      "source_location": "L30",
       "_origin": "ast",
       "id": "package_devdependencies_playwright_test",
       "community": 1,
@@ -1707,7 +1717,7 @@
       "label": "dotenv",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L30",
+      "source_location": "L31",
       "_origin": "ast",
       "id": "package_devdependencies_dotenv",
       "community": 1,
@@ -1717,7 +1727,7 @@
       "label": "esbuild",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L31",
+      "source_location": "L32",
       "_origin": "ast",
       "id": "package_devdependencies_esbuild",
       "community": 1,
@@ -1727,7 +1737,7 @@
       "label": "exceljs",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L32",
+      "source_location": "L33",
       "_origin": "ast",
       "id": "package_devdependencies_exceljs",
       "community": 1,
@@ -1737,7 +1747,7 @@
       "label": "xlsx",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L33",
+      "source_location": "L34",
       "_origin": "ast",
       "id": "package_devdependencies_xlsx",
       "community": 1,
@@ -1747,7 +1757,7 @@
       "label": "xlsx-calc",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L34",
+      "source_location": "L35",
       "_origin": "ast",
       "id": "package_devdependencies_xlsx_calc",
       "community": 1,
@@ -2184,6 +2194,46 @@
       "norm_label": "checksession()"
     },
     {
+      "label": "clean-orphans.mjs",
+      "file_type": "code",
+      "source_file": "tests/setup/clean-orphans.mjs",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "tests_setup_clean_orphans",
+      "community": 53,
+      "norm_label": "clean-orphans.mjs"
+    },
+    {
+      "label": "requireEnv()",
+      "file_type": "code",
+      "source_file": "tests/setup/clean-orphans.mjs",
+      "source_location": "L24",
+      "_origin": "ast",
+      "id": "tests_setup_clean_orphans_requireenv",
+      "community": 53,
+      "norm_label": "requireenv()"
+    },
+    {
+      "label": "trello()",
+      "file_type": "code",
+      "source_file": "tests/setup/clean-orphans.mjs",
+      "source_location": "L40",
+      "_origin": "ast",
+      "id": "tests_setup_clean_orphans_trello",
+      "community": 53,
+      "norm_label": "trello()"
+    },
+    {
+      "label": "main()",
+      "file_type": "code",
+      "source_file": "tests/setup/clean-orphans.mjs",
+      "source_location": "L50",
+      "_origin": "ast",
+      "id": "tests_setup_clean_orphans_main",
+      "community": 53,
+      "norm_label": "main()"
+    },
+    {
       "label": "seed-board.mjs",
       "file_type": "code",
       "source_file": "tests/setup/seed-board.mjs",
@@ -2310,7 +2360,7 @@
       "source_location": "L88",
       "_origin": "ast",
       "id": "tests_setup_seed_board_listfixtures",
-      "community": 11,
+      "community": 7,
       "norm_label": "listfixtures()"
     },
     {
@@ -3154,46 +3204,6 @@
       "norm_label": "ci"
     },
     {
-      "label": "SheetJS (spreadsheet parsing/HTML rendering library)",
-      "file_type": "concept",
-      "source_file": "README.md",
-      "source_location": null,
-      "source_url": "https://sheetjs.com/",
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "community": 3,
-      "norm_label": "sheetjs (spreadsheet parsing/html rendering library)",
-      "id": "readme_sheetjs"
-    },
-    {
-      "label": "JSZip (zip extraction for embedded images/drawing anchors)",
-      "file_type": "concept",
-      "source_file": "README.md",
-      "source_location": null,
-      "source_url": "https://stuk.github.io/jszip/",
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "community": 3,
-      "norm_label": "jszip (zip extraction for embedded images/drawing anchors)",
-      "id": "readme_jszip"
-    },
-    {
-      "label": "Preview Proxy (/api/proxy)",
-      "file_type": "concept",
-      "source_file": "README.md",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "rationale": "CORS-bypassing in-memory fetch on Vercel: file streams through, never written to disk, so free Trello plans (10 MB) and paid plans (up to 25 MB) can both preview without server storage.",
-      "community": 3,
-      "norm_label": "preview proxy (/api/proxy)",
-      "id": "readme_preview_proxy"
-    },
-    {
       "label": "Client-side Formula Calculation",
       "file_type": "rationale",
       "source_file": "CHANGELOG.md",
@@ -3411,32 +3421,6 @@
       "id": "tests_readme_storagestate"
     },
     {
-      "label": "RELEASE.md Known Limitations (public roadmap)",
-      "file_type": "document",
-      "source_file": "RELEASE.md",
-      "source_location": "## Known limitations to keep on the public roadmap",
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "community": 54,
-      "norm_label": "release.md known limitations (public roadmap)",
-      "id": "release_known_limitations"
-    },
-    {
-      "label": "Listing Known Limitations to Disclose",
-      "file_type": "document",
-      "source_file": "marketing/listing.md",
-      "source_location": "## Known limitations to disclose",
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "community": 53,
-      "norm_label": "listing known limitations to disclose",
-      "id": "marketing_listing_known_limitations"
-    },
-    {
       "label": "Privacy Policy (EN + UA)",
       "file_type": "document",
       "source_file": "privacy.html",
@@ -3515,90 +3499,6 @@
       "community": 3,
       "norm_label": "preview iframe page (preview.html)",
       "id": "preview_preview_page"
-    },
-    {
-      "label": "TODO Exploratory Follow-ups",
-      "file_type": "document",
-      "source_file": "TODO.md",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "rationale": "Non-blocking experiments; each item becomes its own branch when picked up.",
-      "community": 59,
-      "norm_label": "todo exploratory follow-ups",
-      "id": "todo_todo_followups"
-    },
-    {
-      "label": "Cell Styles Fix Root Cause (applyCellStyles selector)",
-      "file_type": "rationale",
-      "source_file": "TODO.md",
-      "source_location": "## Cell styles",
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "rationale": "The bug was never OOXML parsing (parseStyles was correct, 204 styled cells proven in Node) but the DOM selector in applyCellStyles: td[data-r] never exists, and sheet_to_html's id option makes cell ids 'excel-table-A1' not 'sjs-A1'. Final fix reads the cell address as the suffix after the last '-' (addresses never contain '-'), prefix-agnostic. Also honors explicit-false boolean font props (<b val=\"0\"/>) emitted by LibreOffice.",
-      "community": 55,
-      "norm_label": "cell styles fix root cause (applycellstyles selector)",
-      "id": "todo_cell_styles_fix"
-    },
-    {
-      "label": "Image Positioning Fix (buildGridEdges + header band)",
-      "file_type": "rationale",
-      "source_file": "TODO.md",
-      "source_location": "## Embedded image positioning",
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "rationale": "positionImages sized twoCellAnchor images from DOM rect differences; with merged cells the 'to' cell can land visually above 'from', producing negative height that a size guard silently dropped (all 7 images of a real price-list). Fix: buildGridEdges() computes monotonic cumulative colEdges/rowEdges like Excel does (never negative); negative from-indices clamp to 0; logos in trimmed empty top rows get a reserved header band via wrapper paddingTop.",
-      "community": 57,
-      "norm_label": "image positioning fix (buildgridedges + header band)",
-      "id": "todo_image_positioning_fix"
-    },
-    {
-      "label": "Images v2 (a:xfrm ext sizing, rotation, groups, WMF)",
-      "file_type": "rationale",
-      "source_file": "TODO.md",
-      "source_location": "## Other image files still misaligned on preview",
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "rationale": "Four root causes fixed in the shared algorithm: (1) size taken from the pic's own a:xfrm/a:ext EMU then shrunk-never-grown to the anchor box because our column widths differ from Excel's and most real anchors are editAs=oneCell; (2) a:xfrm rot (1/60000 deg) + flipH/flipV applied as CSS transforms; (3) grpSp groups render every pic in its own sub-box via chOff/chExt child space; (4) WMF blips get a labelled placeholder after js-wmf conversion was tested on all 46 real WMFs and rejected (23 blank, 23 black silhouettes). Deliberate remaining limits: oneCellAnchor can still overlap neighbours; charts (graphicFrame) not rendered - separate future feature.",
-      "community": 58,
-      "norm_label": "images v2 (a:xfrm ext sizing, rotation, groups, wmf)",
-      "id": "todo_images_v2"
-    },
-    {
-      "label": "UptimeRobot Monitoring on /api/health",
-      "file_type": "concept",
-      "source_file": "TODO.md",
-      "source_location": "## Post-launch operations",
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "rationale": "Pings /api/health every 5 min and emails on downtime. The monitor watches HTTP 200 (+ optional status:ok keyword), not uptimeSeconds, because Vercel cold-starts reset uptimeSeconds to 0.",
-      "community": 60,
-      "norm_label": "uptimerobot monitoring on /api/health",
-      "id": "todo_uptimerobot_monitoring"
-    },
-    {
-      "label": "Charts (graphicFrame) Not Rendered",
-      "file_type": "concept",
-      "source_file": "TODO.md",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "rationale": "User decided chart rendering is a separate future feature - its own branch when picked up.",
-      "community": 56,
-      "norm_label": "charts (graphicframe) not rendered",
-      "id": "todo_charts_not_rendered"
     },
     {
       "label": "CLAUDE.md Behavioral Guidelines",
@@ -4127,15 +4027,14 @@
       "confidence_score": 1.0
     },
     {
-      "relation": "indirect_call",
-      "confidence": "INFERRED",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "js/attachments.js",
-      "source_location": "L234",
+      "source_location": "L220",
       "weight": 1.0,
-      "context": "argument",
       "source": "js_attachments",
       "target": "js_attachments_renderlist",
-      "confidence_score": 0.5
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4162,7 +4061,7 @@
       "context": "argument",
       "confidence": "INFERRED",
       "source_file": "js/attachments.js",
-      "source_location": "L220",
+      "source_location": "L226",
       "weight": 1.0,
       "source": "js_attachments_renderlist",
       "target": "js_attachments_isexcel",
@@ -4327,7 +4226,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "js/attachments.js",
-      "source_location": "L225",
+      "source_location": "L231",
       "weight": 1.0,
       "source": "js_attachments_renderlist",
       "target": "js_attachments_renderitem",
@@ -4339,7 +4238,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "js/attachments.js",
-      "source_location": "L225",
+      "source_location": "L231",
       "weight": 1.0,
       "source": "js_attachments_renderlist",
       "target": "js_xlsx_calc_bundle_f"
@@ -5952,6 +5851,17 @@
       "context": "argument",
       "confidence": "INFERRED",
       "confidence_score": 0.8,
+      "source_file": "tests/setup/clean-orphans.mjs",
+      "source_location": "L44",
+      "weight": 1.0,
+      "source": "tests_setup_clean_orphans_trello",
+      "target": "js_xlsx_calc_bundle_v"
+    },
+    {
+      "relation": "indirect_call",
+      "context": "argument",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
       "source_file": "tests/setup/seed-board.mjs",
       "source_location": "L38",
       "weight": 1.0,
@@ -6233,7 +6143,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "package.json",
-      "source_location": "L28",
+      "source_location": "L29",
       "weight": 1.0,
       "source": "package",
       "target": "package_devdependencies",
@@ -6343,7 +6253,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "package.json",
-      "source_location": "L20",
+      "source_location": "L21",
       "weight": 1.0,
       "source": "package_scripts",
       "target": "package_scripts_bundle_vendor",
@@ -6353,10 +6263,10 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "package.json",
-      "source_location": "L21",
+      "source_location": "L20",
       "weight": 1.0,
       "source": "package_scripts",
-      "target": "package_scripts_generate_fixtures",
+      "target": "package_scripts_clean_orphans",
       "confidence_score": 1.0
     },
     {
@@ -6366,37 +6276,7 @@
       "source_location": "L22",
       "weight": 1.0,
       "source": "package_scripts",
-      "target": "package_scripts_seed_board",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "package.json",
-      "source_location": "L24",
-      "weight": 1.0,
-      "source": "package_scripts",
-      "target": "package_scripts_test_e2e",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "package.json",
-      "source_location": "L25",
-      "weight": 1.0,
-      "source": "package_scripts",
-      "target": "package_scripts_test_e2e_headed",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "package.json",
-      "source_location": "L26",
-      "weight": 1.0,
-      "source": "package_scripts",
-      "target": "package_scripts_test_e2e_ui",
+      "target": "package_scripts_generate_fixtures",
       "confidence_score": 1.0
     },
     {
@@ -6406,17 +6286,47 @@
       "source_location": "L23",
       "weight": 1.0,
       "source": "package_scripts",
-      "target": "package_scripts_unseed_real",
+      "target": "package_scripts_seed_board",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "package.json",
-      "source_location": "L30",
+      "source_location": "L25",
       "weight": 1.0,
-      "source": "package_devdependencies",
-      "target": "package_devdependencies_dotenv",
+      "source": "package_scripts",
+      "target": "package_scripts_test_e2e",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L26",
+      "weight": 1.0,
+      "source": "package_scripts",
+      "target": "package_scripts_test_e2e_headed",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L27",
+      "weight": 1.0,
+      "source": "package_scripts",
+      "target": "package_scripts_test_e2e_ui",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L24",
+      "weight": 1.0,
+      "source": "package_scripts",
+      "target": "package_scripts_unseed_real",
       "confidence_score": 1.0
     },
     {
@@ -6426,7 +6336,7 @@
       "source_location": "L31",
       "weight": 1.0,
       "source": "package_devdependencies",
-      "target": "package_devdependencies_esbuild",
+      "target": "package_devdependencies_dotenv",
       "confidence_score": 1.0
     },
     {
@@ -6436,17 +6346,7 @@
       "source_location": "L32",
       "weight": 1.0,
       "source": "package_devdependencies",
-      "target": "package_devdependencies_exceljs",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "package.json",
-      "source_location": "L29",
-      "weight": 1.0,
-      "source": "package_devdependencies",
-      "target": "package_devdependencies_playwright_test",
+      "target": "package_devdependencies_esbuild",
       "confidence_score": 1.0
     },
     {
@@ -6456,7 +6356,17 @@
       "source_location": "L33",
       "weight": 1.0,
       "source": "package_devdependencies",
-      "target": "package_devdependencies_xlsx",
+      "target": "package_devdependencies_exceljs",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L30",
+      "weight": 1.0,
+      "source": "package_devdependencies",
+      "target": "package_devdependencies_playwright_test",
       "confidence_score": 1.0
     },
     {
@@ -6464,6 +6374,16 @@
       "confidence": "EXTRACTED",
       "source_file": "package.json",
       "source_location": "L34",
+      "weight": 1.0,
+      "source": "package_devdependencies",
+      "target": "package_devdependencies_xlsx",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L35",
       "weight": 1.0,
       "source": "package_devdependencies",
       "target": "package_devdependencies_xlsx_calc",
@@ -7145,6 +7065,58 @@
       "weight": 1.0,
       "source": "tests_setup_check_session",
       "target": "tests_setup_check_session_checksession",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/setup/clean-orphans.mjs",
+      "source_location": "L50",
+      "weight": 1.0,
+      "source": "tests_setup_clean_orphans",
+      "target": "tests_setup_clean_orphans_main",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/setup/clean-orphans.mjs",
+      "source_location": "L24",
+      "weight": 1.0,
+      "source": "tests_setup_clean_orphans",
+      "target": "tests_setup_clean_orphans_requireenv",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/setup/clean-orphans.mjs",
+      "source_location": "L40",
+      "weight": 1.0,
+      "source": "tests_setup_clean_orphans",
+      "target": "tests_setup_clean_orphans_trello",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/setup/clean-orphans.mjs",
+      "source_location": "L51",
+      "weight": 1.0,
+      "source": "tests_setup_clean_orphans_main",
+      "target": "tests_setup_clean_orphans_requireenv",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/setup/clean-orphans.mjs",
+      "source_location": "L54",
+      "weight": 1.0,
+      "source": "tests_setup_clean_orphans_main",
+      "target": "tests_setup_clean_orphans_trello",
       "confidence_score": 1.0
     },
     {
@@ -8161,56 +8133,6 @@
       "confidence_score": 1.0
     },
     {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "preview.html",
-      "source_location": "script src cdn.sheetjs.com xlsx-0.20.3",
-      "weight": 1.0,
-      "source": "preview_preview_page",
-      "target": "readme_sheetjs"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "privacy.html",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "privacy_privacy_policy",
-      "target": "readme_sheetjs"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "terms.html",
-      "source_location": "Section 6",
-      "weight": 1.0,
-      "source": "terms_terms_of_use",
-      "target": "readme_sheetjs"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "privacy.html",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "privacy_privacy_policy",
-      "target": "readme_jszip"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "privacy.html",
-      "source_location": "Section 3",
-      "weight": 1.0,
-      "source": "privacy_privacy_policy",
-      "target": "readme_preview_proxy"
-    },
-    {
       "relation": "implements",
       "confidence": "INFERRED",
       "confidence_score": 0.85,
@@ -8472,5 +8394,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "06ed7b78c754015c96a8a661190d4d7f2fd89a62"
+  "built_at_commit": "83b0d7a490194f123a4eb6bbe0e8cf1d2174eafb"
 }
