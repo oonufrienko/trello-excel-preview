@@ -12,10 +12,13 @@ on:
 # Every run seeds and mutates the same Trello test board, so runs must not
 # overlap. cancel-in-progress stays false on purpose: a run killed mid-suite
 # leaves the board dirty (that is how the orphan renamed-*.csv attachments
-# accumulated), so we queue instead of cancelling.
+# accumulated), so we queue instead of cancelling. queue: max because the
+# default (single) keeps just one run pending and cancels it when the next
+# one arrives — with two open PRs the first one's check would go cancelled.
 concurrency:
   group: trello-test-board
   cancel-in-progress: false
+  queue: max
 
 jobs:
   # Job name must stay "e2e" — the ruleset-for-main required status
@@ -83,7 +86,9 @@ jobs:
         id: preview
         if: github.event_name == 'pull_request'
         run: |
-          url=$(npx vercel@58.1.0 deploy --prod --skip-domain --yes --token "$VERCEL_TOKEN")
+          # Both --yes matter: the first stops npx asking before it installs
+          # the package, the second stops the Vercel CLI's own prompts.
+          url=$(npx --yes vercel@58.1.0 deploy --prod --skip-domain --yes --token "$VERCEL_TOKEN")
           echo "url=$url" >> "$GITHUB_OUTPUT"
           echo "Staged: $url"
         env:
