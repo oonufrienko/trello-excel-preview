@@ -7,14 +7,12 @@ name: reset-dev
 # dev alias, so leaving it there makes the nightly report on a branch instead of
 # on what users have.
 #
-# push to main is the workhorse trigger: it catches every merge and, unlike a
-# pull_request trigger, runs the definition from main — so it fires even for
-# branches that predate this file. pull_request/closed covers the other exit,
-# a PR abandoned without merging, which no push would ever catch. Running twice
-# for one merge is harmless: the second run just aliases main again.
+# Merges are handled by deploy.yml, which builds main once, tests it and puts
+# that same build on both production and the dev alias. What is left for this
+# workflow is the other exit: a PR abandoned without merging, which no push to
+# main would ever catch — plus the manual button for "done looking, but the PR
+# stays open".
 on:
-  push:
-    branches: [main]
   pull_request:
     types: [closed]
   workflow_dispatch: {}

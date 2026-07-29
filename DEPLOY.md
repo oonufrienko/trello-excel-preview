@@ -1,12 +1,12 @@
 # Deploy & Rollback
 
-No Vercel git integration: **nothing reaches the production domain
-automatically** — merging a PR ships nothing to users. All production deploys go
-through the Vercel CLI (`npx vercel`, already authorized).
+No Vercel git integration, but CI ships: **merging to main deploys to
+production if the full e2e suite passes against that exact build**
+(`.github/workflows/deploy.yml`). Nothing else deploys by itself — a PR run only
+stages a build and moves the dev alias.
 
-CI does build on its own, but only for the test environment: a PR run stages
-that PR's build, and `reset-dev` builds main after a merge. Both only ever move
-the dev alias.
+The commands below are for deploying by hand, which is still how you ship
+outside the merge path (or when CI is unavailable).
 
 ## Dev (test environment)
 
@@ -26,11 +26,13 @@ Vercel Dashboard → project → Settings → Domains.
 **CI moves this alias too.** When an e2e run on a pull request goes green it
 points `trello-excel-preview-dev.vercel.app` at that PR's build, so you can look
 at the change in Trello without deploying anything by hand. The alias stays
-there only until the PR is finished: closing or merging it triggers `reset-dev`,
-which builds main and aliases it back. That matters because the nightly e2e run
-tests the dev alias — left on a branch, the nightly would report on that branch
-instead of on main. To put main back sooner (you are done looking, but the PR
-stays open), run it by hand: **Actions → reset-dev → Run workflow**.
+there only until the PR is finished: merging it hands the alias to the build
+`deploy.yml` ships to production, and closing it without merging triggers
+`reset-dev`, which builds main and aliases it back. That matters because the
+nightly e2e run tests the dev alias — left on a branch, the nightly would report
+on that branch instead of on main. To put main back sooner (you are done
+looking, but the PR stays open), run it by hand:
+**Actions → reset-dev → Run workflow**.
 
 ## Prod
 

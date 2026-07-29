@@ -1,0 +1,125 @@
+name: deploy
+
+# What happens to main after a merge, in one pass: build it once, run the full
+# e2e suite against that exact build, and promote it to the production domain
+# only if the suite is green. The dev alias gets the same build, so the test
+# board shows what users have.
+#
+# Building once is the point. If we tested one build and deployed a rebuild of
+# the same commit, the artifact users get would not be the artifact that passed.
+#
+# Failure means nothing ships: the promote step never runs, production keeps
+# serving whatever it served before, and the run goes red.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+# Shares the lock with e2e and reset-dev — all three seed and mutate the same
+# Trello board. Never cancel-in-progress: a run killed mid-suite leaves the
+# board dirty.
+concurrency:
+  group: trello-test-board
+  cancel-in-progress: false
+  queue: max
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      # Project identifiers (not secrets) — let the Vercel CLI work without a
+      # local .vercel/ directory.
+      VERCEL_ORG_ID: team_i8VbzTWKRuzPhOtsS49yRAgi
+      VERCEL_PROJECT_ID: prj_Ie3XBspzfh7eMheHHxTu6fx3frhV
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Restore storageState.json
+        run: |
+          printf '%s' "$TRELLO_STORAGE_STATE_B64" | tr -d '[:space:]' | base64 -d > ./storageState.json
+          test -s ./storageState.json
+        env:
+          TRELLO_STORAGE_STATE_B64: ${{ secrets.TRELLO_STORAGE_STATE_B64 }}
+
+      # --skip-domain builds a production-grade artifact without moving the
+      # production domain, so users keep the current build until the suite has
+      # had its say.
+      - name: Stage the build
+        id: build
+        run: |
+          url=$(npx --yes vercel@58.1.0 deploy --prod --skip-domain --yes --token "$VERCEL_TOKEN")
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          echo "Staged: $url"
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+
+      - name: Generate synthetic fixtures
+        run: npm run generate-fixtures
+
+      - name: Seed test board
+        run: npm run seed-board
+        env:
+          TRELLO_API_KEY: ${{ secrets.TRELLO_API_KEY }}
+          TRELLO_USER_TOKEN: ${{ secrets.TRELLO_USER_TOKEN }}
+          TRELLO_TEST_BOARD_ID: ${{ secrets.TRELLO_TEST_BOARD_ID }}
+
+      - name: Run Playwright against the staged build
+        run: |
+          PREVIEW_HOST="${DEPLOYMENT_URL#https://}" npx playwright test
+        env:
+          # Through env, not ${{ }} inline: GitHub substitutes expressions into
+          # the script before bash parses it.
+          DEPLOYMENT_URL: ${{ steps.build.outputs.url }}
+          TRELLO_API_KEY: ${{ secrets.TRELLO_API_KEY }}
+          TRELLO_USER_TOKEN: ${{ secrets.TRELLO_USER_TOKEN }}
+          TRELLO_TEST_BOARD_ID: ${{ secrets.TRELLO_TEST_BOARD_ID }}
+
+      - name: Promote the tested build to production
+        run: npx --yes vercel@58.1.0 promote "$DEPLOYMENT_URL" --yes --token "$VERCEL_TOKEN"
+        env:
+          DEPLOYMENT_URL: ${{ steps.build.outputs.url }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+
+      # Same build on the dev alias, so the test board and production agree.
+      - name: Point dev alias at the same build
+        run: |
+          npx --yes vercel@58.1.0 alias set "$DEPLOYMENT_URL" \
+            trello-excel-preview-dev.vercel.app \
+            --scope oonufrienkos-projects --token "$VERCEL_TOKEN"
+        env:
+          DEPLOYMENT_URL: ${{ steps.build.outputs.url }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+
+      - name: Verify production
+        run: |
+          sleep 10
+          curl -sf https://trello-excel-preview.vercel.app/api/health
+          echo
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-deploy
+          path: playwright-report/
+          retention-days: 14
