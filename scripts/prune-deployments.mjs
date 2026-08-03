@@ -26,11 +26,15 @@ const MAX_PAGES = 20;  // stop runaway pagination rather than loop forever
 // Fail closed on a bad knob: a negative PRUNE_DAYS would put the cutoff in the
 // future and sweep everything, and a negative PRUNE_KEEP_NEWEST would protect
 // the wrong end of the list.
+//
+// Match digits rather than trusting Number(): it reads " " and "\n" as 0, which
+// would put the cutoff at now and make every unaliased deployment stale, and it
+// silently accepts "0x10" as 16 and "1e3" as 1000.
 function positiveInt(name, fallback) {
   const raw = process.env[name];
   if (raw === undefined || raw === '') return fallback;
   const n = Number(raw);
-  if (!Number.isInteger(n) || n < 0) {
+  if (!/^\d+$/.test(raw) || !Number.isSafeInteger(n)) {
     console.error(`${name} must be a non-negative integer, got ${JSON.stringify(raw)}`);
     process.exit(1);
   }
