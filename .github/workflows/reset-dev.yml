@@ -26,6 +26,12 @@ concurrency:
 
 jobs:
   reset-dev:
+    # `types: [closed]` fires on merged PRs too, and for those deploy.yml is
+    # already building main and putting it on the dev alias. Running here as
+    # well would build main a second time and race deploy.yml for the alias —
+    # whichever finished last would win, so the alias could end up on an
+    # untested build. Merges are deploy.yml's; this job takes the other exits.
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == false
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
