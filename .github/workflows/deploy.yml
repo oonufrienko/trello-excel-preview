@@ -144,18 +144,26 @@ jobs:
           # instant, and a guess that comes up short would fail this step on a
           # perfectly good deploy — which the step below would then announce as
           # "shipped, post-promote steps failed" and send someone to consider a
-          # rollback for nothing. Quiet while polling: early misses are expected.
-          for attempt in $(seq 1 12); do
-            if curl --fail --silent --connect-timeout 5 --max-time 15 \
-              https://trello-excel-preview.vercel.app/api/health; then
-              echo
+          # rollback for nothing.
+          #
+          # One absolute deadline rather than a retry count: with a count, the
+          # per-request timeouts and the sleeps stack on top of each other, so
+          # "about a minute" quietly becomes four. Worst case here is the minute
+          # plus whichever request was already in flight. Keep the failing output
+          # instead of re-requesting it: by the deadline we already have it.
+          deadline=$(( SECONDS + 60 ))
+          last=""
+          while [ "$SECONDS" -lt "$deadline" ]; do
+            if last=$(curl --fail --silent --show-error \
+              --connect-timeout 5 --max-time 15 \
+              https://trello-excel-preview.vercel.app/api/health 2>&1); then
+              echo "$last"
               exit 0
             fi
             sleep 5
           done
-          echo "Production did not answer /api/health within ~60s. Last attempt:" >&2
-          curl --fail --silent --show-error --connect-timeout 5 --max-time 15 \
-            https://trello-excel-preview.vercel.app/api/health || true
+          echo "Production did not answer /api/health within 60s. Last attempt:" >&2
+          echo "$last" >&2
           exit 1
 
       # Promote succeeded but something after it did not, so this run is red
