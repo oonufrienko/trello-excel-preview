@@ -21,6 +21,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Playwright e2e test infrastructure with safety guard against running on non-test boards.
 - GitHub Actions workflow that runs e2e tests on pull requests to `main` and nightly at 03:17 UTC.
 - Marketplace assets (privacy policy, listing copy, 1024×1024 icon, demo gif).
+- `prune-deployments` workflow (daily): deletes Vercel deployments older than 5 days, keeping the 5 newest and anything that still has an alias. With no retention policy set on the project, Vercel keeps deployments indefinitely and every PR push stages one. `npm run prune-deployments` shows what would go without deleting.
 
 ### Changed
 - e2e runs now serialize on a `trello-test-board` concurrency group (`queue: max`). Every run seeds and mutates the same Trello board, and a run cancelled mid-suite left it dirty.
