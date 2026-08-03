@@ -20,6 +20,10 @@ concurrency:
   cancel-in-progress: false
   queue: max
 
+# The job reads the repo and talks to Vercel; it never writes back to git.
+permissions:
+  contents: read
+
 jobs:
   # Job name must stay "e2e" — the ruleset-for-main required status
   # check matches on the job name, not the workflow name.
@@ -32,7 +36,11 @@ jobs:
       VERCEL_ORG_ID: team_i8VbzTWKRuzPhOtsS49yRAgi
       VERCEL_PROJECT_ID: prj_Ie3XBspzfh7eMheHHxTu6fx3frhV
     steps:
+      # No git token left in the checkout: the steps below run npm ci, playwright
+      # and the Vercel CLI over the PR's own code, and none of it needs to push.
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - uses: actions/setup-node@v4
         with:

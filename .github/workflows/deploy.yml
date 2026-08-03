@@ -26,6 +26,10 @@ concurrency:
   cancel-in-progress: false
   queue: max
 
+# The job reads the repo and talks to Vercel; it never writes back to git.
+permissions:
+  contents: read
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -36,7 +40,11 @@ jobs:
       VERCEL_ORG_ID: team_i8VbzTWKRuzPhOtsS49yRAgi
       VERCEL_PROJECT_ID: prj_Ie3XBspzfh7eMheHHxTu6fx3frhV
     steps:
+      # No git token left in the checkout: the steps below run npm ci, playwright
+      # and the Vercel CLI, and none of it needs to push anything.
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - uses: actions/setup-node@v4
         with:
