@@ -7,7 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ## [Unreleased]
 
 ### Added
-- **Deploy on green**: merging to `main` builds it once, runs the full e2e suite against that exact build, and promotes it to production only if the suite passes (`.github/workflows/deploy.yml`). A red suite ships nothing — production keeps serving what it served before.
+- **Deploy on green**: merging to `main` builds it once, runs the full e2e suite against that exact build, and promotes it to production only if the suite passes (`.github/workflows/deploy.yml`). A red suite ships nothing — production keeps serving what it served before. When a step *after* the promote fails, the run summary opens with "Production shipped, post-promote steps failed", so a red run is never ambiguous about whether the merge reached users.
 - **Pull requests are tested against their own build**: an e2e run stages the PR's build and points the suite at it via `PREVIEW_HOST`. Previously the suite exercised whatever the dev alias happened to serve, so a green check said nothing about the change under review.
 - **The dev alias follows the PR**: a green PR run points `trello-excel-preview-dev.vercel.app` at that build, so the change can be opened on the Trello test board without deploying by hand. `reset-dev` puts `main` back when a PR is closed without merging, or on demand.
 - `npm run clean-orphans` — sweeps `renamed-*.csv` attachments left on the test board by interrupted rename runs.

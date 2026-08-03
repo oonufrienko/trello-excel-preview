@@ -5,6 +5,14 @@ production if the full e2e suite passes against that exact build**
 (`.github/workflows/deploy.yml`). Nothing else deploys by itself — a PR run only
 stages a build and moves the dev alias.
 
+**A red `deploy` run almost always means nothing shipped**: the promote step
+runs after the suite, so anything failing before it leaves production on the
+build it was already serving. The one exception is a failure *after* promote —
+the dev alias or the production health check — and there the run summary opens
+with "Production shipped, post-promote steps failed". Read the summary before
+assuming a red run kept the merge off production; [Rollback](#rollback) is the
+way back.
+
 The commands below are for deploying by hand, which is still how you ship
 outside the merge path (or when CI is unavailable).
 

@@ -8,8 +8,11 @@ name: deploy
 # Building once is the point. If we tested one build and deployed a rebuild of
 # the same commit, the artifact users get would not be the artifact that passed.
 #
-# Failure means nothing ships: the promote step never runs, production keeps
-# serving whatever it served before, and the run goes red.
+# Failure before the promote step means nothing ships: promote never runs,
+# production keeps serving whatever it served before, and the run goes red.
+# A failure after it is the one case where red does not mean "not shipped" —
+# the last step spells that out in the run summary so nobody has to read the
+# log to find out whether production moved.
 on:
   push:
     branches: [main]
@@ -94,7 +97,19 @@ jobs:
           TRELLO_USER_TOKEN: ${{ secrets.TRELLO_USER_TOKEN }}
           TRELLO_TEST_BOARD_ID: ${{ secrets.TRELLO_TEST_BOARD_ID }}
 
+      # Everything that can be checked before shipping is checked before
+      # shipping: the suite covers the Power-Up UI, this covers the API the
+      # health check would otherwise only exercise once production is already
+      # on the new build.
+      - name: Check the staged build's health endpoint
+        run: |
+          curl -sf "$DEPLOYMENT_URL/api/health"
+          echo
+        env:
+          DEPLOYMENT_URL: ${{ steps.build.outputs.url }}
+
       - name: Promote the tested build to production
+        id: promote
         run: npx --yes vercel@58.1.0 promote "$DEPLOYMENT_URL" --yes --token "$VERCEL_TOKEN"
         env:
           DEPLOYMENT_URL: ${{ steps.build.outputs.url }}
@@ -115,6 +130,28 @@ jobs:
           sleep 10
           curl -sf https://trello-excel-preview.vercel.app/api/health
           echo
+
+      # Promote succeeded but something after it did not, so this run is red
+      # while production is already on the new build. Say so where it is seen
+      # without opening the log — the decision it feeds is whether to roll back.
+      - name: Report that production already shipped
+        if: failure() && steps.promote.outcome == 'success'
+        run: |
+          {
+            echo "## Production shipped, post-promote steps failed"
+            echo
+            echo "\`${GITHUB_SHA}\` **is live on** https://trello-excel-preview.vercel.app —"
+            echo "the promote step succeeded. What failed came after it (dev alias"
+            echo "or the production health check), so this red run does *not* mean"
+            echo "the merge stayed off production."
+            echo
+            echo "To put the previous build back, see the Rollback section of DEPLOY.md:"
+            echo
+            echo '```bash'
+            echo "npx vercel ls"
+            echo "npx vercel rollback <previous-prod-url>"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload Playwright report
         if: always()
