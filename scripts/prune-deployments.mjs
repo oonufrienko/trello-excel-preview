@@ -70,6 +70,10 @@ function listAll(args, key) {
 // Belt and braces: removal also passes --safe, which is what actually
 // guarantees an aliased deployment survives. This just keeps them out of the
 // candidate list so the dry run reads honestly.
+//
+// `.url` is the deployment the alias points at, in the same bare-host form
+// `ls` reports (`<project>-<hash>-<scope>.vercel.app`); `.alias` is the domain
+// (`trello-excel-preview.vercel.app`). Matching on `.alias` would never hit.
 const aliased = new Set(
   listAll(['alias', 'ls', '--json', '--limit', String(PAGE)], 'aliases').map(a => a.url)
 );
@@ -85,7 +89,10 @@ const stale = deployments
 
 const age = d => ((Date.now() - d.createdAt) / 86_400_000).toFixed(1);
 console.log(`${deployments.length} deployments; keeping the newest ${KEEP_NEWEST} and anything under ${MAX_AGE_DAYS} days old.`);
-console.log(`${aliased.size} deployment(s) hold an alias and are never candidates.`);
+// `alias ls` is account-wide, so aliased.size counts aliased deployments across
+// every project. Report the ones actually in this project's list instead.
+const protectedByAlias = deployments.filter(d => aliased.has(d.url));
+console.log(`${protectedByAlias.length} deployment(s) of this project hold an alias and are never candidates.`);
 
 if (!stale.length) {
   console.log('Nothing to prune.');
