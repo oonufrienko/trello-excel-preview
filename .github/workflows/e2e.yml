@@ -20,6 +20,10 @@ concurrency:
   cancel-in-progress: false
   queue: max
 
+# The job reads the repo and talks to Vercel; it never writes back to git.
+permissions:
+  contents: read
+
 jobs:
   # Job name must stay "e2e" — the ruleset-for-main required status
   # check matches on the job name, not the workflow name.
@@ -32,7 +36,11 @@ jobs:
       VERCEL_ORG_ID: team_i8VbzTWKRuzPhOtsS49yRAgi
       VERCEL_PROJECT_ID: prj_Ie3XBspzfh7eMheHHxTu6fx3frhV
     steps:
+      # No git token left in the checkout: the steps below run npm ci, playwright
+      # and the Vercel CLI over the PR's own code, and none of it needs to push.
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - uses: actions/setup-node@v4
         with:
@@ -98,12 +106,29 @@ jobs:
       # the dev alias actually serves, not a fresh build.
       - name: Run Playwright
         run: |
-          host="${{ steps.preview.outputs.url }}"
-          PREVIEW_HOST="${host#https://}" npx playwright test
+          PREVIEW_HOST="${DEPLOYMENT_URL#https://}" npx playwright test
         env:
+          # Through env, not ${{ }} inline: GitHub substitutes expressions into
+          # the script before bash parses it, so a stray quote or newline in the
+          # value would rewrite the command rather than be passed to it.
+          DEPLOYMENT_URL: ${{ steps.preview.outputs.url }}
           TRELLO_API_KEY: ${{ secrets.TRELLO_API_KEY }}
           TRELLO_USER_TOKEN: ${{ secrets.TRELLO_USER_TOKEN }}
           TRELLO_TEST_BOARD_ID: ${{ secrets.TRELLO_TEST_BOARD_ID }}
+
+      # Tests passed, so put this build on the dev alias — the Power-Up on the
+      # test board is registered against that alias, so this is the only way to
+      # look at a PR by hand in Trello. Note that the nightly run then exercises
+      # this PR's code: run the reset-dev workflow to put main back.
+      - name: Point dev alias at this build
+        if: github.event_name == 'pull_request'
+        run: |
+          npx --yes vercel@58.1.0 alias set "$DEPLOYMENT_URL" \
+            trello-excel-preview-dev.vercel.app \
+            --scope oonufrienkos-projects --token "$VERCEL_TOKEN"
+        env:
+          DEPLOYMENT_URL: ${{ steps.preview.outputs.url }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
 
       - name: Upload Playwright report
         if: always()

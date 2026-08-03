@@ -1,0 +1,77 @@
+name: reset-dev
+
+# Put main back on the dev alias.
+#
+# The e2e job points dev at whichever PR was pushed last, so after eyeballing a
+# PR in Trello the alias is left on branch code. The nightly e2e run tests the
+# dev alias, so leaving it there makes the nightly report on a branch instead of
+# on what users have.
+#
+# Merges are handled by deploy.yml, which builds main once, tests it and puts
+# that same build on both production and the dev alias. What is left for this
+# workflow is the other exit: a PR abandoned without merging, which no push to
+# main would ever catch — plus the manual button for "done looking, but the PR
+# stays open".
+on:
+  pull_request:
+    types: [closed]
+  workflow_dispatch: {}
+
+# Shares the lock with e2e: switching what dev serves mid-suite would pull the
+# ground out from under a running test.
+concurrency:
+  group: trello-test-board
+  cancel-in-progress: false
+  queue: max
+
+# The job reads the repo and talks to Vercel; it never writes back to git.
+permissions:
+  contents: read
+
+jobs:
+  reset-dev:
+    # `types: [closed]` fires on merged PRs too, and for those deploy.yml is
+    # already building main and putting it on the dev alias. Running here as
+    # well would build main a second time and race deploy.yml for the alias —
+    # whichever finished last would win, so the alias could end up on an
+    # untested build. Merges are deploy.yml's; this job takes the other exits.
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      VERCEL_ORG_ID: team_i8VbzTWKRuzPhOtsS49yRAgi
+      VERCEL_PROJECT_ID: prj_Ie3XBspzfh7eMheHHxTu6fx3frhV
+    steps:
+      # No git token left in the checkout: the steps below run the Vercel CLI,
+      # which never needs to push anything.
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # --prod --skip-domain, same as the e2e job: a plain preview deploy gets
+      # Vercel's vercel.live toolbar injected, our CSP blocks it, and the
+      # nightly run would then fail on preview.spec's no-CSP-violations check.
+      - name: Build main
+        id: build
+        run: |
+          url=$(npx --yes vercel@58.1.0 deploy --prod --skip-domain --yes --token "$VERCEL_TOKEN")
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          echo "Built: $url"
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+
+      - name: Point dev alias at main
+        run: |
+          npx --yes vercel@58.1.0 alias set "$DEPLOYMENT_URL" \
+            trello-excel-preview-dev.vercel.app \
+            --scope oonufrienkos-projects --token "$VERCEL_TOKEN"
+        env:
+          # Through env, not ${{ }} inline — GitHub substitutes expressions
+          # before bash parses the script.
+          DEPLOYMENT_URL: ${{ steps.build.outputs.url }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}

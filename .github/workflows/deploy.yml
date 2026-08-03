@@ -1,0 +1,197 @@
+name: deploy
+
+# What happens to main after a merge, in one pass: build it once, run the full
+# e2e suite against that exact build, and promote it to the production domain
+# only if the suite is green. The dev alias gets the same build, so the test
+# board shows what users have.
+#
+# Building once is the point. If we tested one build and deployed a rebuild of
+# the same commit, the artifact users get would not be the artifact that passed.
+#
+# Failure before the promote step means nothing ships: promote never runs,
+# production keeps serving whatever it served before, and the run goes red.
+# A failure after it is the one case where red does not mean "not shipped" —
+# the last step spells that out in the run summary so nobody has to read the
+# log to find out whether production moved.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+# Shares the lock with e2e and reset-dev — all three seed and mutate the same
+# Trello board. Never cancel-in-progress: a run killed mid-suite leaves the
+# board dirty.
+concurrency:
+  group: trello-test-board
+  cancel-in-progress: false
+  queue: max
+
+# The job reads the repo and talks to Vercel; it never writes back to git.
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      # Project identifiers (not secrets) — let the Vercel CLI work without a
+      # local .vercel/ directory.
+      VERCEL_ORG_ID: team_i8VbzTWKRuzPhOtsS49yRAgi
+      VERCEL_PROJECT_ID: prj_Ie3XBspzfh7eMheHHxTu6fx3frhV
+    steps:
+      # No git token left in the checkout: the steps below run npm ci, playwright
+      # and the Vercel CLI, and none of it needs to push anything.
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Restore storageState.json
+        run: |
+          printf '%s' "$TRELLO_STORAGE_STATE_B64" | tr -d '[:space:]' | base64 -d > ./storageState.json
+          test -s ./storageState.json
+        env:
+          TRELLO_STORAGE_STATE_B64: ${{ secrets.TRELLO_STORAGE_STATE_B64 }}
+
+      # --skip-domain builds a production-grade artifact without moving the
+      # production domain, so users keep the current build until the suite has
+      # had its say.
+      - name: Stage the build
+        id: build
+        run: |
+          url=$(npx --yes vercel@58.1.0 deploy --prod --skip-domain --yes --token "$VERCEL_TOKEN")
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          echo "Staged: $url"
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+
+      - name: Generate synthetic fixtures
+        run: npm run generate-fixtures
+
+      - name: Seed test board
+        run: npm run seed-board
+        env:
+          TRELLO_API_KEY: ${{ secrets.TRELLO_API_KEY }}
+          TRELLO_USER_TOKEN: ${{ secrets.TRELLO_USER_TOKEN }}
+          TRELLO_TEST_BOARD_ID: ${{ secrets.TRELLO_TEST_BOARD_ID }}
+
+      - name: Run Playwright against the staged build
+        run: |
+          PREVIEW_HOST="${DEPLOYMENT_URL#https://}" npx playwright test
+        env:
+          # Through env, not ${{ }} inline: GitHub substitutes expressions into
+          # the script before bash parses it.
+          DEPLOYMENT_URL: ${{ steps.build.outputs.url }}
+          TRELLO_API_KEY: ${{ secrets.TRELLO_API_KEY }}
+          TRELLO_USER_TOKEN: ${{ secrets.TRELLO_USER_TOKEN }}
+          TRELLO_TEST_BOARD_ID: ${{ secrets.TRELLO_TEST_BOARD_ID }}
+
+      # Everything that can be checked before shipping is checked before
+      # shipping: the suite covers the Power-Up UI, this covers the API the
+      # health check would otherwise only exercise once production is already
+      # on the new build.
+      - name: Check the staged build's health endpoint
+        run: |
+          # --max-time so a hung endpoint fails this step rather than sitting
+          # there until the job's 25-minute timeout, and --show-error because
+          # -s alone would leave a red step with nothing in the log to read.
+          curl --fail --silent --show-error \
+            --connect-timeout 5 --max-time 30 \
+            "$DEPLOYMENT_URL/api/health"
+          echo
+        env:
+          DEPLOYMENT_URL: ${{ steps.build.outputs.url }}
+
+      - name: Promote the tested build to production
+        id: promote
+        run: npx --yes vercel@58.1.0 promote "$DEPLOYMENT_URL" --yes --token "$VERCEL_TOKEN"
+        env:
+          DEPLOYMENT_URL: ${{ steps.build.outputs.url }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+
+      # Same build on the dev alias, so the test board and production agree.
+      - name: Point dev alias at the same build
+        run: |
+          npx --yes vercel@58.1.0 alias set "$DEPLOYMENT_URL" \
+            trello-excel-preview-dev.vercel.app \
+            --scope oonufrienkos-projects --token "$VERCEL_TOKEN"
+        env:
+          DEPLOYMENT_URL: ${{ steps.build.outputs.url }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+
+      - name: Verify production
+        run: |
+          # Poll instead of sleeping a fixed 10s. Promote propagation is not
+          # instant, and a guess that comes up short would fail this step on a
+          # perfectly good deploy — which the step below would then announce as
+          # "shipped, post-promote steps failed" and send someone to consider a
+          # rollback for nothing.
+          #
+          # One absolute deadline rather than a retry count: with a count, the
+          # per-request timeouts and the sleeps stack on top of each other, so
+          # "about a minute" quietly becomes four. Worst case here is the minute
+          # plus whichever request was already in flight. Keep the failing output
+          # instead of re-requesting it: by the deadline we already have it.
+          deadline=$(( SECONDS + 60 ))
+          last=""
+          while [ "$SECONDS" -lt "$deadline" ]; do
+            if last=$(curl --fail --silent --show-error \
+              --connect-timeout 5 --max-time 15 \
+              https://trello-excel-preview.vercel.app/api/health 2>&1); then
+              echo "$last"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "Production did not answer /api/health within 60s. Last attempt:" >&2
+          echo "$last" >&2
+          exit 1
+
+      # Promote succeeded but something after it did not, so this run is red
+      # while production is already on the new build. Say so where it is seen
+      # without opening the log — the decision it feeds is whether to roll back.
+      - name: Report that production already shipped
+        if: failure() && steps.promote.outcome == 'success'
+        run: |
+          {
+            echo "## Production shipped, post-promote steps failed"
+            echo
+            echo "\`${GITHUB_SHA}\` **is live on** https://trello-excel-preview.vercel.app —"
+            echo "the promote step succeeded. What failed came after it (dev alias"
+            echo "or the production health check), so this red run does *not* mean"
+            echo "the merge stayed off production."
+            echo
+            echo "To put the previous build back, see the Rollback section of DEPLOY.md:"
+            echo
+            echo '```bash'
+            echo "npx vercel ls"
+            echo "npx vercel rollback <previous-prod-url>"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-deploy
+          path: playwright-report/
+          retention-days: 14
