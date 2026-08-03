@@ -111,7 +111,12 @@ jobs:
       # on the new build.
       - name: Check the staged build's health endpoint
         run: |
-          curl -sf "$DEPLOYMENT_URL/api/health"
+          # --max-time so a hung endpoint fails this step rather than sitting
+          # there until the job's 25-minute timeout, and --show-error because
+          # -s alone would leave a red step with nothing in the log to read.
+          curl --fail --silent --show-error \
+            --connect-timeout 5 --max-time 30 \
+            "$DEPLOYMENT_URL/api/health"
           echo
         env:
           DEPLOYMENT_URL: ${{ steps.build.outputs.url }}
@@ -135,9 +140,23 @@ jobs:
 
       - name: Verify production
         run: |
-          sleep 10
-          curl -sf https://trello-excel-preview.vercel.app/api/health
-          echo
+          # Poll instead of sleeping a fixed 10s. Promote propagation is not
+          # instant, and a guess that comes up short would fail this step on a
+          # perfectly good deploy — which the step below would then announce as
+          # "shipped, post-promote steps failed" and send someone to consider a
+          # rollback for nothing. Quiet while polling: early misses are expected.
+          for attempt in $(seq 1 12); do
+            if curl --fail --silent --connect-timeout 5 --max-time 15 \
+              https://trello-excel-preview.vercel.app/api/health; then
+              echo
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "Production did not answer /api/health within ~60s. Last attempt:" >&2
+          curl --fail --silent --show-error --connect-timeout 5 --max-time 15 \
+            https://trello-excel-preview.vercel.app/api/health || true
+          exit 1
 
       # Promote succeeded but something after it did not, so this run is red
       # while production is already on the new build. Say so where it is seen
