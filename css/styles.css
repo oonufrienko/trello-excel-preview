@@ -11,8 +11,9 @@
   --border:          #dfe1e6;
   --text:            #172b4d;
   --text-muted:      #5e6c84;
-  /* One step down the neutral ramp from --text-muted: enough to register as
-     a hover, not so much that the thumb jumps to near-black. */
+  /* One step further from the track than --text-muted, so hover always gains
+     contrast: darker against the light track, lighter against the dark one.
+     Not --text: that is #000000 under .preview-page, far too harsh a jump. */
   --scrollbar-hover: #42526e;
 
   --primary:         #0052cc;
@@ -44,7 +45,7 @@
     --border:          #3b4045;
     --text:            #b6c2cf;
     --text-muted:      #8c9bab;
-    --scrollbar-hover: #78899c;
+    --scrollbar-hover: #9fadbc;
 
     --primary:         #4c9aff;
     --primary-hover:   #85b8ff;
@@ -389,6 +390,20 @@ body.preview-page {
    to scroll", so content below the fold went unnoticed. --text-muted is ~5.9:1. */
 ::-webkit-scrollbar-thumb { background: var(--text-muted); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-hover); }
+
+/* Firefox ignores ::-webkit-scrollbar, so it needs the standard properties.
+   Gated behind @supports so Chromium never enters: from 121 on, any
+   scrollbar-color/-width declaration makes it drop the ::-webkit-scrollbar
+   rules above, taking the :hover state with them. Firefox has no per-state
+   thumb colour, so hover stays flat there — the resting contrast is the point.
+   On * rather than :root: scrollbar-color inherits, but var() resolves against
+   the element's own tokens, and .preview-page overrides them. */
+@supports not selector(::-webkit-scrollbar) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--text-muted) var(--surface);
+  }
+}
 
 /* ── Embedded images positioned over their Excel anchors ── */
 .sheet-wrapper {
