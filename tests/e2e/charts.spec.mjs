@@ -17,9 +17,10 @@ test('Charts: bar/line/pie render as SVG, scatter shows a placeholder', async ({
   const preview = page.frameLocator('iframe[src*="trello-excel-preview"][src*="preview-html"]');
   await expect(preview.locator('table').first()).toBeVisible({ timeout: 15_000 });
 
-  // Four supported charts (bar, line, pie, bar+line combo) → four SVGs.
+  // Five supported charts (bar, line, pie, bar+line combo, secondary-axis
+  // bar combo) → five SVGs.
   const charts = preview.locator('.embedded-chart');
-  await expect(charts).toHaveCount(4, { timeout: 10_000 });
+  await expect(charts).toHaveCount(5, { timeout: 10_000 });
 
   // Bar chart: 8 columns (2 series × 4 categories) + 2 legend swatches
   // share the two series colors.
@@ -42,4 +43,20 @@ test('Charts: bar/line/pie render as SVG, scatter shows a placeholder', async ({
 
   // Scatter is not supported → honest labelled placeholder, not silence.
   await expect(preview.locator('.embedded-img-missing', { hasText: 'CHART' })).toHaveCount(1);
+
+  // Secondary-axis combo: "Revenue" (~120) sits on the primary scale,
+  // "Margin %" (~12) sits on its own secondary scale. If secondary bars
+  // were plotted with the primary scale (the bug this fixture guards
+  // against), the orange bars would collapse to ~1/10 the height of the
+  // blue ones instead of filling their own axis similarly.
+  const secondaryChart = charts.nth(4);
+  const maxHeight = async (fill) => {
+    const heights = await secondaryChart.locator(`svg rect[fill="${fill}"]`).evaluateAll(
+      rects => rects.map(r => parseFloat(r.getAttribute('height')))
+    );
+    return Math.max(...heights);
+  };
+  const blueMax = await maxHeight('#4472c4');
+  const orangeMax = await maxHeight('#ed7d31');
+  expect(orangeMax / blueMax).toBeGreaterThan(0.5);
 });

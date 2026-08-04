@@ -134,6 +134,8 @@ async function withCharts() {
   </c:ser>`;
   const axes = `<c:catAx><c:axId val="1"/><c:scaling><c:orientation val="minMax"/></c:scaling><c:delete val="0"/><c:axPos val="b"/><c:crossAx val="2"/></c:catAx>
     <c:valAx><c:axId val="2"/><c:scaling><c:orientation val="minMax"/></c:scaling><c:delete val="0"/><c:axPos val="l"/><c:crossAx val="1"/></c:valAx>`;
+  const axes2 = `<c:catAx><c:axId val="3"/><c:scaling><c:orientation val="minMax"/></c:scaling><c:delete val="1"/><c:axPos val="b"/><c:crossAx val="4"/></c:catAx>
+    <c:valAx><c:axId val="4"/><c:scaling><c:orientation val="minMax"/></c:scaling><c:delete val="0"/><c:axPos val="r"/><c:crossAx val="3"/><c:crosses val="max"/></c:valAx>`;
   const chartSpace = (title, plot) => `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <c:chartSpace xmlns:c="http://schemas.openxmlformats.org/drawingml/2006/chart" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
   <c:chart>
@@ -147,6 +149,7 @@ async function withCharts() {
   const CATS = rows.map(r => r[0]);
   const V23 = rows.map(r => r[1]);
   const V24 = rows.map(r => r[2]);
+  const PCT = [12, 9, 7, 5]; // order of magnitude below V23 — collapses on the primary scale
 
   const charts = [
     chartSpace('Sales by Region', `<c:barChart><c:barDir val="col"/><c:grouping val="clustered"/>
@@ -168,7 +171,13 @@ async function withCharts() {
         <c:yVal><c:numRef><c:f>Data!C2:C5</c:f><c:numCache>${strCache(V24)}</c:numCache></c:numRef></c:yVal>
       </c:ser><c:axId val="1"/><c:axId val="2"/></c:scatterChart>
       <c:valAx><c:axId val="1"/><c:scaling><c:orientation val="minMax"/></c:scaling><c:delete val="0"/><c:axPos val="b"/><c:crossAx val="2"/></c:valAx>
-      <c:valAx><c:axId val="2"/><c:scaling><c:orientation val="minMax"/></c:scaling><c:delete val="0"/><c:axPos val="l"/><c:crossAx val="1"/></c:valAx>`)
+      <c:valAx><c:axId val="2"/><c:scaling><c:orientation val="minMax"/></c:scaling><c:delete val="0"/><c:axPos val="l"/><c:crossAx val="1"/></c:valAx>`),
+    chartSpace('Revenue vs Margin', `<c:barChart><c:barDir val="col"/><c:grouping val="clustered"/>
+      ${ser(0, 'Revenue', CATS, V23)}
+      <c:axId val="1"/><c:axId val="2"/></c:barChart>
+      <c:barChart><c:barDir val="col"/><c:grouping val="clustered"/>
+      ${ser(1, 'Margin %', CATS, PCT)}
+      <c:axId val="3"/><c:axId val="4"/></c:barChart>${axes}${axes2}`)
   ];
   charts.forEach((xml, i) => zip.file(`xl/charts/chart${i + 1}.xml`, xml));
 
