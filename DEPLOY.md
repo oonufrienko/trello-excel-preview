@@ -70,6 +70,19 @@ git rev-parse --short origin/main
   build of whichever PR was last green, not necessarily main. That is the
   reason `reset-dev` exists.
 
+When the dev alias holds a PR build, its `commit` matches **no branch you have**
+— not the PR head, not main. GitHub builds `pull_request` runs from
+`refs/pull/<n>/merge`, an ephemeral merge of the branch into main, and
+`actions/checkout` takes that by default, so it is the SHA Vercel records.
+Looking for it in `git log` finds nothing. To resolve it:
+
+```bash
+git fetch origin refs/pull/<n>/merge && git rev-parse --short FETCH_HEAD
+```
+
+Production never has this problem: `deploy.yml` runs on `push` to main and
+checks out an ordinary commit, so there `commit` is a SHA you can look up.
+
 `commit` is the only field worth checking. The other two look like answers and
 are not:
 
