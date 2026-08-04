@@ -684,6 +684,7 @@ function parseChartXml(doc) {
     for (let i = series.length - 1; i >= 0; i--) {
       if (series[i].renderAs === 'line') series.splice(i, 1);
     }
+    if (!series.length) return { unsupported: 'horizontal combo' };
   }
 
   const nCats = Math.max(...series.map(s => s.vals.length));
@@ -779,6 +780,10 @@ function renderChartSvg(model, w, h) {
   // Primary series share one axis; series flagged secondary (combo plots
   // with their own axId pair, e.g. % over $) get an independent scale
   // drawn on the right.
+  // Horizontal bars leave no room for a right-side axis, so secondary
+  // series fall back to the primary scale rather than plot against one
+  // that is never drawn.
+  if (model.horizontal) series.forEach(s => { s.secondary = false; });
   const barSeries = series.filter(s => s.renderAs !== 'line');
   const lineSeries = series.filter(s => s.renderAs === 'line');
   const primary = series.filter(s => !s.secondary);
@@ -864,6 +869,7 @@ function renderChartSvg(model, w, h) {
     const stackNeg = new Array(cats.length).fill(0);
     barSeries.forEach((s, si) => {
       const color = CHART_PALETTE[series.indexOf(s) % CHART_PALETTE.length];
+      const toPx = s.secondary ? v2Px : vPx;
       for (let i = 0; i < cats.length; i++) {
         const v = s.vals[i] || 0;
         if (!v && model.stacked) continue;
@@ -873,7 +879,7 @@ function renderChartSvg(model, w, h) {
           from = base; to = base + v;
           if (v >= 0) stackPos[i] = to; else stackNeg[i] = to;
         }
-        const p1 = vPx(from), p2 = vPx(to);
+        const p1 = toPx(from), p2 = toPx(to);
         const cross = (horiz ? plot.y : plot.x) + i * slot + (slot - group) / 2 +
                       (model.stacked ? 0 : si * barW);
         const attrs = horiz
