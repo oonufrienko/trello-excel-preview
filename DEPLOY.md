@@ -49,8 +49,30 @@ git checkout main && git pull
 npx vercel deploy --prod             # updates trello-excel-preview.vercel.app
 ```
 
-Verify: `https://trello-excel-preview.vercel.app/api/health` — a small
-`uptimeSeconds` means the fresh deployment is serving.
+## Which commit is production serving?
+
+```bash
+curl -s https://trello-excel-preview.vercel.app/api/health
+git rev-parse --short origin/main
+```
+
+`/api/health` answers with the commit it was built from:
+
+```json
+{"status":"ok","version":"1.0.0","commit":"d418328","env":"production","uptimeSeconds":8,"timestamp":"..."}
+```
+
+- `commit` equals `origin/main` → production is up to date.
+- `commit` is behind → main has merges that were never deployed. Deploy, or
+  re-run the `deploy` workflow.
+- small `uptimeSeconds` → the deployment you just made is the one serving
+  (the instance restarted).
+- `env` should read `production`. Anything else means the production domain is
+  pointing at a staged build.
+
+The commit comes from the checkout's HEAD, so a local `vercel deploy` with
+uncommitted changes reports HEAD while serving something else. From CI, where
+the checkout is clean, it is exact.
 
 ## Rollback
 
