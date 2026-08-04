@@ -380,8 +380,10 @@ body.preview-page {
 /* ── Scrollbar ── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: var(--surface); }
-::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+/* Thumb was --border on a --surface track: 1.1:1 contrast read as "nothing
+   to scroll", so content below the fold went unnoticed. --text-muted is ~5.9:1. */
+::-webkit-scrollbar-thumb { background: var(--text-muted); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text); }
 
 /* ── Embedded images positioned over their Excel anchors ── */
 .sheet-wrapper {
