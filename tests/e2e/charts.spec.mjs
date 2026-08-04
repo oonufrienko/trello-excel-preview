@@ -2,7 +2,10 @@
 // cached series data; unsupported types (scatter) get a labelled placeholder.
 import { test, expect } from './_setup.mjs';
 
-const FIXTURE = 'with-charts.xlsx';
+// Renamed from with-charts.xlsx when the secondary-axis chart was added:
+// seed-board matches attachments by name only, so editing a fixture's
+// contents never reaches CI — a new name forces a fresh upload.
+const FIXTURE = 'with-charts-v2.xlsx';
 
 test('Charts: bar/line/pie render as SVG, scatter shows a placeholder', async ({ page, fixtureIds }) => {
   const info = fixtureIds[FIXTURE];

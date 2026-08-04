@@ -233,7 +233,7 @@ ${charts.map((_, i) => `<Relationship Id="rId${i + 1}" Type="http://schemas.open
   zip.file(ctPath, ct.replace('</Types>', `${overrides}</Types>`));
 
   const out = await zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE' });
-  await writeFile(join(OUT_DIR, 'with-charts.xlsx'), out);
+  await writeFile(join(OUT_DIR, 'with-charts-v2.xlsx'), out);
 }
 
 // A twoCellAnchor image (tl + br) over a region with merged cells, plus
@@ -356,7 +356,7 @@ async function main() {
   await simple2col();           console.log('  simple-2col.xlsx');
   await multiSheet();           console.log('  multi-sheet.xlsx');
   await multiSheetWithImages(); console.log('  with-images-multi.xlsx');
-  await withCharts();           console.log('  with-charts.xlsx');
+  await withCharts();           console.log('  with-charts-v2.xlsx');
   await twoCellAnchorImage();   console.log('  two-cell-anchor.xlsx');
   await formulasNoCache();      console.log('  formulas-no-cache.xlsx');
   await themeColorsFixture();   console.log('  theme-colors.xlsx');
