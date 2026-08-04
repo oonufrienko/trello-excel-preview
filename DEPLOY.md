@@ -52,7 +52,8 @@ npx vercel deploy --prod             # updates trello-excel-preview.vercel.app
 ## Which commit is production serving?
 
 ```bash
-curl -s https://trello-excel-preview.vercel.app/api/health
+curl -s https://trello-excel-preview.vercel.app/api/health       # prod
+curl -s https://trello-excel-preview-dev.vercel.app/api/health   # dev alias
 git rev-parse --short origin/main
 ```
 
@@ -65,10 +66,21 @@ git rev-parse --short origin/main
 - `commit` equals `origin/main` → production is up to date.
 - `commit` is behind → main has merges that were never deployed. Deploy, or
   re-run the `deploy` workflow.
-- small `uptimeSeconds` → the deployment you just made is the one serving
-  (the instance restarted).
-- `env` should read `production`. Anything else means the production domain is
-  pointing at a staged build.
+- On the dev alias, `commit` is whatever that alias currently points at — the
+  build of whichever PR was last green, not necessarily main. That is the
+  reason `reset-dev` exists.
+
+`commit` is the only field worth checking. The other two look like answers and
+are not:
+
+- `uptimeSeconds` is the age of the *serverless instance*, not of the
+  deployment. A cold start resets it, so a small value proves nothing about
+  whether the deploy you just made is the one serving — it can read seconds
+  hours after the fact.
+- `env` is the build *target*, not the alias you reached. Everything CI stages
+  goes out as `--prod --skip-domain`, so this reads `production` even for a PR
+  build sitting on the dev alias. It reads otherwise only for a plain
+  `vercel deploy` made by hand.
 
 The commit comes from the checkout's HEAD, so a local `vercel deploy` with
 uncommitted changes reports HEAD while serving something else. From CI, where
