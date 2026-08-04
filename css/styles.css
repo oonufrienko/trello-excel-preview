@@ -11,6 +11,9 @@
   --border:          #dfe1e6;
   --text:            #172b4d;
   --text-muted:      #5e6c84;
+  /* One step down the neutral ramp from --text-muted: enough to register as
+     a hover, not so much that the thumb jumps to near-black. */
+  --scrollbar-hover: #42526e;
 
   --primary:         #0052cc;
   --primary-hover:   #0065ff;
@@ -41,6 +44,7 @@
     --border:          #3b4045;
     --text:            #b6c2cf;
     --text-muted:      #8c9bab;
+    --scrollbar-hover: #78899c;
 
     --primary:         #4c9aff;
     --primary-hover:   #85b8ff;
@@ -77,6 +81,7 @@ body.preview-page {
   --border: #dfe1e6;
   --text: #000000;
   --text-muted: #5e6c84;
+  --scrollbar-hover: #42526e;
   --secondary-bg: #f4f5f7;
   --secondary-hover: #ebecf0;
   --secondary-text: #000000;
@@ -383,7 +388,7 @@ body.preview-page {
 /* Thumb was --border on a --surface track: 1.1:1 contrast read as "nothing
    to scroll", so content below the fold went unnoticed. --text-muted is ~5.9:1. */
 ::-webkit-scrollbar-thumb { background: var(--text-muted); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--text); }
+::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-hover); }
 
 /* ── Embedded images positioned over their Excel anchors ── */
 .sheet-wrapper {
