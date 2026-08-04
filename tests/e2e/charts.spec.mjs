@@ -61,5 +61,12 @@ test('Charts: bar/line/pie render as SVG, scatter shows a placeholder', async ({
   };
   const blueMax = await maxHeight('#4472c4');
   const orangeMax = await maxHeight('#ed7d31');
+  // Guard the denominator: with no blue rects Math.max(...[]) is -Infinity
+  // and with zero-height bars the ratio is Infinity — both would slip past
+  // the ratio check while the chart is actually broken.
+  expect(Number.isFinite(blueMax)).toBe(true);
+  expect(Number.isFinite(orangeMax)).toBe(true);
+  expect(blueMax).toBeGreaterThan(0);
+  expect(orangeMax).toBeGreaterThan(0);
   expect(orangeMax / blueMax).toBeGreaterThan(0.5);
 });
