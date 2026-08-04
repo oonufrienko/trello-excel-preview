@@ -641,6 +641,11 @@ function parseChartXml(doc) {
     if (CHART_TYPES[child.localName]) plots.push({ el: child, type: CHART_TYPES[child.localName] });
     else if (/Chart$/.test(child.localName)) unsupported = child.localName.replace(/Chart$/, '');
   }
+  // TODO: a plotArea mixing supported and unsupported plots (barChart +
+  // scatterChart) renders the supported ones and drops the rest without
+  // saying so — the one place this code is less than honest about what it
+  // could not draw. Needs a way to caption a rendered chart, not just a
+  // placeholder; until then the partial render beats showing nothing.
   if (!plots.length) return unsupported ? { unsupported } : null;
 
   // Pie can't be combined with axes — render it alone when present.

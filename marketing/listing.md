@@ -105,7 +105,7 @@ Capture from production (`https://trello-excel-preview.vercel.app`) once the Mar
 ## Known limitations to disclose (optional, but honest)
 
 - Embedded image positions may not match the original Excel layout exactly. Images can drift, more visibly on non-first sheets of multi-sheet workbooks or on files with custom column widths or row heights.
-- Charts: bar/column, line and pie charts are rendered from the data saved in the file. Other chart types (scatter, area, combo) show a labelled placeholder instead.
+- Charts: bar/column, line, pie and combined bar+line charts are rendered from the data saved in the file. Other chart types (scatter, area, 3-D) show a labelled placeholder instead.
 - Cell styling (bold, italic, font colors, background fills) is not rendered.
 - Files larger than 25 MB are blocked from preview (use Download).
 - Old `.xls` binary format renders without embedded images.
