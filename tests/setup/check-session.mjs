@@ -3,22 +3,47 @@
 // board tests time out (15s each) against Trello's login wall.
 import { request } from '@playwright/test';
 
-export default async function checkSession() {
+async function main() {
   const storageState = process.env.STORAGE_STATE_PATH || './storageState.json';
   const ctx = await request.newContext({ storageState, baseURL: 'https://trello.com' });
-  let res;
+
   try {
-    res = await ctx.get('/1/members/me');
+    const res = await ctx.get('/1/members/me');
+
+    if (res.ok()) {
+      console.log(`Trello session OK (GET /1/members/me -> ${res.status()})`);
+      process.exit(0);
+    }
+
+    // Not ok: inspect status and response for better diagnostics.
+    const status = res.status();
+    let body = '';
+    try {
+      body = await res.text();
+    } catch (e) {
+      body = `<failed to read response body: ${e.message}>`;
+    }
+
+    if (status === 400 || status === 401 || status === 403) {
+      // Authentication/authorization style failures -> guide maintainers to rotate secret.
+      console.error(
+        `AUTH_ERROR: Trello session in ${storageState} is invalid or expired ` +
+        `(GET /1/members/me -> ${status}).`
+      );
+      process.exit(2);
+    }
+
+    // Other HTTP errors (rate limit, 5xx, etc) — preserve diagnostics.
+    console.error(`HTTP_ERROR: Trello session check returned ${status}. Response body:\n${body}`);
+    process.exit(3);
+  } catch (err) {
+    // Network/exception — preserve full diagnostics to help root-cause analysis.
+    console.error(`EXCEPTION: Trello session check threw: ${err && err.message}`);
+    if (err && err.stack) console.error(err.stack);
+    process.exit(4);
   } finally {
     await ctx.dispose().catch(() => {});
   }
-  if (!res.ok()) {
-    throw new Error(
-      `Trello session in ${storageState} is invalid or expired ` +
-      `(GET /1/members/me -> ${res.status()}).\n` +
-      'Fix locally: npm run auth (log in manually).\n' +
-      'Fix CI: re-encode the fresh storageState.json as base64 and update the ' +
-      'TRELLO_STORAGE_STATE_B64 GitHub secret.'
-    );
-  }
 }
+
+main();
