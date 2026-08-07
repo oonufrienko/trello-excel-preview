@@ -71,12 +71,13 @@ jobs:
       - name: Validate Trello session (fail fast with instructions)
         run: |
           echo "Validating Trello storageState.json..."
-          # Run the project's session check script which performs GET /1/members/me.
-          # If it fails, print actionable instructions for maintainers to refresh
-          # the TRELLO_STORAGE_STATE_B64 secret and exit non-zero.
-          node tests/setup/check-session.mjs || {
+          node tests/setup/check-session.mjs
+          code=$?
+          if [ "$code" -eq 0 ]; then
+            echo "Trello session valid."
+          elif [ "$code" -eq 2 ]; then
             echo ""
-            echo "ERROR: The decoded storageState.json is invalid or expired."
+            echo "ERROR: Authentication failure detected: the decoded storageState.json is invalid or expired."
             echo "Fix locally: run 'npm run auth' to obtain a fresh storageState.json"
             echo "Then base64-encode it (no newlines) and update the TRELLO_STORAGE_STATE_B64 secret:"
             echo ""
@@ -90,7 +91,12 @@ jobs:
             echo "  gh secret set TRELLO_STORAGE_STATE_B64 --repo oonufrienko/trello-excel-preview < storageState.b64"
             echo ""
             exit 1
-          }
+          else
+            echo ""
+            echo "Trello session check failed with code $code — not classified as an authentication/expiry error."
+            echo "Preserving diagnostics printed above for investigation. Failing the job with original exit code."
+            exit $code
+          fi
 
       - name: Generate synthetic fixtures
         run: npm run generate-fixtures
