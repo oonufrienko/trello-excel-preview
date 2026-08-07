@@ -65,10 +65,32 @@ jobs:
         run: |
           # tr strips CR/LF/spaces a Windows clipboard or editor may have
           # added to the secret; base64 -d chokes on them otherwise.
-          printf '%s' "$TRELLO_STORAGE_STATE_B64" | tr -d '[:space:]' | base64 -d > ./storageState.json
+          printf '%s' "${{ secrets.TRELLO_STORAGE_STATE_B64 }}" | tr -d '[:space:]' | base64 -d > ./storageState.json
           test -s ./storageState.json
-        env:
-          TRELLO_STORAGE_STATE_B64: ${{ secrets.TRELLO_STORAGE_STATE_B64 }}
+      
+      - name: Validate Trello session (fail fast with instructions)
+        run: |
+          echo "Validating Trello storageState.json..."
+          # Run the project's session check script which performs GET /1/members/me.
+          # If it fails, print actionable instructions for maintainers to refresh
+          # the TRELLO_STORAGE_STATE_B64 secret and exit non-zero.
+          node tests/setup/check-session.mjs || {
+            echo ""
+            echo "ERROR: The decoded storageState.json is invalid or expired."
+            echo "Fix locally: run 'npm run auth' to obtain a fresh storageState.json"
+            echo "Then base64-encode it (no newlines) and update the TRELLO_STORAGE_STATE_B64 secret:"
+            echo ""
+            echo "  # Linux:"
+            echo "  base64 -w0 storageState.json > storageState.b64"
+            echo ""
+            echo "  # macOS:"
+            echo "  base64 storageState.json | tr -d '\\n' > storageState.b64"
+            echo ""
+            echo "  # Use the gh CLI to update the secret:"
+            echo "  gh secret set TRELLO_STORAGE_STATE_B64 --repo oonufrienko/trello-excel-preview < storageState.b64"
+            echo ""
+            exit 1
+          }
 
       - name: Generate synthetic fixtures
         run: npm run generate-fixtures
