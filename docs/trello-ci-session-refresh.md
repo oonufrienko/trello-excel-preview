@@ -33,8 +33,13 @@ browser state from being uploaded without Power-Up authorization.
 In PowerShell from the repository root:
 
 ```powershell
-$stateB64 = [Convert]::ToBase64String([IO.File]::ReadAllBytes('.\storageState.json'))
-$stateB64 | gh secret set TRELLO_STORAGE_STATE_B64 --repo oonufrienko/trello-excel-preview
+$inputBytes = [IO.File]::ReadAllBytes('.\storageState.json')
+$inputStream = [IO.MemoryStream]::new($inputBytes)
+$outputStream = [IO.MemoryStream]::new()
+$gzip = [IO.Compression.GZipStream]::new($outputStream, [IO.Compression.CompressionMode]::Compress)
+$inputStream.CopyTo($gzip)
+$gzip.Dispose()
+[Convert]::ToBase64String($outputStream.ToArray()) | gh secret set TRELLO_STORAGE_STATE_B64 --repo oonufrienko/trello-excel-preview
 $userToken = (Get-Content .\.env.local | Where-Object { $_ -match '^TRELLO_USER_TOKEN=' }) -replace '^TRELLO_USER_TOKEN=', ''
 $userToken | gh secret set TRELLO_USER_TOKEN --repo oonufrienko/trello-excel-preview
 ```
@@ -42,14 +47,14 @@ $userToken | gh secret set TRELLO_USER_TOKEN --repo oonufrienko/trello-excel-pre
 In Git Bash or Linux:
 
 ```bash
-base64 -w 0 storageState.json | gh secret set TRELLO_STORAGE_STATE_B64 --repo oonufrienko/trello-excel-preview
+gzip -c storageState.json | base64 -w 0 | gh secret set TRELLO_STORAGE_STATE_B64 --repo oonufrienko/trello-excel-preview
 sed -n 's/^TRELLO_USER_TOKEN=//p' .env.local | gh secret set TRELLO_USER_TOKEN --repo oonufrienko/trello-excel-preview
 ```
 
 If `base64 -w 0` is unavailable, use:
 
 ```bash
-base64 storageState.json | tr -d '\n' | gh secret set TRELLO_STORAGE_STATE_B64 --repo oonufrienko/trello-excel-preview
+gzip -c storageState.json | base64 | tr -d '\n' | gh secret set TRELLO_STORAGE_STATE_B64 --repo oonufrienko/trello-excel-preview
 sed -n 's/^TRELLO_USER_TOKEN=//p' .env.local | gh secret set TRELLO_USER_TOKEN --repo oonufrienko/trello-excel-preview
 ```
 

@@ -28,7 +28,7 @@ jobs:
 
       - name: Restore storageState.json
         run: |
-          printf '%s' "$TRELLO_STORAGE_STATE_B64" | tr -d '[:space:]' | base64 -d > ./storageState.json
+          printf '%s' "$TRELLO_STORAGE_STATE_B64" | tr -d '[:space:]' | base64 -d | gzip -d > ./storageState.json
           test -s ./storageState.json
         env:
           TRELLO_STORAGE_STATE_B64: ${{ secrets.TRELLO_STORAGE_STATE_B64 }}
