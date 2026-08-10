@@ -67,8 +67,22 @@ secrets:
 - `TRELLO_API_KEY`
 - `TRELLO_USER_TOKEN`
 - `TRELLO_TEST_BOARD_ID`
-- `TRELLO_STORAGE_STATE_B64` — base64 of `storageState.json`:
+- `TRELLO_STORAGE_STATE_B64` — gzip-compressed, base64-encoded `storageState.json`:
+
+  **macOS/Linux:**
   ```bash
-  base64 -i storageState.json | pbcopy
+  cat storageState.json | gzip | base64 | pbcopy
   ```
+
+  **Windows (PowerShell):**
+  ```powershell
+  $inputFile = "$PWD\storageState.json"
+  $fileBytes = [System.IO.File]::ReadAllBytes($inputFile)
+  $ms = [System.IO.MemoryStream]::new()
+  $gzip = [System.IO.Compression.GZipStream]::new($ms, [System.IO.Compression.CompressionMode]::Compress)
+  $gzip.Write($fileBytes, 0, $fileBytes.Length)
+  $gzip.Dispose()
+  [Convert]::ToBase64String($ms.ToArray()) | Set-Clipboard
+  ```
+
   Paste into GitHub repo → Settings → Secrets → Actions.
