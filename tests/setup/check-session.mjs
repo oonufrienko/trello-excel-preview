@@ -17,8 +17,10 @@ export default async function checkSession() {
       `Trello session in ${storageState} is invalid or expired ` +
       `(GET /1/members/me -> ${res.status()}).\n` +
       'Fix locally: npm run auth (log in manually).\n' +
-      'Fix CI: re-encode the fresh storageState.json as base64 and update the ' +
-      'TRELLO_STORAGE_STATE_B64 GitHub secret.'
+      'Fix CI: run "npm run auth", then gzip+base64 encode storageState.json:\n' +
+      '  macOS/Linux: cat storageState.json | gzip | base64 -w 0 | pbcopy\n' +
+      '  Windows (PowerShell): see tests/README.md for the command.\n' +
+      'Update the TRELLO_STORAGE_STATE_B64 GitHub secret with the result.'
     );
   }
 }
