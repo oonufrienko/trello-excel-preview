@@ -34,17 +34,18 @@ jobs:
           TRELLO_STORAGE_STATE_B64: ${{ secrets.TRELLO_STORAGE_STATE_B64 }}
 
       - name: Check Trello session
+        id: check_session
         run: node tests/setup/watch-session.mjs
 
       - name: Report refresh instructions
-        if: failure()
+        if: steps.check_session.outcome == 'failure'
         run: |
           {
             echo '## Trello CI session needs refresh'
             echo
             echo '### Prompt for AI'
             echo
-            echo '> Trello CI session expired. Run `npm run auth` with the dedicated Trello account, encode the resulting `storageState.json` as Base64, update the `TRELLO_STORAGE_STATE_B64` GitHub Secret, then rerun this watchdog before rerunning e2e.'
+            echo '> Trello CI session or Power-Up credentials need refresh. Run the documented auth flow with the dedicated Trello account, update both `TRELLO_STORAGE_STATE_B64` and `TRELLO_USER_TOKEN`, then rerun this watchdog before rerunning e2e.'
             echo
             echo 'Runbook: [docs/trello-ci-session-refresh.md](https://github.com/${{ github.repository }}/blob/main/docs/trello-ci-session-refresh.md)'
           } >> "$GITHUB_STEP_SUMMARY"
