@@ -1,0 +1,50 @@
+name: trello-session-watchdog
+
+# Check the dedicated CI account before the full e2e workflow needs it.
+on:
+  schedule:
+    - cron: '17 2 * * 1'
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  session:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Restore storageState.json
+        run: |
+          printf '%s' "$TRELLO_STORAGE_STATE_B64" | tr -d '[:space:]' | base64 -d > ./storageState.json
+          test -s ./storageState.json
+        env:
+          TRELLO_STORAGE_STATE_B64: ${{ secrets.TRELLO_STORAGE_STATE_B64 }}
+
+      - name: Check Trello session
+        run: node tests/setup/watch-session.mjs
+
+      - name: Report refresh instructions
+        if: failure()
+        run: |
+          {
+            echo '## Trello CI session needs refresh'
+            echo
+            echo '### Prompt for AI'
+            echo
+            echo '> Trello CI session expired. Run `npm run auth` with the dedicated Trello account, encode the resulting `storageState.json` as Base64, update the `TRELLO_STORAGE_STATE_B64` GitHub Secret, then rerun this watchdog before rerunning e2e.'
+            echo
+            echo 'Runbook: [docs/trello-ci-session-refresh.md](https://github.com/${{ github.repository }}/blob/main/docs/trello-ci-session-refresh.md)'
+          } >> "$GITHUB_STEP_SUMMARY"

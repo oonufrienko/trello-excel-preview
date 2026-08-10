@@ -61,6 +61,10 @@ contains the configured board ID before any destructive action.
 
 ## CI
 
+The dedicated Trello CI session is checked weekly by
+`.github/workflows/trello-session-watchdog.yml`. If it expires, follow the
+[Trello CI session refresh runbook](../docs/trello-ci-session-refresh.md).
+
 `.github/workflows/e2e.yml` runs the suite on PR to main. Required GitHub
 secrets:
 
