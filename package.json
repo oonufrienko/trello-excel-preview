@@ -27,7 +27,8 @@
     "unseed-real": "node tests/setup/unseed-real.mjs",
     "test:e2e": "playwright test",
     "test:e2e:headed": "playwright test --headed",
-    "test:e2e:ui": "playwright test --ui"
+    "test:e2e:ui": "playwright test --ui",
+    "test:unit": "node --test tests/setup/*.test.mjs"
   },
   "devDependencies": {
     "@playwright/test": "^1.60.0",
