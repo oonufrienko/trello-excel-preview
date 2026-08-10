@@ -71,7 +71,7 @@ secrets:
 
   **macOS/Linux:**
   ```bash
-  cat storageState.json | gzip | base64 -w 0 | pbcopy
+  cat storageState.json | gzip | base64 | pbcopy
   ```
 
   **Windows (PowerShell):**
